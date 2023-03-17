@@ -1,5 +1,5 @@
 /**
- * Copyright (c) Meta Platforms, Inc. and affiliates.
+ * Copyright (c) Facebook, Inc. and its affiliates.
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
@@ -34,9 +34,7 @@ if (!primaryRenderer) {
     }
   });
   console.log();
-  console.log(
-    'If you are not sure, run ' + chalk.green('yarn flow dom-node') + '.'
-  );
+  console.log('If you are not sure, run ' + chalk.green('yarn flow dom') + '.');
   console.log(
     'This will still typecheck non-DOM packages, although less precisely.'
   );

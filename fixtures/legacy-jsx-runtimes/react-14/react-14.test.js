@@ -1,5 +1,5 @@
 /**
- * Copyright (c) Meta Platforms, Inc. and affiliates.
+ * Copyright (c) Facebook, Inc. and its affiliates.
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
@@ -257,10 +257,10 @@ it('does not warn for arrays of elements with keys', () => {
 
 it('does not warn for iterable elements with keys', () => {
   const iterable = {
-    '@@iterator': function () {
+    '@@iterator': function() {
       let i = 0;
       return {
-        next: function () {
+        next: function() {
           const done = ++i > 2;
           return {
             value: done ? undefined : <Component key={'#' + i} />,
@@ -276,10 +276,10 @@ it('does not warn for iterable elements with keys', () => {
 
 it('does not warn for numeric keys in entry iterable as a child', () => {
   const iterable = {
-    '@@iterator': function () {
+    '@@iterator': function() {
       let i = 0;
       return {
-        next: function () {
+        next: function() {
           const done = ++i > 2;
           return {value: done ? undefined : [i, <Component />], done: done};
         },
@@ -319,7 +319,9 @@ it('should give context for PropType errors in nested components.', () => {
       return <MyComp color={123} />;
     }
   }
-  expect(() => ReactTestUtils.renderIntoDocument(<ParentComp />)).toErrorDev(
+  expect(() =>
+    ReactTestUtils.renderIntoDocument(<ParentComp />)
+  ).toErrorDev(
     'Warning: Failed prop type: ' +
       'Invalid prop `color` of type `number` supplied to `MyComp`, ' +
       'expected `string`.',
@@ -332,7 +334,9 @@ it('gives a helpful error when passing null, undefined, or boolean', () => {
   const Null = null;
   const True = true;
   const Div = 'div';
-  expect(() => void (<Undefined />)).toErrorDev(
+  expect(
+    () => void (<Undefined />)
+  ).toErrorDev(
     'Warning: React.jsx: type is invalid -- expected a string ' +
       '(for built-in components) or a class/function (for composite ' +
       'components) but got: undefined. You likely forgot to export your ' +
@@ -343,7 +347,9 @@ it('gives a helpful error when passing null, undefined, or boolean', () => {
         : ''),
     {withoutStack: true}
   );
-  expect(() => void (<Null />)).toErrorDev(
+  expect(
+    () => void (<Null />)
+  ).toErrorDev(
     'Warning: React.jsx: type is invalid -- expected a string ' +
       '(for built-in components) or a class/function (for composite ' +
       'components) but got: null.' +
@@ -352,7 +358,9 @@ it('gives a helpful error when passing null, undefined, or boolean', () => {
         : ''),
     {withoutStack: true}
   );
-  expect(() => void (<True />)).toErrorDev(
+  expect(
+    () => void (<True />)
+  ).toErrorDev(
     'Warning: React.jsx: type is invalid -- expected a string ' +
       '(for built-in components) or a class/function (for composite ' +
       'components) but got: boolean.' +
@@ -713,7 +721,9 @@ it('should warn when `key` is being accessed on composite element', () => {
       );
     }
   }
-  expect(() => ReactDOM.render(<Parent />, container)).toErrorDev(
+  expect(() =>
+    ReactDOM.render(<Parent />, container)
+  ).toErrorDev(
     'Child: `key` is not a prop. Trying to access it will result ' +
       'in `undefined` being returned. If you need to access the same ' +
       'value within the child component, you should pass it as a different ' +
@@ -738,7 +748,9 @@ it('should warn when `ref` is being accessed', () => {
       );
     }
   }
-  expect(() => ReactDOM.render(<Parent />, container)).toErrorDev(
+  expect(() =>
+    ReactDOM.render(<Parent />, container)
+  ).toErrorDev(
     'Child: `ref` is not a prop. Trying to access it will result ' +
       'in `undefined` being returned. If you need to access the same ' +
       'value within the child component, you should pass it as a different ' +

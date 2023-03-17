@@ -1,5 +1,5 @@
 /**
- * Copyright (c) Meta Platforms, Inc. and affiliates.
+ * Copyright (c) Facebook, Inc. and its affiliates.
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
@@ -12,7 +12,7 @@ import type {Rect} from '../../view-base';
 import {rectEqualToRect} from '../../view-base';
 import {COLORS, FONT_SIZE, TEXT_PADDING} from '../constants';
 
-const cachedTextWidths = new Map<string, number>();
+const cachedTextWidths = new Map();
 
 export function getTextWidth(
   context: CanvasRenderingContext2D,
@@ -62,11 +62,11 @@ export function trimText(
   return longestValidText;
 }
 
-type TextConfig = {
+type TextConfig = {|
   fillStyle?: string,
   fontSize?: number,
   textAlign?: 'left' | 'center',
-};
+|};
 
 export function drawText(
   text: string,

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) Meta Platforms, Inc. and affiliates.
+ * Copyright (c) Facebook, Inc. and its affiliates.
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
@@ -14,7 +14,7 @@
  * environment.
  */
 
-import type {ReactClientValue} from 'react-server/src/ReactFlightServer';
+import type {ReactModel} from 'react-server/src/ReactFlightServer';
 import type {ServerContextJSONValue} from 'shared/ReactTypes';
 
 import {saveModule} from 'react-noop-renderer/flight-modules';
@@ -45,21 +45,15 @@ const ReactNoopFlightServer = ReactFlightServer({
   stringToPrecomputedChunk(content: string): string {
     return content;
   },
-  clonePrecomputedChunk(chunk: string): string {
-    return chunk;
+  isModuleReference(reference: Object): boolean {
+    return reference.$$typeof === Symbol.for('react.module.reference');
   },
-  isClientReference(reference: Object): boolean {
-    return reference.$$typeof === Symbol.for('react.client.reference');
-  },
-  isServerReference(reference: Object): boolean {
-    return reference.$$typeof === Symbol.for('react.server.reference');
-  },
-  getClientReferenceKey(reference: Object): Object {
+  getModuleKey(reference: Object): Object {
     return reference;
   },
-  resolveClientReferenceMetadata(
+  resolveModuleMetaData(
     config: void,
-    reference: {$$typeof: symbol, value: any},
+    reference: {$$typeof: Symbol, value: any},
   ) {
     return saveModule(reference.value);
   },
@@ -71,7 +65,7 @@ type Options = {
   identifierPrefix?: string,
 };
 
-function render(model: ReactClientValue, options?: Options): Destination {
+function render(model: ReactModel, options?: Options): Destination {
   const destination: Destination = [];
   const bundlerConfig = undefined;
   const request = ReactNoopFlightServer.createRequest(

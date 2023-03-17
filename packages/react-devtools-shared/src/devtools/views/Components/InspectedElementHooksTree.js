@@ -1,5 +1,5 @@
 /**
- * Copyright (c) Meta Platforms, Inc. and affiliates.
+ * Copyright (c) Facebook, Inc. and its affiliates.
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
@@ -36,7 +36,7 @@ import type {HookNames} from 'react-devtools-shared/src/types';
 import type {Element} from 'react-devtools-shared/src/devtools/views/Components/types';
 import type {ToggleParseHookNames} from './InspectedElementContext';
 
-type HooksTreeViewProps = {
+type HooksTreeViewProps = {|
   bridge: FrontendBridge,
   element: Element,
   hookNames: HookNames | null,
@@ -44,7 +44,7 @@ type HooksTreeViewProps = {
   parseHookNames: boolean,
   store: Store,
   toggleParseHookNames: ToggleParseHookNames,
-};
+|};
 
 export function InspectedElementHooksTree({
   bridge,
@@ -54,13 +54,14 @@ export function InspectedElementHooksTree({
   parseHookNames,
   store,
   toggleParseHookNames,
-}: HooksTreeViewProps): React.Node {
+}: HooksTreeViewProps) {
   const {hooks, id} = inspectedElement;
 
   // Changing parseHookNames is done in a transition, because it suspends.
   // This value is done outside of the transition, so the UI toggle feels responsive.
-  const [parseHookNamesOptimistic, setParseHookNamesOptimistic] =
-    useState(parseHookNames);
+  const [parseHookNamesOptimistic, setParseHookNamesOptimistic] = useState(
+    parseHookNames,
+  );
   const handleChange = () => {
     setParseHookNamesOptimistic(!parseHookNames);
     toggleParseHookNames();
@@ -120,14 +121,14 @@ export function InspectedElementHooksTree({
   }
 }
 
-type InnerHooksTreeViewProps = {
+type InnerHooksTreeViewProps = {|
   element: Element,
   hookNames: HookNames | null,
   hooks: HooksTree,
   id: number,
   inspectedElement: InspectedElement,
   path: Array<string | number>,
-};
+|};
 
 export function InnerHooksTreeView({
   element,
@@ -136,7 +137,8 @@ export function InnerHooksTreeView({
   id,
   inspectedElement,
   path,
-}: InnerHooksTreeViewProps): React.Node {
+}: InnerHooksTreeViewProps) {
+  // $FlowFixMe "Missing type annotation for U" whatever that means
   return hooks.map((hook, index) => (
     <HookView
       key={index}
@@ -150,14 +152,14 @@ export function InnerHooksTreeView({
   ));
 }
 
-type HookViewProps = {
+type HookViewProps = {|
   element: Element,
   hook: HooksNode,
   hookNames: HookNames | null,
   id: number,
   inspectedElement: InspectedElement,
   path: Array<string | number>,
-};
+|};
 
 function HookView({
   element,
@@ -167,8 +169,11 @@ function HookView({
   inspectedElement,
   path,
 }: HookViewProps) {
-  const {canEditHooks, canEditHooksAndDeletePaths, canEditHooksAndRenamePaths} =
-    inspectedElement;
+  const {
+    canEditHooks,
+    canEditHooksAndDeletePaths,
+    canEditHooksAndRenamePaths,
+  } = inspectedElement;
   const {id: hookID, isStateEditable, subHooks, value} = hook;
 
   const isReadOnly = hookID == null || !isStateEditable;
@@ -219,7 +224,6 @@ function HookView({
 
   // Certain hooks are not editable at all (as identified by react-debug-tools).
   // Primitive hook names (e.g. the "State" name for useState) are also never editable.
-  // $FlowFixMe[missing-local-annot]
   const canRenamePathsAtDepth = depth => isStateEditable && depth > 1;
 
   const isCustomHook = subHooks.length > 0;
@@ -352,6 +356,7 @@ function HookView({
               className={name !== '' ? styles.Name : styles.NameAnonymous}>
               {hookDisplayName || 'Anonymous'}
             </span>{' '}
+            {/* $FlowFixMe */}
             <span className={styles.Value} onClick={toggleIsOpen}>
               {displayValue}
             </span>
@@ -412,6 +417,5 @@ function HookView({
   }
 }
 
-export default (React.memo(
-  InspectedElementHooksTree,
-): React.ComponentType<HookViewProps>);
+// $FlowFixMe
+export default React.memo(InspectedElementHooksTree);

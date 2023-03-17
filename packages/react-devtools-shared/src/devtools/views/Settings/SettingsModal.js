@@ -1,5 +1,5 @@
 /**
- * Copyright (c) Meta Platforms, Inc. and affiliates.
+ * Copyright (c) Facebook, Inc. and its affiliates.
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
@@ -28,7 +28,7 @@ import styles from './SettingsModal.css';
 
 type TabID = 'general' | 'components' | 'profiler';
 
-export default function SettingsModal(_: {}): React.Node {
+export default function SettingsModal(_: {||}) {
   const {isModalShowing, setIsModalShowing} = useContext(SettingsModalContext);
   const store = useContext(StoreContext);
   const {profilerStore} = store;
@@ -57,12 +57,11 @@ export default function SettingsModal(_: {}): React.Node {
   return <SettingsModalImpl />;
 }
 
-function SettingsModalImpl(_: {}) {
+function SettingsModalImpl(_: {||}) {
   const {setIsModalShowing} = useContext(SettingsModalContext);
-  const dismissModal = useCallback(
-    () => setIsModalShowing(false),
-    [setIsModalShowing],
-  );
+  const dismissModal = useCallback(() => setIsModalShowing(false), [
+    setIsModalShowing,
+  ]);
 
   const [selectedTabID, selectTab] = useLocalStorage<TabID>(
     'React::DevTools::selectedSettingsTabID',
@@ -83,7 +82,6 @@ function SettingsModalImpl(_: {}) {
     case 'components':
       view = <ComponentsSettings />;
       break;
-    // $FlowFixMe[incompatible-type] is this missing in TabID?
     case 'debugging':
       view = <DebuggingSettings />;
       break;

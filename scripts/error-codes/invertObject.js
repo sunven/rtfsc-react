@@ -1,10 +1,14 @@
 /**
- * Copyright (c) Meta Platforms, Inc. and affiliates.
+ * Copyright (c) Facebook, Inc. and its affiliates.
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
+ *
+ * @flow
  */
 'use strict';
+
+/*:: import type { ErrorMap } from './Types' */
 
 /**
  * turns
@@ -12,8 +16,8 @@
  * into
  *   { 0: 'MUCH ERROR', 1: 'SUCH WRONG' }
  */
-function invertObject(targetObj) {
-  const result /*: {[string]: string} */ = {};
+function invertObject(targetObj /* : ErrorMap */) /* : ErrorMap */ {
+  const result = {};
   const mapKeys = Object.keys(targetObj);
 
   // eslint-disable-next-line no-for-of-loops/no-for-of-loops

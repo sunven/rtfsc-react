@@ -91,8 +91,7 @@ async function publishToNPM() {
         )} has already been published.`
       );
 
-      await confirm(`Is this expected (will skip ${npmPackage}@${version})?`);
-      continue;
+      await confirm('Is this expected?');
     }
 
     if (DRY_RUN) {

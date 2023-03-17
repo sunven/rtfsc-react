@@ -1,5 +1,5 @@
 /**
- * Copyright (c) Meta Platforms, Inc. and affiliates.
+ * Copyright (c) Facebook, Inc. and its affiliates.
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
@@ -67,9 +67,6 @@ export const prepareScopeUpdate = $$$hostConfig.prepareScopeUpdate;
 export const getInstanceFromScope = $$$hostConfig.getInstanceFromScope;
 export const getCurrentEventPriority = $$$hostConfig.getCurrentEventPriority;
 export const detachDeletedInstance = $$$hostConfig.detachDeletedInstance;
-export const requestPostPaintCallback = $$$hostConfig.requestPostPaintCallback;
-export const prepareRendererToRender = $$$hostConfig.prepareRendererToRender;
-export const resetRendererAfterRender = $$$hostConfig.resetRendererAfterRender;
 
 // -------------------
 //      Microtasks
@@ -130,8 +127,10 @@ export const cloneHiddenTextInstance = $$$hostConfig.cloneHiddenTextInstance;
 //     Hydration
 //     (optional)
 // -------------------
-export const isHydratableType = $$$hostConfig.isHydratableType;
-export const isHydratableText = $$$hostConfig.isHydratableText;
+export const canHydrateInstance = $$$hostConfig.canHydrateInstance;
+export const canHydrateTextInstance = $$$hostConfig.canHydrateTextInstance;
+export const canHydrateSuspenseInstance =
+  $$$hostConfig.canHydrateSuspenseInstance;
 export const isSuspenseInstancePending =
   $$$hostConfig.isSuspenseInstancePending;
 export const isSuspenseInstanceFallback =
@@ -146,16 +145,6 @@ export const getFirstHydratableChildWithinContainer =
   $$$hostConfig.getFirstHydratableChildWithinContainer;
 export const getFirstHydratableChildWithinSuspenseInstance =
   $$$hostConfig.getFirstHydratableChildWithinSuspenseInstance;
-export const shouldSkipHydratableForInstance =
-  $$$hostConfig.shouldSkipHydratableForInstance;
-export const shouldSkipHydratableForTextInstance =
-  $$$hostConfig.shouldSkipHydratableForTextInstance;
-export const shouldSkipHydratableForSuspenseInstance =
-  $$$hostConfig.shouldSkipHydratableForSuspenseInstance;
-export const canHydrateInstance = $$$hostConfig.canHydrateInstance;
-export const canHydrateTextInstance = $$$hostConfig.canHydrateTextInstance;
-export const canHydrateSuspenseInstance =
-  $$$hostConfig.canHydrateSuspenseInstance;
 export const hydrateInstance = $$$hostConfig.hydrateInstance;
 export const hydrateTextInstance = $$$hostConfig.hydrateTextInstance;
 export const hydrateSuspenseInstance = $$$hostConfig.hydrateSuspenseInstance;
@@ -197,32 +186,3 @@ export const didNotFindHydratableTextInstance =
 export const didNotFindHydratableSuspenseInstance =
   $$$hostConfig.didNotFindHydratableSuspenseInstance;
 export const errorHydratingContainer = $$$hostConfig.errorHydratingContainer;
-
-// -------------------
-//     Resources
-//     (optional)
-// -------------------
-export type HoistableRoot = mixed;
-export const supportsResources = $$$hostConfig.supportsResources;
-export const isHostHoistableType = $$$hostConfig.isHostHoistableType;
-export const getHoistableRoot = $$$hostConfig.getHoistableRoot;
-export const getResource = $$$hostConfig.getResource;
-export const acquireResource = $$$hostConfig.acquireResource;
-export const releaseResource = $$$hostConfig.releaseResource;
-export const hydrateHoistable = $$$hostConfig.hydrateHoistable;
-export const mountHoistable = $$$hostConfig.mountHoistable;
-export const unmountHoistable = $$$hostConfig.unmountHoistable;
-export const createHoistableInstance = $$$hostConfig.createHoistableInstance;
-export const prepareToCommitHoistables =
-  $$$hostConfig.prepareToCommitHoistables;
-
-// -------------------
-//     Singletons
-//     (optional)
-// -------------------
-export const supportsSingletons = $$$hostConfig.supportsSingletons;
-export const resolveSingletonInstance = $$$hostConfig.resolveSingletonInstance;
-export const clearSingleton = $$$hostConfig.clearSingleton;
-export const acquireSingletonInstance = $$$hostConfig.acquireSingletonInstance;
-export const releaseSingletonInstance = $$$hostConfig.releaseSingletonInstance;
-export const isHostSingletonType = $$$hostConfig.isHostSingletonType;

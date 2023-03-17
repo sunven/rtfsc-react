@@ -1,5 +1,5 @@
 /**
- * Copyright (c) Meta Platforms, Inc. and affiliates.
+ * Copyright (c) Facebook, Inc. and its affiliates.
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
@@ -18,11 +18,7 @@ let useLayoutEffect;
 let forwardRef;
 let useImperativeHandle;
 let useRef;
-let useState;
 let startTransition;
-let waitFor;
-let waitForAll;
-let assertLog;
 
 // This tests the native useSyncExternalStore implementation, not the shim.
 // Tests that apply to both the native implementation and the shim should go
@@ -40,20 +36,14 @@ describe('useSyncExternalStore', () => {
     useImperativeHandle = React.useImperativeHandle;
     forwardRef = React.forwardRef;
     useRef = React.useRef;
-    useState = React.useState;
     useSyncExternalStore = React.useSyncExternalStore;
     startTransition = React.startTransition;
 
-    const InternalTestUtils = require('internal-test-utils');
-    waitFor = InternalTestUtils.waitFor;
-    waitForAll = InternalTestUtils.waitForAll;
-    assertLog = InternalTestUtils.assertLog;
-
-    act = require('internal-test-utils').act;
+    act = require('jest-react').act;
   });
 
   function Text({text}) {
-    Scheduler.log(text);
+    Scheduler.unstable_yieldValue(text);
     return text;
   }
 
@@ -110,7 +100,7 @@ describe('useSyncExternalStore', () => {
           const aText = refA.current;
           const bText = refB.current;
           const cText = refC.current;
-          Scheduler.log(
+          Scheduler.unstable_yieldValue(
             `Children observed during layout: A${aText}B${bText}C${cText}`,
           );
         });
@@ -130,13 +120,13 @@ describe('useSyncExternalStore', () => {
           root.render(<App store={store1} />);
         });
 
-        await waitFor(['A0', 'B0']);
+        expect(Scheduler).toFlushAndYieldThrough(['A0', 'B0']);
 
         // During an interleaved event, the store is mutated.
         store1.set(1);
 
         // Then we continue rendering.
-        await waitForAll([
+        expect(Scheduler).toFlushAndYield([
           // C reads a newer value from the store than A or B, which means they
           // are inconsistent.
           'C1',
@@ -160,13 +150,13 @@ describe('useSyncExternalStore', () => {
         });
 
         // Start a concurrent render that reads from the store, then yield.
-        await waitFor(['A0', 'B0']);
+        expect(Scheduler).toFlushAndYieldThrough(['A0', 'B0']);
 
         // During an interleaved event, the store is mutated.
         store2.set(1);
 
         // Then we continue rendering.
-        await waitForAll([
+        expect(Scheduler).toFlushAndYield([
           // C reads a newer value from the store than A or B, which means they
           // are inconsistent.
           'C1',
@@ -183,33 +173,4 @@ describe('useSyncExternalStore', () => {
       });
     },
   );
-
-  test('next value is correctly cached when state is dispatched in render phase', async () => {
-    const store = createExternalStore('value:initial');
-
-    function App() {
-      const value = useSyncExternalStore(store.subscribe, store.getState);
-      const [sameValue, setSameValue] = useState(value);
-      if (value !== sameValue) setSameValue(value);
-      return <Text text={value} />;
-    }
-
-    const root = ReactNoop.createRoot();
-    await act(() => {
-      // Start a render that reads from the store and yields value
-      root.render(<App />);
-    });
-    assertLog(['value:initial']);
-
-    await act(() => {
-      store.set('value:changed');
-    });
-    assertLog(['value:changed']);
-
-    // If cached value was updated, we expect a re-render
-    await act(() => {
-      store.set('value:initial');
-    });
-    assertLog(['value:initial']);
-  });
 });

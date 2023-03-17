@@ -1,5 +1,5 @@
 /**
- * Copyright (c) Meta Platforms, Inc. and affiliates.
+ * Copyright (c) Facebook, Inc. and its affiliates.
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
@@ -32,7 +32,8 @@ if (compactConsole) {
   global.console = new CustomConsole(process.stdout, process.stderr, formatter);
 }
 
-beforeEach(() => {
+const env = jasmine.getEnv();
+env.beforeEach(() => {
   global.mockClipboardCopy = jest.fn();
 
   // Test environment doesn't support document methods like execCommand()
@@ -51,7 +52,8 @@ beforeEach(() => {
   const {installHook} = require('react-devtools-shared/src/hook');
   const {
     getDefaultComponentFilters,
-    setSavedComponentFilters,
+    saveComponentFilters,
+    setShowInlineWarningsAndErrors,
   } = require('react-devtools-shared/src/utils');
 
   // Fake timers let us flush Bridge operations between setup and assertions.
@@ -60,14 +62,8 @@ beforeEach(() => {
   // Use utils.js#withErrorsOrWarningsIgnored instead of directly mutating this array.
   global._ignoredErrorOrWarningMessages = [];
   function shouldIgnoreConsoleErrorOrWarn(args) {
-    let firstArg = args[0];
-    if (
-      firstArg !== null &&
-      typeof firstArg === 'object' &&
-      String(firstArg).indexOf('Error: Uncaught [') === 0
-    ) {
-      firstArg = String(firstArg);
-    } else if (typeof firstArg !== 'string') {
+    const firstArg = args[0];
+    if (typeof firstArg !== 'string') {
       return false;
     }
     const shouldFilter = global._ignoredErrorOrWarningMessages.some(
@@ -122,10 +118,11 @@ beforeEach(() => {
   };
 
   // Initialize filters to a known good state.
-  setSavedComponentFilters(getDefaultComponentFilters());
+  saveComponentFilters(getDefaultComponentFilters());
   global.__REACT_DEVTOOLS_COMPONENT_FILTERS__ = getDefaultComponentFilters();
 
   // Also initialize inline warnings so that we can test them.
+  setShowInlineWarningsAndErrors(true);
   global.__REACT_DEVTOOLS_SHOW_INLINE_WARNINGS_AND_ERRORS__ = true;
 
   installHook(global);
@@ -168,7 +165,7 @@ beforeEach(() => {
   }
   global.fetch = mockFetch;
 });
-afterEach(() => {
+env.afterEach(() => {
   delete global.__REACT_DEVTOOLS_GLOBAL_HOOK__;
 
   // It's important to reset modules between test runs;
@@ -176,4 +173,8 @@ afterEach(() => {
   // It's also important to reset after tests, rather than before,
   // so that we don't disconnect the ReactCurrentDispatcher ref.
   jest.resetModules();
+});
+
+expect.extend({
+  ...require('../../../../scripts/jest/matchers/schedulerTestMatchers'),
 });

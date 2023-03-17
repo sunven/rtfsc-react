@@ -1,5 +1,5 @@
 /**
- * Copyright (c) Meta Platforms, Inc. and affiliates.
+ * Copyright (c) Facebook, Inc. and its affiliates.
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
@@ -9,7 +9,6 @@
 
 import {REACT_PROVIDER_TYPE, REACT_CONTEXT_TYPE} from 'shared/ReactSymbols';
 
-import type {ReactProviderType} from 'shared/ReactTypes';
 import type {ReactContext} from 'shared/ReactTypes';
 
 export function createContext<T>(defaultValue: T): ReactContext<T> {
@@ -67,7 +66,7 @@ export function createContext<T>(defaultValue: T): ReactContext<T> {
           }
           return context.Provider;
         },
-        set(_Provider: ReactProviderType<T>) {
+        set(_Provider) {
           context.Provider = _Provider;
         },
       },
@@ -75,7 +74,7 @@ export function createContext<T>(defaultValue: T): ReactContext<T> {
         get() {
           return context._currentValue;
         },
-        set(_currentValue: T) {
+        set(_currentValue) {
           context._currentValue = _currentValue;
         },
       },
@@ -83,7 +82,7 @@ export function createContext<T>(defaultValue: T): ReactContext<T> {
         get() {
           return context._currentValue2;
         },
-        set(_currentValue2: T) {
+        set(_currentValue2) {
           context._currentValue2 = _currentValue2;
         },
       },
@@ -91,7 +90,7 @@ export function createContext<T>(defaultValue: T): ReactContext<T> {
         get() {
           return context._threadCount;
         },
-        set(_threadCount: number) {
+        set(_threadCount) {
           context._threadCount = _threadCount;
         },
       },
@@ -111,7 +110,7 @@ export function createContext<T>(defaultValue: T): ReactContext<T> {
         get() {
           return context.displayName;
         },
-        set(displayName: void | string) {
+        set(displayName) {
           if (!hasWarnedAboutDisplayNameOnConsumer) {
             console.warn(
               'Setting `displayName` on Context.Consumer has no effect. ' +

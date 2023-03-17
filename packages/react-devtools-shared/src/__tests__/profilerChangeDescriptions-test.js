@@ -1,5 +1,5 @@
 /**
- * Copyright (c) Meta Platforms, Inc. and affiliates.
+ * Copyright (c) Facebook, Inc. and its affiliates.
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
@@ -10,7 +10,7 @@
 describe('Profiler change descriptions', () => {
   let React;
   let legacyRender;
-  let store;
+  let store: Store;
   let utils;
 
   beforeEach(() => {
@@ -89,12 +89,12 @@ describe('Profiler change descriptions', () => {
     expect(element.hocDisplayNames).toBeNull();
     expect(commitData.changeDescriptions.get(element.id))
       .toMatchInlineSnapshot(`
-      {
+      Object {
         "context": true,
         "didHooksChange": false,
         "hooks": null,
         "isFirstMount": false,
-        "props": [],
+        "props": Array [],
         "state": null,
       }
     `);
@@ -109,12 +109,12 @@ describe('Profiler change descriptions', () => {
     expect(element.hocDisplayNames).toBeNull();
     expect(commitData.changeDescriptions.get(element.id))
       .toMatchInlineSnapshot(`
-      {
+      Object {
         "context": true,
         "didHooksChange": false,
         "hooks": null,
         "isFirstMount": false,
-        "props": [],
+        "props": Array [],
         "state": null,
       }
     `);
@@ -124,12 +124,12 @@ describe('Profiler change descriptions', () => {
     expect(element.hocDisplayNames).toEqual(['ForwardRef']);
     expect(commitData.changeDescriptions.get(element.id))
       .toMatchInlineSnapshot(`
-      {
+      Object {
         "context": null,
         "didHooksChange": false,
         "hooks": null,
         "isFirstMount": false,
-        "props": [],
+        "props": Array [],
         "state": null,
       }
     `);
@@ -139,12 +139,12 @@ describe('Profiler change descriptions', () => {
     expect(element.hocDisplayNames).toBeNull();
     expect(commitData.changeDescriptions.get(element.id))
       .toMatchInlineSnapshot(`
-      {
+      Object {
         "context": true,
         "didHooksChange": false,
         "hooks": null,
         "isFirstMount": false,
-        "props": [],
+        "props": Array [],
         "state": null,
       }
     `);

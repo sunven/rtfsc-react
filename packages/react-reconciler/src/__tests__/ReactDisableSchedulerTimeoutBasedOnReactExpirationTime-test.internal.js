@@ -5,8 +5,6 @@ let Scheduler;
 let Suspense;
 let scheduleCallback;
 let NormalPriority;
-let waitForAll;
-let waitFor;
 
 describe('ReactSuspenseList', () => {
   beforeEach(() => {
@@ -22,28 +20,24 @@ describe('ReactSuspenseList', () => {
 
     scheduleCallback = Scheduler.unstable_scheduleCallback;
     NormalPriority = Scheduler.unstable_NormalPriority;
-
-    const InternalTestUtils = require('internal-test-utils');
-    waitForAll = InternalTestUtils.waitForAll;
-    waitFor = InternalTestUtils.waitFor;
   });
 
   function Text(props) {
-    Scheduler.log(props.text);
+    Scheduler.unstable_yieldValue(props.text);
     return props.text;
   }
 
   function createAsyncText(text) {
     let resolved = false;
-    const Component = function () {
+    const Component = function() {
       if (!resolved) {
-        Scheduler.log('Suspend! [' + text + ']');
+        Scheduler.unstable_yieldValue('Suspend! [' + text + ']');
         throw promise;
       }
       return <Text text={text} />;
     };
     const promise = new Promise(resolve => {
-      Component.resolve = function () {
+      Component.resolve = function() {
         resolved = true;
         return resolve();
       };
@@ -67,34 +61,42 @@ describe('ReactSuspenseList', () => {
     const root = ReactNoop.createRoot(null);
 
     root.render(<App show={false} />);
-    await waitForAll([]);
+    expect(Scheduler).toFlushAndYield([]);
 
-    React.startTransition(() => {
+    if (gate(flags => flags.enableSyncDefaultUpdates)) {
+      React.startTransition(() => {
+        root.render(<App show={true} />);
+      });
+    } else {
       root.render(<App show={true} />);
-    });
-    await waitForAll(['Suspend! [A]', 'Suspend! [B]', 'Loading...']);
+    }
+    expect(Scheduler).toFlushAndYield([
+      'Suspend! [A]',
+      'Suspend! [B]',
+      'Loading...',
+    ]);
     expect(root).toMatchRenderedOutput(null);
 
     Scheduler.unstable_advanceTime(2000);
     expect(root).toMatchRenderedOutput(null);
 
     scheduleCallback(NormalPriority, () => {
-      Scheduler.log('Resolve A');
+      Scheduler.unstable_yieldValue('Resolve A');
       A.resolve();
     });
     scheduleCallback(NormalPriority, () => {
-      Scheduler.log('Resolve B');
+      Scheduler.unstable_yieldValue('Resolve B');
       B.resolve();
     });
 
     // This resolves A and schedules a task for React to retry.
-    await waitFor(['Resolve A']);
+    await expect(Scheduler).toFlushAndYieldThrough(['Resolve A']);
 
     // The next task that flushes should be the one that resolves B. The render
     // task should not jump the queue ahead of B.
-    await waitFor(['Resolve B']);
+    await expect(Scheduler).toFlushAndYieldThrough(['Resolve B']);
 
-    await waitForAll(['A', 'B']);
+    expect(Scheduler).toFlushAndYield(['A', 'B']);
     expect(root).toMatchRenderedOutput('AB');
   });
 });

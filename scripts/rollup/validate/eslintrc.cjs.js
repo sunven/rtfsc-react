@@ -33,14 +33,10 @@ module.exports = {
 
     TaskController: 'readonly',
     reportError: 'readonly',
-    AggregateError: 'readonly',
 
     // Flight
     Uint8Array: 'readonly',
     Promise: 'readonly',
-
-    // Temp
-    AsyncLocalStorage: 'readonly',
 
     // Flight Webpack
     __webpack_chunk_load__: 'readonly',
@@ -54,7 +50,7 @@ module.exports = {
     IS_REACT_ACT_ENVIRONMENT: 'readonly',
   },
   parserOptions: {
-    ecmaVersion: 2020,
+    ecmaVersion: 5,
     sourceType: 'script',
   },
   rules: {
@@ -65,5 +61,5 @@ module.exports = {
   // These plugins aren't used, but eslint complains if an eslint-ignore comment
   // references unused plugins. An alternate approach could be to strip
   // eslint-ignore comments as part of the build.
-  plugins: ['ft-flow', 'jest', 'no-for-of-loops', 'react', 'react-internal'],
+  plugins: ['jest', 'no-for-of-loops', 'react', 'react-internal'],
 };

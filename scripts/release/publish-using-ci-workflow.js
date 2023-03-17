@@ -99,15 +99,6 @@ async function main() {
     }
   );
 
-  if (!pipelineResponse.ok) {
-    console.error(
-      theme.error(
-        `Failed to access CircleCI. Responded with status: ${pipelineResponse.status}`
-      )
-    );
-    process.exit(1);
-  }
-
   const pipelineJSON = await pipelineResponse.json();
   const pipelineID = pipelineJSON.id;
 

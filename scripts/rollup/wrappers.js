@@ -6,16 +6,13 @@ const {bundleTypes, moduleTypes} = require('./bundles');
 
 const {
   NODE_ES2015,
-  ESM_DEV,
-  ESM_PROD,
+  NODE_ESM,
   UMD_DEV,
   UMD_PROD,
   UMD_PROFILING,
   NODE_DEV,
   NODE_PROD,
   NODE_PROFILING,
-  BUN_DEV,
-  BUN_PROD,
   FB_WWW_DEV,
   FB_WWW_PROD,
   FB_WWW_PROFILING,
@@ -25,7 +22,6 @@ const {
   RN_FB_DEV,
   RN_FB_PROD,
   RN_FB_PROFILING,
-  BROWSER_SCRIPT,
 } = bundleTypes;
 
 const {RECONCILER} = moduleTypes;
@@ -44,10 +40,12 @@ function registerInternalModuleStop(globalName) {
 
   // Remove the 'use strict' directive from the footer.
   // This directive is only meaningful when it is the first statement in a file or function.
-  return String(file).replace(USE_STRICT_HEADER_REGEX, '').trim();
+  return String(file)
+    .replace(USE_STRICT_HEADER_REGEX, '')
+    .trim();
 }
 
-const license = ` * Copyright (c) Meta Platforms, Inc. and affiliates.
+const license = ` * Copyright (c) Facebook, Inc. and its affiliates.
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.`;
@@ -67,44 +65,8 @@ ${license}
 ${source}`;
   },
 
-  /***************** ESM_DEV *****************/
-  [ESM_DEV](source, globalName, filename, moduleType) {
-    return `/**
-* @license React
- * ${filename}
- *
-${license}
- */
-
-${source}`;
-  },
-
-  /***************** ESM_PROD *****************/
-  [ESM_PROD](source, globalName, filename, moduleType) {
-    return `/**
-* @license React
- * ${filename}
- *
-${license}
- */
-
-${source}`;
-  },
-
-  /***************** BUN_DEV *****************/
-  [BUN_DEV](source, globalName, filename, moduleType) {
-    return `/**
-* @license React
- * ${filename}
- *
-${license}
- */
-
-${source}`;
-  },
-
-  /***************** BUN_PROD *****************/
-  [BUN_PROD](source, globalName, filename, moduleType) {
+  /***************** NODE_ESM *****************/
+  [NODE_ESM](source, globalName, filename, moduleType) {
     return `/**
 * @license React
  * ${filename}
@@ -422,12 +384,6 @@ function wrapBundle(
     }
   }
 
-  if (bundleType === BROWSER_SCRIPT) {
-    // Bundles of type BROWSER_SCRIPT get sent straight to the browser without
-    // additional processing. So we should exclude any extra wrapper comments.
-    return source;
-  }
-
   if (moduleType === RECONCILER) {
     // Standalone reconciler is only used by third-party renderers.
     // It is handled separately.
@@ -439,7 +395,6 @@ function wrapBundle(
     }
     return wrapper(source, globalName, filename, moduleType);
   }
-
   // All the other packages.
   const wrapper = wrappers[bundleType];
   if (typeof wrapper !== 'function') {

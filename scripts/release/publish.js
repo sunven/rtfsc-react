@@ -23,9 +23,8 @@ const run = async () => {
   try {
     const params = parseParams();
 
-    const version = readJsonSync(
-      './build/node_modules/react/package.json'
-    ).version;
+    const version = readJsonSync('./build/node_modules/react/package.json')
+      .version;
     const isExperimental = version.includes('experimental');
 
     params.cwd = join(__dirname, '..', '..');

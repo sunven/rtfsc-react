@@ -1,5 +1,5 @@
 /**
- * Copyright (c) Meta Platforms, Inc. and affiliates.
+ * Copyright (c) Facebook, Inc. and its affiliates.
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
@@ -8,20 +8,15 @@
  */
 
 import {withSyncPerfMeasurements} from 'react-devtools-shared/src/PerformanceLoggingUtils';
-import traverse from '@babel/traverse';
+import traverse, {NodePath, Node} from '@babel/traverse';
+import {File} from '@babel/types';
 
 import type {HooksNode} from 'react-debug-tools/src/ReactDebugHooks';
 
-// Missing types in @babel/traverse
-type NodePath = any;
-type Node = any;
-// Missing types in @babel/types
-type File = any;
-
-export type Position = {
+export type Position = {|
   line: number,
   column: number,
-};
+|};
 
 export type SourceFileASTWithHookDetails = {
   sourceFileAST: File,
@@ -244,10 +239,9 @@ function getHookNameFromNode(
       // const flagState = useState(true); -> later referenced as
       // const flag = flagState[0];
       // const setFlag = flagState[1];
-      nodesAssociatedWithReactHookASTNode =
-        nodesAssociatedWithReactHookASTNode.filter(hookPath =>
-          filterMemberWithHookVariableName(hookPath),
-        );
+      nodesAssociatedWithReactHookASTNode = nodesAssociatedWithReactHookASTNode.filter(
+        hookPath => filterMemberWithHookVariableName(hookPath),
+      );
 
       if (nodesAssociatedWithReactHookASTNode.length !== 1) {
         // Something went wrong, only a single desirable hook should remain here
@@ -362,8 +356,8 @@ function getPotentialHookDeclarationsFromAST(sourceAST: File): NodePath[] {
  */
 export function getHookNamesMappingFromAST(
   sourceAST: File,
-): $ReadOnlyArray<{name: string, start: Position}> {
-  const hookStack: Array<{name: string, start: $FlowFixMe}> = [];
+): $ReadOnlyArray<{|name: string, start: Position|}> {
+  const hookStack = [];
   const hookNames = [];
   const pushFrame = (name: string, node: Node) => {
     const nameInfo = {name, start: {...node.loc.start}};

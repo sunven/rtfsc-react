@@ -1,5 +1,5 @@
 /**
- * Copyright (c) Meta Platforms, Inc. and affiliates.
+ * Copyright (c) Facebook, Inc. and its affiliates.
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
@@ -26,20 +26,20 @@ const Pending = 0;
 const Resolved = 1;
 const Rejected = 2;
 
-type PendingRecord = {
+type PendingRecord = {|
   status: 0,
   value: Wakeable,
-};
+|};
 
-type ResolvedRecord<T> = {
+type ResolvedRecord<T> = {|
   status: 1,
   value: T,
-};
+|};
 
-type RejectedRecord = {
+type RejectedRecord = {|
   status: 2,
   value: Error | string,
-};
+|};
 
 type Record<T> = PendingRecord | ResolvedRecord<T> | RejectedRecord;
 
@@ -89,9 +89,9 @@ export function inspectElement(
   const map = getRecordMap();
   let record = map.get(element);
   if (!record) {
-    const callbacks = new Set<() => mixed>();
+    const callbacks = new Set();
     const wakeable: Wakeable = {
-      then(callback: () => mixed) {
+      then(callback) {
         callbacks.add(callback);
       },
 
@@ -128,12 +128,8 @@ export function inspectElement(
       path,
       rendererID: ((rendererID: any): number),
     }).then(
-      ([inspectedElement]: [
-        InspectedElementFrontend,
-        InspectedElementResponseType,
-      ]) => {
-        const resolvedRecord =
-          ((newRecord: any): ResolvedRecord<InspectedElementFrontend>);
+      ([inspectedElement: InspectedElementFrontend]) => {
+        const resolvedRecord = ((newRecord: any): ResolvedRecord<InspectedElementFrontend>);
         resolvedRecord.status = Resolved;
         resolvedRecord.value = inspectedElement;
 
@@ -187,9 +183,9 @@ export function checkForUpdate({
       path: null,
       rendererID: ((rendererID: any): number),
     }).then(
-      ([inspectedElement, responseType]: [
-        InspectedElementFrontend,
-        InspectedElementResponseType,
+      ([
+        inspectedElement: InspectedElementFrontend,
+        responseType: InspectedElementResponseType,
       ]) => {
         if (responseType === 'full-data') {
           startTransition(() => {

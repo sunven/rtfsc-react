@@ -1,5 +1,5 @@
 /**
- * Copyright (c) Meta Platforms, Inc. and affiliates.
+ * Copyright (c) Facebook, Inc. and its affiliates.
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
@@ -17,20 +17,20 @@ const Pending = 0;
 const Resolved = 1;
 const Rejected = 2;
 
-type PendingRecord = {
+type PendingRecord = {|
   status: 0,
   value: Wakeable,
-};
+|};
 
-type ResolvedRecord<T> = {
+type ResolvedRecord<T> = {|
   status: 1,
   value: T,
-};
+|};
 
-type RejectedRecord = {
+type RejectedRecord = {|
   status: 2,
   value: null,
-};
+|};
 
 type Record<T> = PendingRecord | ResolvedRecord<T> | RejectedRecord;
 
@@ -40,8 +40,10 @@ type ModuleLoaderFunction = () => Thenable<Module>;
 // This is intentionally a module-level Map, rather than a React-managed one.
 // Otherwise, refreshing the inspected element cache would also clear this cache.
 // Modules are static anyway.
-const moduleLoaderFunctionToModuleMap: Map<ModuleLoaderFunction, Module> =
-  new Map();
+const moduleLoaderFunctionToModuleMap: Map<
+  ModuleLoaderFunction,
+  Module,
+> = new Map();
 
 function readRecord<T>(record: Record<T>): ResolvedRecord<T> | RejectedRecord {
   if (record.status === Resolved) {
@@ -66,9 +68,9 @@ export function loadModule(moduleLoaderFunction: ModuleLoaderFunction): Module {
   }
 
   if (!record) {
-    const callbacks = new Set<() => mixed>();
+    const callbacks = new Set();
     const wakeable: Wakeable = {
-      then(callback: () => mixed) {
+      then(callback) {
         callbacks.add(callback);
       },
 
@@ -134,7 +136,7 @@ export function loadModule(moduleLoaderFunction: ModuleLoaderFunction): Module {
     );
 
     // Eventually timeout and stop trying to load the module.
-    let timeoutID: null | TimeoutID = setTimeout(function onTimeout() {
+    let timeoutID = setTimeout(function onTimeout() {
       if (__DEBUG__) {
         console.log(
           `[dynamicImportCache] loadModule("${moduleLoaderFunction.name}") onTimeout()`,
@@ -155,7 +157,6 @@ export function loadModule(moduleLoaderFunction: ModuleLoaderFunction): Module {
     moduleLoaderFunctionToModuleMap.set(moduleLoaderFunction, record);
   }
 
-  // $FlowFixMe[underconstrained-implicit-instantiation]
   const response = readRecord(record).value;
   return response;
 }

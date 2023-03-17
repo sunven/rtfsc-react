@@ -1,5 +1,5 @@
 /**
- * Copyright (c) Meta Platforms, Inc. and affiliates.
+ * Copyright (c) Facebook, Inc. and its affiliates.
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
@@ -17,7 +17,7 @@ const errorMap = invertObject(
 
 const SEEN_SYMBOL = Symbol('transform-error-messages.seen');
 
-module.exports = function (babel) {
+module.exports = function(babel) {
   const t = babel.types;
 
   function ErrorCallExpression(path, file) {

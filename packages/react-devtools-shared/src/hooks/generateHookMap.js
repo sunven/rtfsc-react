@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Meta Platforms, Inc. and affiliates.
+ * Copyright (c) Facebook, Inc. and its affiliates.
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
@@ -9,19 +9,17 @@
 
 import {getHookNamesMappingFromAST} from './astUtils';
 import {encode, decode} from 'sourcemap-codec';
+import {File} from '@babel/types';
 
-// Missing types in @babel/types
-type File = any;
-
-export type HookMap = {
+export type HookMap = {|
   names: $ReadOnlyArray<string>,
   mappings: HookMapMappings,
-};
+|};
 
-export type EncodedHookMap = {
+export type EncodedHookMap = {|
   names: $ReadOnlyArray<string>,
   mappings: string,
-};
+|};
 
 // See generateHookMap below for more details on formatting
 export type HookMapEntry = [
@@ -63,9 +61,9 @@ export function generateHookMap(sourceAST: File): HookMap {
   const hookNamesMapping = getHookNamesMappingFromAST(sourceAST);
   const namesMap: Map<string, number> = new Map();
   const names = [];
-  const mappings: Array<HookMapLine> = [];
+  const mappings = [];
 
-  let currentLine: $FlowFixMe | null = null;
+  let currentLine = null;
   hookNamesMapping.forEach(({name, start}) => {
     let nameIndex = namesMap.get(name);
     if (nameIndex == null) {

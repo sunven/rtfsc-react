@@ -27,8 +27,10 @@ test.describe('Profiler', () => {
     runOnlyForReactRange('>=16.5');
     async function getSnapshotSelectorText() {
       return await page.evaluate(() => {
-        const {createTestNameSelector, findAllNodes} =
-          window.REACT_DOM_DEVTOOLS;
+        const {
+          createTestNameSelector,
+          findAllNodes,
+        } = window.REACT_DOM_DEVTOOLS;
         const container = document.getElementById('devtools');
 
         const input = findAllNodes(container, [

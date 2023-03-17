@@ -1,5 +1,5 @@
 /**
- * Copyright (c) Meta Platforms, Inc. and affiliates.
+ * Copyright (c) Facebook, Inc. and its affiliates.
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
@@ -18,7 +18,7 @@ import styles from './NewKeyValue.css';
 import type {InspectedElement} from './types';
 import type {FrontendBridge} from 'react-devtools-shared/src/bridge';
 
-type Props = {
+type Props = {|
   bridge: FrontendBridge,
   depth: number,
   hidden: boolean,
@@ -27,7 +27,7 @@ type Props = {
   path: Array<string | number>,
   store: Store,
   type: 'props' | 'state' | 'hooks' | 'context',
-};
+|};
 
 export default function NewKeyValue({
   bridge,
@@ -38,19 +38,15 @@ export default function NewKeyValue({
   path,
   store,
   type,
-}: Props): React.Node {
+}: Props) {
   const [newPropKey, setNewPropKey] = useState<number>(0);
   const [newPropName, setNewPropName] = useState<string>('');
 
-  // $FlowFixMe[missing-local-annot]
-  const overrideNewEntryName = (oldPath: any, newPath) => {
+  const overrideNewEntryName = (oldPath, newPath) => {
     setNewPropName(newPath[newPath.length - 1]);
   };
 
-  const overrideNewEntryValue = (
-    newPath: Array<string | number>,
-    value: any,
-  ) => {
+  const overrideNewEntryValue = (newPath, value) => {
     if (!newPropName) {
       return;
     }
@@ -61,7 +57,7 @@ export default function NewKeyValue({
     const {id} = inspectedElement;
     const rendererID = store.getRendererIDForElement(id);
     if (rendererID !== null) {
-      let basePath: Array<string | number> = newPath;
+      let basePath = newPath;
       if (hookID != null) {
         basePath = parseHookPathForEdit(basePath);
       }

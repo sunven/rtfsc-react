@@ -1,5 +1,5 @@
 /**
- * Copyright (c) Meta Platforms, Inc. and affiliates.
+ * Copyright (c) Facebook, Inc. and its affiliates.
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
@@ -7,7 +7,6 @@
  * @flow
  */
 
-import type {ReactContext} from 'shared/ReactTypes';
 import * as React from 'react';
 import {
   createContext,
@@ -24,8 +23,7 @@ import {
 
 const initialData = {foo: 'FOO', bar: 'BAR'};
 
-// $FlowFixMe[missing-local-annot]
-function reducer(state, action: {type: string}) {
+function reducer(state, action) {
   switch (action.type) {
     case 'swap':
       return {foo: state.bar, bar: state.foo};
@@ -34,15 +32,14 @@ function reducer(state, action: {type: string}) {
   }
 }
 
-type StatefulFunctionProps = {name: string};
+type StatefulFunctionProps = {|name: string|};
 
 function StatefulFunction({name}: StatefulFunctionProps) {
   const [count, updateCount] = useState(0);
   const debouncedCount = useDebounce(count, 1000);
-  const handleUpdateCountClick = useCallback(
-    () => updateCount(count + 1),
-    [count],
-  );
+  const handleUpdateCountClick = useCallback(() => updateCount(count + 1), [
+    count,
+  ]);
 
   const [data, dispatch] = useReducer(reducer, initialData);
   const handleUpdateReducerClick = useCallback(
@@ -71,24 +68,23 @@ function StatefulFunction({name}: StatefulFunctionProps) {
 const BoolContext = createContext(true);
 BoolContext.displayName = 'BoolContext';
 
-type Props = {name: string, toggle: boolean};
-type State = {cities: Array<string>, state: string};
+type Props = {|name: string, toggle: boolean|};
+type State = {|cities: Array<string>, state: string|};
 
 class StatefulClass extends Component<Props, State> {
-  static contextType: ReactContext<boolean> = BoolContext;
+  static contextType = BoolContext;
 
   state: State = {
     cities: ['San Francisco', 'San Jose'],
     state: 'California',
   };
 
-  // $FlowFixMe[missing-local-annot]
-  handleChange = ({target}): any =>
+  handleChange = ({target}) =>
     this.setState({
       state: target.value,
     });
 
-  render(): any {
+  render() {
     return (
       <ul>
         <li>Name: {this.props.name}</li>
@@ -106,14 +102,13 @@ class StatefulClass extends Component<Props, State> {
 const MemoizedStatefulClass = memo(StatefulClass);
 const MemoizedStatefulFunction = memo(StatefulFunction);
 
-const ForwardRef = forwardRef<{name: string}, HTMLUListElement>(
+const ForwardRef = forwardRef<{|name: string|}, HTMLUListElement>(
   ({name}, ref) => {
     const [count, updateCount] = useState(0);
     const debouncedCount = useDebounce(count, 1000);
-    const handleUpdateCountClick = useCallback(
-      () => updateCount(count + 1),
-      [count],
-    );
+    const handleUpdateCountClick = useCallback(() => updateCount(count + 1), [
+      count,
+    ]);
     return (
       <ul ref={ref}>
         <li>Name: {name}</li>
@@ -127,7 +122,7 @@ const ForwardRef = forwardRef<{name: string}, HTMLUListElement>(
   },
 );
 
-export default function EditableProps(): React.Node {
+export default function EditableProps() {
   return (
     <Fragment>
       <h1>Editable props</h1>
@@ -146,7 +141,7 @@ export default function EditableProps(): React.Node {
 }
 
 // Below copied from https://usehooks.com/
-function useDebounce(value: number, delay: number) {
+function useDebounce(value, delay) {
   // State and setters for debounced value
   const [debouncedValue, setDebouncedValue] = useState(value);
 

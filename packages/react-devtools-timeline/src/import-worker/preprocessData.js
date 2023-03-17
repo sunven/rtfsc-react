@@ -1,5 +1,5 @@
 /**
- * Copyright (c) Meta Platforms, Inc. and affiliates.
+ * Copyright (c) Facebook, Inc. and its affiliates.
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
@@ -38,15 +38,15 @@ import InvalidProfileError from './InvalidProfileError';
 import {getBatchRange} from '../utils/getBatchRange';
 import ErrorStackParser from 'error-stack-parser';
 
-type MeasureStackElement = {
+type MeasureStackElement = {|
   type: ReactMeasureType,
   depth: number,
   measure: ReactMeasure,
   startTime: Milliseconds,
   stopTime?: Milliseconds,
-};
+|};
 
-type ProcessorState = {
+type ProcessorState = {|
   asyncProcessingPromises: Promise<any>[],
   batchUID: BatchUID,
   currentReactComponentMeasure: ReactComponentMeasure | null,
@@ -64,7 +64,7 @@ type ProcessorState = {
   requestIdToNetworkMeasureMap: Map<string, NetworkMeasure>,
   uidCounter: BatchUID,
   unresolvedSuspenseEvents: Map<string, SuspenseEvent>,
-};
+|};
 
 const NATIVE_EVENT_DURATION_THRESHOLD = 20;
 const NESTED_UPDATE_DURATION_THRESHOLD = 20;
@@ -391,7 +391,7 @@ function processResourceSendRequest(
   const data = event.args.data;
   const requestId = data.requestId;
 
-  const availableDepths = new Array<boolean>(
+  const availableDepths = new Array(
     state.requestIdToNetworkMeasureMap.size + 1,
   ).fill(true);
   state.requestIdToNetworkMeasureMap.forEach(({depth}) => {
@@ -552,12 +552,16 @@ function processTimelineEvent(
           type: 'thrown-error',
         });
       } else if (name.startsWith('--suspense-suspend-')) {
-        const [id, componentName, phase, laneBitmaskString, promiseName] = name
-          .substr(19)
-          .split('-');
+        const [
+          id,
+          componentName,
+          phase,
+          laneBitmaskString,
+          promiseName,
+        ] = name.substr(19).split('-');
         const lanes = getLanesFromTransportDecimalBitmask(laneBitmaskString);
 
-        const availableDepths = new Array<boolean>(
+        const availableDepths = new Array(
           state.unresolvedSuspenseEvents.size + 1,
         ).fill(true);
         state.unresolvedSuspenseEvents.forEach(({depth}) => {
@@ -964,32 +968,21 @@ function preprocessFlamechart(rawData: TimelineEvent[]): Flamechart {
   const profile = parsedData.profiles[0]; // TODO: Choose the main CPU thread only
 
   const speedscopeFlamechart = new SpeedscopeFlamechart({
-    // $FlowFixMe[method-unbinding]
     getTotalWeight: profile.getTotalWeight.bind(profile),
-    // $FlowFixMe[method-unbinding]
     forEachCall: profile.forEachCall.bind(profile),
-    // $FlowFixMe[method-unbinding]
     formatValue: profile.formatValue.bind(profile),
     getColorBucketForFrame: () => 0,
   });
 
   const flamechart: Flamechart = speedscopeFlamechart.getLayers().map(layer =>
-    layer.map(
-      ({
-        start,
-        end,
-        node: {
-          frame: {name, file, line, col},
-        },
-      }) => ({
-        name,
-        timestamp: start / 1000,
-        duration: (end - start) / 1000,
-        scriptUrl: file,
-        locationLine: line,
-        locationColumn: col,
-      }),
-    ),
+    layer.map(({start, end, node: {frame: {name, file, line, col}}}) => ({
+      name,
+      timestamp: start / 1000,
+      duration: (end - start) / 1000,
+      scriptUrl: file,
+      locationLine: line,
+      locationColumn: col,
+    })),
   );
 
   return flamechart;
@@ -1009,7 +1002,7 @@ export default async function preprocessData(
 ): Promise<TimelineData> {
   const flamechart = preprocessFlamechart(timeline);
 
-  const laneToReactMeasureMap: Map<ReactLane, Array<ReactMeasure>> = new Map();
+  const laneToReactMeasureMap = new Map();
   for (let lane: ReactLane = 0; lane < REACT_TOTAL_NUM_LANES; lane++) {
     laneToReactMeasureMap.set(lane, []);
   }

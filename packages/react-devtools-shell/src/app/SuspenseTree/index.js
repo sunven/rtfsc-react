@@ -1,5 +1,5 @@
 /**
- * Copyright (c) Meta Platforms, Inc. and affiliates.
+ * Copyright (c) Facebook, Inc. and its affiliates.
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
@@ -10,7 +10,7 @@
 import * as React from 'react';
 import {Fragment, Suspense, SuspenseList, useState} from 'react';
 
-function SuspenseTree(): React.Node {
+function SuspenseTree() {
   return (
     <Fragment>
       <h1>Suspense</h1>
@@ -29,7 +29,6 @@ function EmptySuspense() {
   return <Suspense />;
 }
 
-// $FlowFixMe[missing-local-annot]
 function PrimaryFallbackTest({initialSuspend}) {
   const [suspend, setSuspend] = useState(initialSuspend);
   const fallbackStep = useTestSequence('fallback', Fallback1, Fallback2);
@@ -52,14 +51,14 @@ function PrimaryFallbackTest({initialSuspend}) {
   );
 }
 
-function useTestSequence(label: string, T1: any => any, T2: any => any) {
+function useTestSequence(label, T1, T2) {
   const [step, setStep] = useState(0);
-  const next: $FlowFixMe = (
+  const next = (
     <button onClick={() => setStep(s => (s + 1) % allSteps.length)}>
       next {label} content
     </button>
   );
-  const allSteps: $FlowFixMe = [
+  const allSteps = [
     <Fragment>{next}</Fragment>,
     <Fragment>
       {next} <T1 prop={step}>mount</T1>

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) Meta Platforms, Inc. and affiliates.
+ * Copyright (c) Facebook, Inc. and its affiliates.
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
@@ -17,10 +17,7 @@ let ReactDOMClient;
 let ReactFreshRuntime;
 let Scheduler;
 let act;
-let internalAct;
 let createReactClass;
-let waitFor;
-let assertLog;
 
 describe('ReactFresh', () => {
   let container;
@@ -34,13 +31,7 @@ describe('ReactFresh', () => {
       ReactDOM = require('react-dom');
       ReactDOMClient = require('react-dom/client');
       Scheduler = require('scheduler');
-      act = require('react-dom/test-utils').act;
-      internalAct = require('internal-test-utils').act;
-
-      const InternalTestUtils = require('internal-test-utils');
-      waitFor = InternalTestUtils.waitFor;
-      assertLog = InternalTestUtils.assertLog;
-
+      act = require('jest-react').act;
       createReactClass = require('create-react-class/factory')(
         React.Component,
         React.isValidElement,
@@ -864,7 +855,7 @@ describe('ReactFresh', () => {
       });
 
       expect(container.textContent).toBe('Loading');
-      await act(() => {
+      await act(async () => {
         jest.runAllTimers();
       });
       expect(container.textContent).toBe('0');
@@ -1013,7 +1004,7 @@ describe('ReactFresh', () => {
         $RefreshReg$(Hello, 'Hello');
       });
 
-      await act(() => {
+      await act(async () => {
         jest.runAllTimers();
       });
 
@@ -1097,7 +1088,7 @@ describe('ReactFresh', () => {
         $RefreshReg$(Hello, 'Hello');
       });
 
-      await act(() => {
+      await act(async () => {
         jest.runAllTimers();
       });
 
@@ -1182,7 +1173,7 @@ describe('ReactFresh', () => {
         $RefreshReg$(Hello, 'Hello');
       });
 
-      await act(() => {
+      await act(async () => {
         jest.runAllTimers();
       });
 
@@ -1267,7 +1258,7 @@ describe('ReactFresh', () => {
         $RefreshReg$(Hello, 'Hello');
       });
 
-      await act(() => {
+      await act(async () => {
         jest.runAllTimers();
       });
 
@@ -2425,7 +2416,7 @@ describe('ReactFresh', () => {
     const AppV1 = prepare(() => {
       function Hello() {
         React.useLayoutEffect(() => {
-          Scheduler.log('Hello#layout');
+          Scheduler.unstable_yieldValue('Hello#layout');
         });
         const [val, setVal] = React.useState(0);
         return (
@@ -2438,7 +2429,7 @@ describe('ReactFresh', () => {
 
       return function App({offscreen}) {
         React.useLayoutEffect(() => {
-          Scheduler.log('App#layout');
+          Scheduler.unstable_yieldValue('App#layout');
         });
         return (
           <LegacyHiddenDiv mode={offscreen ? 'hidden' : 'visible'}>
@@ -2450,7 +2441,7 @@ describe('ReactFresh', () => {
 
     const root = ReactDOMClient.createRoot(container);
     root.render(<AppV1 offscreen={true} />);
-    await waitFor(['App#layout']);
+    expect(Scheduler).toFlushAndYieldThrough(['App#layout']);
     const el = container.firstChild;
     expect(el.hidden).toBe(true);
     expect(el.firstChild).toBe(null); // Offscreen content not flushed yet.
@@ -2459,7 +2450,7 @@ describe('ReactFresh', () => {
     patch(() => {
       function Hello() {
         React.useLayoutEffect(() => {
-          Scheduler.log('Hello#layout');
+          Scheduler.unstable_yieldValue('Hello#layout');
         });
         const [val, setVal] = React.useState(0);
         return (
@@ -2477,12 +2468,12 @@ describe('ReactFresh', () => {
     expect(el.firstChild).toBe(null);
 
     // Process the offscreen updates.
-    await waitFor(['Hello#layout']);
+    expect(Scheduler).toFlushAndYieldThrough(['Hello#layout']);
     expect(container.firstChild).toBe(el);
     expect(el.firstChild.textContent).toBe('0');
     expect(el.firstChild.style.color).toBe('red');
 
-    await internalAct(() => {
+    await act(async () => {
       el.firstChild.dispatchEvent(
         new MouseEvent('click', {
           bubbles: true,
@@ -2490,7 +2481,7 @@ describe('ReactFresh', () => {
       );
     });
 
-    assertLog(['Hello#layout']);
+    expect(Scheduler).toHaveYielded(['Hello#layout']);
     expect(el.firstChild.textContent).toBe('1');
     expect(el.firstChild.style.color).toBe('red');
 
@@ -2498,7 +2489,7 @@ describe('ReactFresh', () => {
     patch(() => {
       function Hello() {
         React.useLayoutEffect(() => {
-          Scheduler.log('Hello#layout');
+          Scheduler.unstable_yieldValue('Hello#layout');
         });
         const [val, setVal] = React.useState(0);
         return (
@@ -2516,7 +2507,7 @@ describe('ReactFresh', () => {
     expect(el.firstChild.style.color).toBe('red');
 
     // Process the offscreen updates.
-    await waitFor(['Hello#layout']);
+    expect(Scheduler).toFlushAndYieldThrough(['Hello#layout']);
     expect(container.firstChild).toBe(el);
     expect(el.firstChild.textContent).toBe('1');
     expect(el.firstChild.style.color).toBe('orange');
@@ -3616,7 +3607,7 @@ describe('ReactFresh', () => {
       // a proper reload because we will bottle up the update.
       // So we're being somewhat conservative.
       expect(ReactFreshRuntime.isLikelyComponentType(() => {})).toBe(false);
-      expect(ReactFreshRuntime.isLikelyComponentType(function () {})).toBe(
+      expect(ReactFreshRuntime.isLikelyComponentType(function() {})).toBe(
         false,
       );
       expect(
@@ -3783,7 +3774,7 @@ describe('ReactFresh', () => {
   }
 
   // This simulates the scenario in https://github.com/facebook/react/issues/17626
-  it('can inject the runtime after the renderer executes', async () => {
+  it('can inject the runtime after the renderer executes', () => {
     if (__DEV__) {
       initFauxDevToolsHook();
 
@@ -3792,8 +3783,7 @@ describe('ReactFresh', () => {
       React = require('react');
       ReactDOM = require('react-dom');
       Scheduler = require('scheduler');
-      act = require('react-dom/test-utils').act;
-      internalAct = require('internal-test-utils').act;
+      act = require('jest-react').act;
 
       // Important! Inject into the global hook *after* ReactDOM runs:
       ReactFreshRuntime = require('react-refresh/runtime');

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) Meta Platforms, Inc. and affiliates.
+ * Copyright (c) Facebook, Inc. and its affiliates.
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
@@ -7,80 +7,42 @@
  * @flow
  */
 
-import type {ReactClientValue} from 'react-server/src/ReactFlightServer';
-
-export type ClientManifest = {
-  [id: string]: ClientReferenceMetadata,
+type WebpackMap = {
+  [filepath: string]: {
+    [name: string]: ModuleMetaData,
+  },
 };
 
-export type ServerReference<T: Function> = T & {
-  $$typeof: symbol,
-  $$id: string,
-  $$bound: null | Array<ReactClientValue>,
-};
-
-export type ServerReferenceId = string;
+export type BundlerConfig = WebpackMap;
 
 // eslint-disable-next-line no-unused-vars
-export type ClientReference<T> = {
-  $$typeof: symbol,
-  $$id: string,
-  $$async: boolean,
+export type ModuleReference<T> = {
+  $$typeof: Symbol,
+  filepath: string,
+  name: string,
 };
 
-export type ClientReferenceMetadata = {
+export type ModuleMetaData = {
   id: string,
   chunks: Array<string>,
   name: string,
-  async: boolean,
 };
 
-export type ClientReferenceKey = string;
+export type ModuleKey = string;
 
-const CLIENT_REFERENCE_TAG = Symbol.for('react.client.reference');
-const SERVER_REFERENCE_TAG = Symbol.for('react.server.reference');
+const MODULE_TAG = Symbol.for('react.module.reference');
 
-export function getClientReferenceKey(
-  reference: ClientReference<any>,
-): ClientReferenceKey {
-  return reference.$$async ? reference.$$id + '#async' : reference.$$id;
+export function getModuleKey(reference: ModuleReference<any>): ModuleKey {
+  return reference.filepath + '#' + reference.name;
 }
 
-export function isClientReference(reference: Object): boolean {
-  return reference.$$typeof === CLIENT_REFERENCE_TAG;
+export function isModuleReference(reference: Object): boolean {
+  return reference.$$typeof === MODULE_TAG;
 }
 
-export function isServerReference(reference: Object): boolean {
-  return reference.$$typeof === SERVER_REFERENCE_TAG;
-}
-
-export function resolveClientReferenceMetadata<T>(
-  config: ClientManifest,
-  clientReference: ClientReference<T>,
-): ClientReferenceMetadata {
-  const resolvedModuleData = config[clientReference.$$id];
-  if (clientReference.$$async) {
-    return {
-      id: resolvedModuleData.id,
-      chunks: resolvedModuleData.chunks,
-      name: resolvedModuleData.name,
-      async: true,
-    };
-  } else {
-    return resolvedModuleData;
-  }
-}
-
-export function getServerReferenceId<T>(
-  config: ClientManifest,
-  serverReference: ServerReference<T>,
-): ServerReferenceId {
-  return serverReference.$$id;
-}
-
-export function getServerReferenceBoundArguments<T>(
-  config: ClientManifest,
-  serverReference: ServerReference<T>,
-): null | Array<ReactClientValue> {
-  return serverReference.$$bound;
+export function resolveModuleMetaData<T>(
+  config: BundlerConfig,
+  moduleReference: ModuleReference<T>,
+): ModuleMetaData {
+  return config[moduleReference.filepath][moduleReference.name];
 }

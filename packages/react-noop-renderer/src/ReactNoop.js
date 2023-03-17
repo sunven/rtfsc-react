@@ -1,5 +1,5 @@
 /**
- * Copyright (c) Meta Platforms, Inc. and affiliates.
+ * Copyright (c) Facebook, Inc. and its affiliates.
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
@@ -20,9 +20,7 @@ import createReactNoop from './createReactNoop';
 export const {
   _Scheduler,
   getChildren,
-  dangerouslyGetChildren,
   getPendingChildren,
-  dangerouslyGetPendingChildren,
   getOrCreateRootContainer,
   createRoot,
   createLegacyRoot,
@@ -35,8 +33,7 @@ export const {
   unmountRootWithID,
   findInstance,
   flushNextYield,
-  startTrackingHostCounters,
-  stopTrackingHostCounters,
+  flushWithHostCounters,
   expire,
   flushExpired,
   batchedUpdates,

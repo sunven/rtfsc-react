@@ -1,5 +1,5 @@
 /**
- * Copyright (c) Meta Platforms, Inc. and affiliates.
+ * Copyright (c) Facebook, Inc. and its affiliates.
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
@@ -18,9 +18,9 @@ import {StoreContext} from '../context';
 
 import styles from './SnapshotSelector.css';
 
-export type Props = {};
+export type Props = {||};
 
-export default function SnapshotSelector(_: Props): React.Node {
+export default function SnapshotSelector(_: Props) {
   const {
     isCommitFilterEnabled,
     minCommitDuration,
@@ -45,7 +45,7 @@ export default function SnapshotSelector(_: Props): React.Node {
 
   const filteredCommitIndices = useMemo(
     () =>
-      commitData.reduce((reduced: $FlowFixMe, commitDatum, index) => {
+      commitData.reduce((reduced, commitDatum, index) => {
         if (
           !isCommitFilterEnabled ||
           commitDatum.duration >= minCommitDuration
@@ -86,7 +86,6 @@ export default function SnapshotSelector(_: Props): React.Node {
 
   let label = null;
   if (numFilteredCommits > 0) {
-    // $FlowFixMe[missing-local-annot]
     const handleCommitInputChange = event => {
       const value = parseInt(event.currentTarget.value, 10);
       if (!isNaN(value)) {
@@ -101,12 +100,10 @@ export default function SnapshotSelector(_: Props): React.Node {
       }
     };
 
-    // $FlowFixMe[missing-local-annot]
     const handleClick = event => {
       event.currentTarget.select();
     };
 
-    // $FlowFixMe[missing-local-annot]
     const handleKeyDown = event => {
       switch (event.key) {
         case 'ArrowDown':
@@ -129,10 +126,7 @@ export default function SnapshotSelector(_: Props): React.Node {
         type="text"
         inputMode="numeric"
         pattern="[0-9]*"
-        value={
-          // $FlowFixMe[unsafe-addition] addition with possible null/undefined value
-          selectedFilteredCommitIndex + 1
-        }
+        value={selectedFilteredCommitIndex + 1}
         size={`${numFilteredCommits}`.length}
         onChange={handleCommitInputChange}
         onClick={handleClick}
@@ -162,7 +156,6 @@ export default function SnapshotSelector(_: Props): React.Node {
     selectCommitIndex(filteredCommitIndices[nextCommitIndex]);
   };
 
-  // $FlowFixMe[missing-local-annot]
   const handleKeyDown = event => {
     switch (event.key) {
       case 'ArrowLeft':

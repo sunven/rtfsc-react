@@ -1,5 +1,5 @@
 /**
- * Copyright (c) Meta Platforms, Inc. and affiliates.
+ * Copyright (c) Facebook, Inc. and its affiliates.
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
@@ -24,22 +24,12 @@ export function useSyncExternalStoreWithSelector<Snapshot, Selection>(
   isEqual?: (a: Selection, b: Selection) => boolean,
 ): Selection {
   // Use this to track the rendered snapshot.
-  const instRef = useRef<
-    | {
-        hasValue: true,
-        value: Selection,
-      }
-    | {
-        hasValue: false,
-        value: null,
-      }
-    | null,
-  >(null);
+  const instRef = useRef(null);
   let inst;
   if (instRef.current === null) {
     inst = {
       hasValue: false,
-      value: null,
+      value: (null: Selection | null),
     };
     instRef.current = inst;
   } else {
@@ -53,8 +43,8 @@ export function useSyncExternalStoreWithSelector<Snapshot, Selection>(
     // copies of the hook/component.
     let hasMemo = false;
     let memoizedSnapshot;
-    let memoizedSelection: Selection;
-    const memoizedSelector = (nextSnapshot: Snapshot) => {
+    let memoizedSelection;
+    const memoizedSelector = nextSnapshot => {
       if (!hasMemo) {
         // The first time the hook is called, there is no memoized result.
         hasMemo = true;
@@ -118,9 +108,7 @@ export function useSyncExternalStoreWithSelector<Snapshot, Selection>(
   );
 
   useEffect(() => {
-    // $FlowFixMe[incompatible-type] changing the variant using mutation isn't supported
     inst.hasValue = true;
-    // $FlowFixMe[incompatible-type]
     inst.value = value;
   }, [value]);
 

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) Meta Platforms, Inc. and affiliates.
+ * Copyright (c) Facebook, Inc. and its affiliates.
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
@@ -8,8 +8,6 @@
  */
 
 'use strict';
-
-import {normalizeCodeLocInfo} from './utils';
 
 describe('Timeline profiler', () => {
   let React;
@@ -20,10 +18,6 @@ describe('Timeline profiler', () => {
   let store;
   let unmountFns;
   let utils;
-  let waitFor;
-  let waitForAll;
-  let waitForPaint;
-  let assertLog;
 
   beforeEach(() => {
     utils = require('./utils');
@@ -48,17 +42,7 @@ describe('Timeline profiler', () => {
     ReactDOMClient = require('react-dom/client');
     Scheduler = require('scheduler');
 
-    const InternalTestUtils = require('internal-test-utils');
-    waitFor = InternalTestUtils.waitFor;
-    waitForAll = InternalTestUtils.waitForAll;
-    waitForPaint = InternalTestUtils.waitForPaint;
-    assertLog = InternalTestUtils.assertLog;
-
     store = global.store;
-  });
-
-  afterEach(() => {
-    jest.restoreAllMocks();
   });
 
   describe('User Timing API', () => {
@@ -126,8 +110,8 @@ describe('Timeline profiler', () => {
     }
 
     beforeEach(() => {
-      setPerformanceMock =
-        require('react-devtools-shared/src/backend/profilingHooks').setPerformanceMock_ONLY_FOR_TESTING;
+      setPerformanceMock = require('react-devtools-shared/src/backend/profilingHooks')
+        .setPerformanceMock_ONLY_FOR_TESTING;
       setPerformanceMock(createUserTimingPolyfill());
     });
 
@@ -140,65 +124,68 @@ describe('Timeline profiler', () => {
       setPerformanceMock(null);
     });
 
+    // @reactVersion >=18.0
     it('should mark sync render without suspends or state updates', () => {
       renderHelper(<div />);
 
       expect(clearedMarks).toMatchInlineSnapshot(`
-        [
-          "--schedule-render-2",
-          "--render-start-2",
+        Array [
+          "--schedule-render-1",
+          "--render-start-1",
           "--render-stop",
-          "--commit-start-2",
+          "--commit-start-1",
           "--react-version-<filtered-version>",
           "--profiler-version-1",
           "--react-internal-module-start-  at filtered (<anonymous>:0:0)",
           "--react-internal-module-stop-  at filtered (<anonymous>:1:1)",
-          "--react-lane-labels-SyncHydrationLane,Sync,InputContinuousHydration,InputContinuous,DefaultHydration,Default,TransitionHydration,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Retry,Retry,Retry,Retry,SelectiveHydration,IdleHydration,Idle,Offscreen",
-          "--layout-effects-start-2",
+          "--react-lane-labels-Sync,InputContinuousHydration,InputContinuous,DefaultHydration,Default,TransitionHydration,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Retry,Retry,Retry,Retry,Retry,SelectiveHydration,IdleHydration,Idle,Offscreen",
+          "--layout-effects-start-1",
           "--layout-effects-stop",
           "--commit-stop",
         ]
       `);
     });
 
-    it('should mark concurrent render without suspends or state updates', async () => {
+    // @reactVersion >=18.0
+    it('should mark concurrent render without suspends or state updates', () => {
       renderRootHelper(<div />);
 
       expect(clearedMarks).toMatchInlineSnapshot(`
-        [
-          "--schedule-render-32",
-        ]
-      `);
+            Array [
+              "--schedule-render-16",
+            ]
+        `);
 
       clearPendingMarks();
 
-      await waitForPaint([]);
+      expect(Scheduler).toFlushUntilNextPaint([]);
 
       expect(clearedMarks).toMatchInlineSnapshot(`
-        [
-          "--render-start-32",
+        Array [
+          "--render-start-16",
           "--render-stop",
-          "--commit-start-32",
+          "--commit-start-16",
           "--react-version-<filtered-version>",
           "--profiler-version-1",
           "--react-internal-module-start-  at filtered (<anonymous>:0:0)",
           "--react-internal-module-stop-  at filtered (<anonymous>:1:1)",
-          "--react-lane-labels-SyncHydrationLane,Sync,InputContinuousHydration,InputContinuous,DefaultHydration,Default,TransitionHydration,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Retry,Retry,Retry,Retry,SelectiveHydration,IdleHydration,Idle,Offscreen",
-          "--layout-effects-start-32",
+          "--react-lane-labels-Sync,InputContinuousHydration,InputContinuous,DefaultHydration,Default,TransitionHydration,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Retry,Retry,Retry,Retry,Retry,SelectiveHydration,IdleHydration,Idle,Offscreen",
+          "--layout-effects-start-16",
           "--layout-effects-stop",
           "--commit-stop",
         ]
       `);
     });
 
+    // @reactVersion >=18.0
     it('should mark render yields', async () => {
       function Bar() {
-        Scheduler.log('Bar');
+        Scheduler.unstable_yieldValue('Bar');
         return null;
       }
 
       function Foo() {
-        Scheduler.log('Foo');
+        Scheduler.unstable_yieldValue('Foo');
         return <Bar />;
       }
 
@@ -206,19 +193,21 @@ describe('Timeline profiler', () => {
         renderRootHelper(<Foo />);
       });
 
-      await waitFor(['Foo']);
+      // Do one step of work.
+      expect(Scheduler).toFlushAndYieldThrough(['Foo']);
 
       expect(clearedMarks).toMatchInlineSnapshot(`
-        [
-          "--schedule-render-128",
-          "--render-start-128",
-          "--component-render-start-Foo",
-          "--component-render-stop",
-          "--render-yield",
-        ]
-      `);
+            Array [
+              "--schedule-render-64",
+              "--render-start-64",
+              "--component-render-start-Foo",
+              "--component-render-stop",
+              "--render-yield",
+            ]
+        `);
     });
 
+    // @reactVersion >=18.0
     it('should mark sync render with suspense that resolves', async () => {
       const fakeSuspensePromise = Promise.resolve(true);
       function Example() {
@@ -232,20 +221,20 @@ describe('Timeline profiler', () => {
       );
 
       expect(clearedMarks).toMatchInlineSnapshot(`
-        [
-          "--schedule-render-2",
-          "--render-start-2",
+        Array [
+          "--schedule-render-1",
+          "--render-start-1",
           "--component-render-start-Example",
           "--component-render-stop",
-          "--suspense-suspend-0-Example-mount-2-",
+          "--suspense-suspend-0-Example-mount-1-",
           "--render-stop",
-          "--commit-start-2",
+          "--commit-start-1",
           "--react-version-<filtered-version>",
           "--profiler-version-1",
           "--react-internal-module-start-  at filtered (<anonymous>:0:0)",
           "--react-internal-module-stop-  at filtered (<anonymous>:1:1)",
-          "--react-lane-labels-SyncHydrationLane,Sync,InputContinuousHydration,InputContinuous,DefaultHydration,Default,TransitionHydration,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Retry,Retry,Retry,Retry,SelectiveHydration,IdleHydration,Idle,Offscreen",
-          "--layout-effects-start-2",
+          "--react-lane-labels-Sync,InputContinuousHydration,InputContinuous,DefaultHydration,Default,TransitionHydration,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Retry,Retry,Retry,Retry,Retry,SelectiveHydration,IdleHydration,Idle,Offscreen",
+          "--layout-effects-start-1",
           "--layout-effects-stop",
           "--commit-stop",
         ]
@@ -255,12 +244,13 @@ describe('Timeline profiler', () => {
 
       await fakeSuspensePromise;
       expect(clearedMarks).toMatchInlineSnapshot(`
-                [
+                Array [
                   "--suspense-resolved-0-Example",
                 ]
           `);
     });
 
+    // @reactVersion >=18.0
     it('should mark sync render with suspense that rejects', async () => {
       const fakeSuspensePromise = Promise.reject(new Error('error'));
       function Example() {
@@ -274,20 +264,20 @@ describe('Timeline profiler', () => {
       );
 
       expect(clearedMarks).toMatchInlineSnapshot(`
-        [
-          "--schedule-render-2",
-          "--render-start-2",
+        Array [
+          "--schedule-render-1",
+          "--render-start-1",
           "--component-render-start-Example",
           "--component-render-stop",
-          "--suspense-suspend-0-Example-mount-2-",
+          "--suspense-suspend-0-Example-mount-1-",
           "--render-stop",
-          "--commit-start-2",
+          "--commit-start-1",
           "--react-version-<filtered-version>",
           "--profiler-version-1",
           "--react-internal-module-start-  at filtered (<anonymous>:0:0)",
           "--react-internal-module-stop-  at filtered (<anonymous>:1:1)",
-          "--react-lane-labels-SyncHydrationLane,Sync,InputContinuousHydration,InputContinuous,DefaultHydration,Default,TransitionHydration,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Retry,Retry,Retry,Retry,SelectiveHydration,IdleHydration,Idle,Offscreen",
-          "--layout-effects-start-2",
+          "--react-lane-labels-Sync,InputContinuousHydration,InputContinuous,DefaultHydration,Default,TransitionHydration,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Retry,Retry,Retry,Retry,Retry,SelectiveHydration,IdleHydration,Idle,Offscreen",
+          "--layout-effects-start-1",
           "--layout-effects-stop",
           "--commit-stop",
         ]
@@ -299,12 +289,9 @@ describe('Timeline profiler', () => {
       expect(clearedMarks).toContain(`--suspense-rejected-0-Example`);
     });
 
+    // @reactVersion >=18.0
     it('should mark concurrent render with suspense that resolves', async () => {
-      let resolveFakePromise;
-      const fakeSuspensePromise = new Promise(
-        resolve => (resolveFakePromise = resolve),
-      );
-
+      const fakeSuspensePromise = Promise.resolve(true);
       function Example() {
         throw fakeSuspensePromise;
       }
@@ -316,29 +303,29 @@ describe('Timeline profiler', () => {
       );
 
       expect(clearedMarks).toMatchInlineSnapshot(`
-        [
-          "--schedule-render-32",
-        ]
-      `);
+            Array [
+              "--schedule-render-16",
+            ]
+        `);
 
       clearPendingMarks();
 
-      await waitForPaint([]);
+      expect(Scheduler).toFlushUntilNextPaint([]);
 
       expect(clearedMarks).toMatchInlineSnapshot(`
-        [
-          "--render-start-32",
+        Array [
+          "--render-start-16",
           "--component-render-start-Example",
           "--component-render-stop",
-          "--suspense-suspend-0-Example-mount-32-",
+          "--suspense-suspend-0-Example-mount-16-",
           "--render-stop",
-          "--commit-start-32",
+          "--commit-start-16",
           "--react-version-<filtered-version>",
           "--profiler-version-1",
           "--react-internal-module-start-  at filtered (<anonymous>:0:0)",
           "--react-internal-module-stop-  at filtered (<anonymous>:1:1)",
-          "--react-lane-labels-SyncHydrationLane,Sync,InputContinuousHydration,InputContinuous,DefaultHydration,Default,TransitionHydration,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Retry,Retry,Retry,Retry,SelectiveHydration,IdleHydration,Idle,Offscreen",
-          "--layout-effects-start-32",
+          "--react-lane-labels-Sync,InputContinuousHydration,InputContinuous,DefaultHydration,Default,TransitionHydration,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Retry,Retry,Retry,Retry,Retry,SelectiveHydration,IdleHydration,Idle,Offscreen",
+          "--layout-effects-start-16",
           "--layout-effects-stop",
           "--commit-stop",
         ]
@@ -346,20 +333,17 @@ describe('Timeline profiler', () => {
 
       clearPendingMarks();
 
-      await resolveFakePromise();
+      await fakeSuspensePromise;
       expect(clearedMarks).toMatchInlineSnapshot(`
-            [
+            Array [
               "--suspense-resolved-0-Example",
             ]
         `);
     });
 
+    // @reactVersion >=18.0
     it('should mark concurrent render with suspense that rejects', async () => {
-      let rejectFakePromise;
-      const fakeSuspensePromise = new Promise(
-        (_, reject) => (rejectFakePromise = reject),
-      );
-
+      const fakeSuspensePromise = Promise.reject(new Error('error'));
       function Example() {
         throw fakeSuspensePromise;
       }
@@ -371,29 +355,29 @@ describe('Timeline profiler', () => {
       );
 
       expect(clearedMarks).toMatchInlineSnapshot(`
-        [
-          "--schedule-render-32",
-        ]
-      `);
+            Array [
+              "--schedule-render-16",
+            ]
+        `);
 
       clearPendingMarks();
 
-      await waitForPaint([]);
+      expect(Scheduler).toFlushUntilNextPaint([]);
 
       expect(clearedMarks).toMatchInlineSnapshot(`
-        [
-          "--render-start-32",
+        Array [
+          "--render-start-16",
           "--component-render-start-Example",
           "--component-render-stop",
-          "--suspense-suspend-0-Example-mount-32-",
+          "--suspense-suspend-0-Example-mount-16-",
           "--render-stop",
-          "--commit-start-32",
+          "--commit-start-16",
           "--react-version-<filtered-version>",
           "--profiler-version-1",
           "--react-internal-module-start-  at filtered (<anonymous>:0:0)",
           "--react-internal-module-stop-  at filtered (<anonymous>:1:1)",
-          "--react-lane-labels-SyncHydrationLane,Sync,InputContinuousHydration,InputContinuous,DefaultHydration,Default,TransitionHydration,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Retry,Retry,Retry,Retry,SelectiveHydration,IdleHydration,Idle,Offscreen",
-          "--layout-effects-start-32",
+          "--react-lane-labels-Sync,InputContinuousHydration,InputContinuous,DefaultHydration,Default,TransitionHydration,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Retry,Retry,Retry,Retry,Retry,SelectiveHydration,IdleHydration,Idle,Offscreen",
+          "--layout-effects-start-16",
           "--layout-effects-stop",
           "--commit-stop",
         ]
@@ -401,18 +385,16 @@ describe('Timeline profiler', () => {
 
       clearPendingMarks();
 
-      await expect(() => {
-        rejectFakePromise(new Error('error'));
-        return fakeSuspensePromise;
-      }).rejects.toThrow();
+      await expect(fakeSuspensePromise).rejects.toThrow();
       expect(clearedMarks).toMatchInlineSnapshot(`
-                [
+                Array [
                   "--suspense-rejected-0-Example",
                 ]
           `);
     });
 
-    it('should mark cascading class component state updates', async () => {
+    // @reactVersion >=18.0
+    it('should mark cascading class component state updates', () => {
       class Example extends React.Component {
         state = {didMount: false};
         componentDidMount() {
@@ -426,47 +408,48 @@ describe('Timeline profiler', () => {
       renderRootHelper(<Example />);
 
       expect(clearedMarks).toMatchInlineSnapshot(`
-        [
-          "--schedule-render-32",
-        ]
-      `);
+            Array [
+              "--schedule-render-16",
+            ]
+        `);
 
       clearPendingMarks();
 
-      await waitForPaint([]);
+      expect(Scheduler).toFlushUntilNextPaint([]);
 
       expect(clearedMarks).toMatchInlineSnapshot(`
-        [
-          "--render-start-32",
+        Array [
+          "--render-start-16",
           "--component-render-start-Example",
           "--component-render-stop",
           "--render-stop",
-          "--commit-start-32",
+          "--commit-start-16",
           "--react-version-<filtered-version>",
           "--profiler-version-1",
           "--react-internal-module-start-  at filtered (<anonymous>:0:0)",
           "--react-internal-module-stop-  at filtered (<anonymous>:1:1)",
-          "--react-lane-labels-SyncHydrationLane,Sync,InputContinuousHydration,InputContinuous,DefaultHydration,Default,TransitionHydration,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Retry,Retry,Retry,Retry,SelectiveHydration,IdleHydration,Idle,Offscreen",
-          "--layout-effects-start-32",
-          "--schedule-state-update-2-Example",
+          "--react-lane-labels-Sync,InputContinuousHydration,InputContinuous,DefaultHydration,Default,TransitionHydration,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Retry,Retry,Retry,Retry,Retry,SelectiveHydration,IdleHydration,Idle,Offscreen",
+          "--layout-effects-start-16",
+          "--schedule-state-update-1-Example",
           "--layout-effects-stop",
-          "--render-start-2",
+          "--render-start-1",
           "--component-render-start-Example",
           "--component-render-stop",
           "--render-stop",
-          "--commit-start-2",
+          "--commit-start-1",
           "--react-version-<filtered-version>",
           "--profiler-version-1",
           "--react-internal-module-start-  at filtered (<anonymous>:0:0)",
           "--react-internal-module-stop-  at filtered (<anonymous>:1:1)",
-          "--react-lane-labels-SyncHydrationLane,Sync,InputContinuousHydration,InputContinuous,DefaultHydration,Default,TransitionHydration,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Retry,Retry,Retry,Retry,SelectiveHydration,IdleHydration,Idle,Offscreen",
+          "--react-lane-labels-Sync,InputContinuousHydration,InputContinuous,DefaultHydration,Default,TransitionHydration,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Retry,Retry,Retry,Retry,Retry,SelectiveHydration,IdleHydration,Idle,Offscreen",
           "--commit-stop",
           "--commit-stop",
         ]
       `);
     });
 
-    it('should mark cascading class component force updates', async () => {
+    // @reactVersion >=18.0
+    it('should mark cascading class component force updates', () => {
       class Example extends React.Component {
         componentDidMount() {
           this.forceUpdate();
@@ -479,47 +462,48 @@ describe('Timeline profiler', () => {
       renderRootHelper(<Example />);
 
       expect(clearedMarks).toMatchInlineSnapshot(`
-        [
-          "--schedule-render-32",
-        ]
-      `);
+                Array [
+                  "--schedule-render-16",
+                ]
+          `);
 
       clearPendingMarks();
 
-      await waitForPaint([]);
+      expect(Scheduler).toFlushUntilNextPaint([]);
 
       expect(clearedMarks).toMatchInlineSnapshot(`
-        [
-          "--render-start-32",
+        Array [
+          "--render-start-16",
           "--component-render-start-Example",
           "--component-render-stop",
           "--render-stop",
-          "--commit-start-32",
+          "--commit-start-16",
           "--react-version-<filtered-version>",
           "--profiler-version-1",
           "--react-internal-module-start-  at filtered (<anonymous>:0:0)",
           "--react-internal-module-stop-  at filtered (<anonymous>:1:1)",
-          "--react-lane-labels-SyncHydrationLane,Sync,InputContinuousHydration,InputContinuous,DefaultHydration,Default,TransitionHydration,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Retry,Retry,Retry,Retry,SelectiveHydration,IdleHydration,Idle,Offscreen",
-          "--layout-effects-start-32",
-          "--schedule-forced-update-2-Example",
+          "--react-lane-labels-Sync,InputContinuousHydration,InputContinuous,DefaultHydration,Default,TransitionHydration,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Retry,Retry,Retry,Retry,Retry,SelectiveHydration,IdleHydration,Idle,Offscreen",
+          "--layout-effects-start-16",
+          "--schedule-forced-update-1-Example",
           "--layout-effects-stop",
-          "--render-start-2",
+          "--render-start-1",
           "--component-render-start-Example",
           "--component-render-stop",
           "--render-stop",
-          "--commit-start-2",
+          "--commit-start-1",
           "--react-version-<filtered-version>",
           "--profiler-version-1",
           "--react-internal-module-start-  at filtered (<anonymous>:0:0)",
           "--react-internal-module-stop-  at filtered (<anonymous>:1:1)",
-          "--react-lane-labels-SyncHydrationLane,Sync,InputContinuousHydration,InputContinuous,DefaultHydration,Default,TransitionHydration,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Retry,Retry,Retry,Retry,SelectiveHydration,IdleHydration,Idle,Offscreen",
+          "--react-lane-labels-Sync,InputContinuousHydration,InputContinuous,DefaultHydration,Default,TransitionHydration,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Retry,Retry,Retry,Retry,Retry,SelectiveHydration,IdleHydration,Idle,Offscreen",
           "--commit-stop",
           "--commit-stop",
         ]
       `);
     });
 
-    it('should mark render phase state updates for class component', async () => {
+    // @reactVersion >=18.0
+    it('should mark render phase state updates for class component', () => {
       class Example extends React.Component {
         state = {didRender: false};
         render() {
@@ -533,19 +517,19 @@ describe('Timeline profiler', () => {
       renderRootHelper(<Example />);
 
       expect(clearedMarks).toMatchInlineSnapshot(`
-        [
-          "--schedule-render-32",
-        ]
-      `);
+                Array [
+                  "--schedule-render-16",
+                ]
+          `);
 
       clearPendingMarks();
 
       let errorMessage;
-      jest.spyOn(console, 'error').mockImplementation(message => {
+      spyOn(console, 'error').and.callFake(message => {
         errorMessage = message;
       });
 
-      await waitForPaint([]);
+      expect(Scheduler).toFlushUntilNextPaint([]);
 
       expect(console.error).toHaveBeenCalledTimes(1);
       expect(errorMessage).toContain(
@@ -553,26 +537,27 @@ describe('Timeline profiler', () => {
       );
 
       expect(clearedMarks).toMatchInlineSnapshot(`
-        [
-          "--render-start-32",
+        Array [
+          "--render-start-16",
           "--component-render-start-Example",
-          "--schedule-state-update-32-Example",
+          "--schedule-state-update-16-Example",
           "--component-render-stop",
           "--render-stop",
-          "--commit-start-32",
+          "--commit-start-16",
           "--react-version-<filtered-version>",
           "--profiler-version-1",
           "--react-internal-module-start-  at filtered (<anonymous>:0:0)",
           "--react-internal-module-stop-  at filtered (<anonymous>:1:1)",
-          "--react-lane-labels-SyncHydrationLane,Sync,InputContinuousHydration,InputContinuous,DefaultHydration,Default,TransitionHydration,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Retry,Retry,Retry,Retry,SelectiveHydration,IdleHydration,Idle,Offscreen",
-          "--layout-effects-start-32",
+          "--react-lane-labels-Sync,InputContinuousHydration,InputContinuous,DefaultHydration,Default,TransitionHydration,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Retry,Retry,Retry,Retry,Retry,SelectiveHydration,IdleHydration,Idle,Offscreen",
+          "--layout-effects-start-16",
           "--layout-effects-stop",
           "--commit-stop",
         ]
       `);
     });
 
-    it('should mark render phase force updates for class component', async () => {
+    // @reactVersion >=18.0
+    it('should mark render phase force updates for class component', () => {
       let forced = false;
       class Example extends React.Component {
         render() {
@@ -587,19 +572,19 @@ describe('Timeline profiler', () => {
       renderRootHelper(<Example />);
 
       expect(clearedMarks).toMatchInlineSnapshot(`
-        [
-          "--schedule-render-32",
-        ]
-      `);
+                Array [
+                  "--schedule-render-16",
+                ]
+          `);
 
       clearPendingMarks();
 
       let errorMessage;
-      jest.spyOn(console, 'error').mockImplementation(message => {
+      spyOn(console, 'error').and.callFake(message => {
         errorMessage = message;
       });
 
-      await waitForPaint([]);
+      expect(Scheduler).toFlushUntilNextPaint([]);
 
       expect(console.error).toHaveBeenCalledTimes(1);
       expect(errorMessage).toContain(
@@ -607,26 +592,27 @@ describe('Timeline profiler', () => {
       );
 
       expect(clearedMarks).toMatchInlineSnapshot(`
-        [
-          "--render-start-32",
+        Array [
+          "--render-start-16",
           "--component-render-start-Example",
-          "--schedule-forced-update-32-Example",
+          "--schedule-forced-update-16-Example",
           "--component-render-stop",
           "--render-stop",
-          "--commit-start-32",
+          "--commit-start-16",
           "--react-version-<filtered-version>",
           "--profiler-version-1",
           "--react-internal-module-start-  at filtered (<anonymous>:0:0)",
           "--react-internal-module-stop-  at filtered (<anonymous>:1:1)",
-          "--react-lane-labels-SyncHydrationLane,Sync,InputContinuousHydration,InputContinuous,DefaultHydration,Default,TransitionHydration,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Retry,Retry,Retry,Retry,SelectiveHydration,IdleHydration,Idle,Offscreen",
-          "--layout-effects-start-32",
+          "--react-lane-labels-Sync,InputContinuousHydration,InputContinuous,DefaultHydration,Default,TransitionHydration,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Retry,Retry,Retry,Retry,Retry,SelectiveHydration,IdleHydration,Idle,Offscreen",
+          "--layout-effects-start-16",
           "--layout-effects-stop",
           "--commit-stop",
         ]
       `);
     });
 
-    it('should mark cascading layout updates', async () => {
+    // @reactVersion >=18.0
+    it('should mark cascading layout updates', () => {
       function Example() {
         const [didMount, setDidMount] = React.useState(false);
         React.useLayoutEffect(() => {
@@ -638,49 +624,50 @@ describe('Timeline profiler', () => {
       renderRootHelper(<Example />);
 
       expect(clearedMarks).toMatchInlineSnapshot(`
-        [
-          "--schedule-render-32",
-        ]
-      `);
+                Array [
+                  "--schedule-render-16",
+                ]
+          `);
 
       clearPendingMarks();
 
-      await waitForPaint([]);
+      expect(Scheduler).toFlushUntilNextPaint([]);
 
       expect(clearedMarks).toMatchInlineSnapshot(`
-        [
-          "--render-start-32",
+        Array [
+          "--render-start-16",
           "--component-render-start-Example",
           "--component-render-stop",
           "--render-stop",
-          "--commit-start-32",
+          "--commit-start-16",
           "--react-version-<filtered-version>",
           "--profiler-version-1",
           "--react-internal-module-start-  at filtered (<anonymous>:0:0)",
           "--react-internal-module-stop-  at filtered (<anonymous>:1:1)",
-          "--react-lane-labels-SyncHydrationLane,Sync,InputContinuousHydration,InputContinuous,DefaultHydration,Default,TransitionHydration,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Retry,Retry,Retry,Retry,SelectiveHydration,IdleHydration,Idle,Offscreen",
-          "--layout-effects-start-32",
+          "--react-lane-labels-Sync,InputContinuousHydration,InputContinuous,DefaultHydration,Default,TransitionHydration,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Retry,Retry,Retry,Retry,Retry,SelectiveHydration,IdleHydration,Idle,Offscreen",
+          "--layout-effects-start-16",
           "--component-layout-effect-mount-start-Example",
-          "--schedule-state-update-2-Example",
+          "--schedule-state-update-1-Example",
           "--component-layout-effect-mount-stop",
           "--layout-effects-stop",
-          "--render-start-2",
+          "--render-start-1",
           "--component-render-start-Example",
           "--component-render-stop",
           "--render-stop",
-          "--commit-start-2",
+          "--commit-start-1",
           "--react-version-<filtered-version>",
           "--profiler-version-1",
           "--react-internal-module-start-  at filtered (<anonymous>:0:0)",
           "--react-internal-module-stop-  at filtered (<anonymous>:1:1)",
-          "--react-lane-labels-SyncHydrationLane,Sync,InputContinuousHydration,InputContinuous,DefaultHydration,Default,TransitionHydration,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Retry,Retry,Retry,Retry,SelectiveHydration,IdleHydration,Idle,Offscreen",
+          "--react-lane-labels-Sync,InputContinuousHydration,InputContinuous,DefaultHydration,Default,TransitionHydration,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Retry,Retry,Retry,Retry,Retry,SelectiveHydration,IdleHydration,Idle,Offscreen",
           "--commit-stop",
           "--commit-stop",
         ]
       `);
     });
 
-    it('should mark cascading passive updates', async () => {
+    // @reactVersion >=18.0
+    it('should mark cascading passive updates', () => {
       function Example() {
         const [didMount, setDidMount] = React.useState(false);
         React.useEffect(() => {
@@ -691,45 +678,46 @@ describe('Timeline profiler', () => {
 
       renderRootHelper(<Example />);
 
-      await waitForAll([]);
+      expect(Scheduler).toFlushAndYield([]);
 
       expect(clearedMarks).toMatchInlineSnapshot(`
-        [
-          "--schedule-render-32",
-          "--render-start-32",
+        Array [
+          "--schedule-render-16",
+          "--render-start-16",
           "--component-render-start-Example",
           "--component-render-stop",
           "--render-stop",
-          "--commit-start-32",
+          "--commit-start-16",
           "--react-version-<filtered-version>",
           "--profiler-version-1",
           "--react-internal-module-start-  at filtered (<anonymous>:0:0)",
           "--react-internal-module-stop-  at filtered (<anonymous>:1:1)",
-          "--react-lane-labels-SyncHydrationLane,Sync,InputContinuousHydration,InputContinuous,DefaultHydration,Default,TransitionHydration,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Retry,Retry,Retry,Retry,SelectiveHydration,IdleHydration,Idle,Offscreen",
-          "--layout-effects-start-32",
+          "--react-lane-labels-Sync,InputContinuousHydration,InputContinuous,DefaultHydration,Default,TransitionHydration,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Retry,Retry,Retry,Retry,Retry,SelectiveHydration,IdleHydration,Idle,Offscreen",
+          "--layout-effects-start-16",
           "--layout-effects-stop",
           "--commit-stop",
-          "--passive-effects-start-32",
+          "--passive-effects-start-16",
           "--component-passive-effect-mount-start-Example",
-          "--schedule-state-update-32-Example",
+          "--schedule-state-update-16-Example",
           "--component-passive-effect-mount-stop",
           "--passive-effects-stop",
-          "--render-start-32",
+          "--render-start-16",
           "--component-render-start-Example",
           "--component-render-stop",
           "--render-stop",
-          "--commit-start-32",
+          "--commit-start-16",
           "--react-version-<filtered-version>",
           "--profiler-version-1",
           "--react-internal-module-start-  at filtered (<anonymous>:0:0)",
           "--react-internal-module-stop-  at filtered (<anonymous>:1:1)",
-          "--react-lane-labels-SyncHydrationLane,Sync,InputContinuousHydration,InputContinuous,DefaultHydration,Default,TransitionHydration,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Retry,Retry,Retry,Retry,SelectiveHydration,IdleHydration,Idle,Offscreen",
+          "--react-lane-labels-Sync,InputContinuousHydration,InputContinuous,DefaultHydration,Default,TransitionHydration,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Retry,Retry,Retry,Retry,Retry,SelectiveHydration,IdleHydration,Idle,Offscreen",
           "--commit-stop",
         ]
       `);
     });
 
-    it('should mark render phase updates', async () => {
+    // @reactVersion >=18.0
+    it('should mark render phase updates', () => {
       function Example() {
         const [didRender, setDidRender] = React.useState(false);
         if (!didRender) {
@@ -740,31 +728,32 @@ describe('Timeline profiler', () => {
 
       renderRootHelper(<Example />);
 
-      await waitForAll([]);
+      expect(Scheduler).toFlushAndYield([]);
 
       expect(clearedMarks).toMatchInlineSnapshot(`
-        [
-          "--schedule-render-32",
-          "--render-start-32",
+        Array [
+          "--schedule-render-16",
+          "--render-start-16",
           "--component-render-start-Example",
-          "--schedule-state-update-32-Example",
+          "--schedule-state-update-16-Example",
           "--component-render-stop",
           "--render-stop",
-          "--commit-start-32",
+          "--commit-start-16",
           "--react-version-<filtered-version>",
           "--profiler-version-1",
           "--react-internal-module-start-  at filtered (<anonymous>:0:0)",
           "--react-internal-module-stop-  at filtered (<anonymous>:1:1)",
-          "--react-lane-labels-SyncHydrationLane,Sync,InputContinuousHydration,InputContinuous,DefaultHydration,Default,TransitionHydration,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Retry,Retry,Retry,Retry,SelectiveHydration,IdleHydration,Idle,Offscreen",
-          "--layout-effects-start-32",
+          "--react-lane-labels-Sync,InputContinuousHydration,InputContinuous,DefaultHydration,Default,TransitionHydration,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Retry,Retry,Retry,Retry,Retry,SelectiveHydration,IdleHydration,Idle,Offscreen",
+          "--layout-effects-start-16",
           "--layout-effects-stop",
           "--commit-stop",
         ]
       `);
     });
 
+    // @reactVersion >=18.0
     it('should mark sync render that throws', async () => {
-      jest.spyOn(console, 'error').mockImplementation(() => {});
+      spyOn(console, 'error');
 
       class ErrorBoundary extends React.Component {
         state = {error: null};
@@ -790,9 +779,9 @@ describe('Timeline profiler', () => {
       );
 
       expect(clearedMarks).toMatchInlineSnapshot(`
-        [
-          "--schedule-render-2",
-          "--render-start-2",
+        Array [
+          "--schedule-render-1",
+          "--render-start-1",
           "--component-render-start-ErrorBoundary",
           "--component-render-stop",
           "--component-render-start-ExampleThatThrows",
@@ -800,33 +789,34 @@ describe('Timeline profiler', () => {
           "--component-render-stop",
           "--error-ExampleThatThrows-mount-Expected error",
           "--render-stop",
-          "--commit-start-2",
+          "--commit-start-1",
           "--react-version-<filtered-version>",
           "--profiler-version-1",
           "--react-internal-module-start-  at filtered (<anonymous>:0:0)",
           "--react-internal-module-stop-  at filtered (<anonymous>:1:1)",
-          "--react-lane-labels-SyncHydrationLane,Sync,InputContinuousHydration,InputContinuous,DefaultHydration,Default,TransitionHydration,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Retry,Retry,Retry,Retry,SelectiveHydration,IdleHydration,Idle,Offscreen",
-          "--layout-effects-start-2",
-          "--schedule-state-update-2-ErrorBoundary",
+          "--react-lane-labels-Sync,InputContinuousHydration,InputContinuous,DefaultHydration,Default,TransitionHydration,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Retry,Retry,Retry,Retry,Retry,SelectiveHydration,IdleHydration,Idle,Offscreen",
+          "--layout-effects-start-1",
+          "--schedule-state-update-1-ErrorBoundary",
           "--layout-effects-stop",
           "--commit-stop",
-          "--render-start-2",
+          "--render-start-1",
           "--component-render-start-ErrorBoundary",
           "--component-render-stop",
           "--render-stop",
-          "--commit-start-2",
+          "--commit-start-1",
           "--react-version-<filtered-version>",
           "--profiler-version-1",
           "--react-internal-module-start-  at filtered (<anonymous>:0:0)",
           "--react-internal-module-stop-  at filtered (<anonymous>:1:1)",
-          "--react-lane-labels-SyncHydrationLane,Sync,InputContinuousHydration,InputContinuous,DefaultHydration,Default,TransitionHydration,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Retry,Retry,Retry,Retry,SelectiveHydration,IdleHydration,Idle,Offscreen",
+          "--react-lane-labels-Sync,InputContinuousHydration,InputContinuous,DefaultHydration,Default,TransitionHydration,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Retry,Retry,Retry,Retry,Retry,SelectiveHydration,IdleHydration,Idle,Offscreen",
           "--commit-stop",
         ]
       `);
     });
 
+    // @reactVersion >=18.0
     it('should mark concurrent render that throws', async () => {
-      jest.spyOn(console, 'error').mockImplementation(() => {});
+      spyOn(console, 'error');
 
       class ErrorBoundary extends React.Component {
         state = {error: null};
@@ -853,18 +843,18 @@ describe('Timeline profiler', () => {
       );
 
       expect(clearedMarks).toMatchInlineSnapshot(`
-        [
-          "--schedule-render-32",
-        ]
-      `);
+                Array [
+                  "--schedule-render-16",
+                ]
+          `);
 
       clearPendingMarks();
 
-      await waitForPaint([]);
+      expect(Scheduler).toFlushUntilNextPaint([]);
 
       expect(clearedMarks).toMatchInlineSnapshot(`
-        [
-          "--render-start-32",
+        Array [
+          "--render-start-16",
           "--component-render-start-ErrorBoundary",
           "--component-render-stop",
           "--component-render-start-ExampleThatThrows",
@@ -872,7 +862,7 @@ describe('Timeline profiler', () => {
           "--component-render-stop",
           "--error-ExampleThatThrows-mount-Expected error",
           "--render-stop",
-          "--render-start-32",
+          "--render-start-16",
           "--component-render-start-ErrorBoundary",
           "--component-render-stop",
           "--component-render-start-ExampleThatThrows",
@@ -880,65 +870,66 @@ describe('Timeline profiler', () => {
           "--component-render-stop",
           "--error-ExampleThatThrows-mount-Expected error",
           "--render-stop",
-          "--commit-start-32",
+          "--commit-start-16",
           "--react-version-<filtered-version>",
           "--profiler-version-1",
           "--react-internal-module-start-  at filtered (<anonymous>:0:0)",
           "--react-internal-module-stop-  at filtered (<anonymous>:1:1)",
-          "--react-lane-labels-SyncHydrationLane,Sync,InputContinuousHydration,InputContinuous,DefaultHydration,Default,TransitionHydration,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Retry,Retry,Retry,Retry,SelectiveHydration,IdleHydration,Idle,Offscreen",
-          "--layout-effects-start-32",
-          "--schedule-state-update-2-ErrorBoundary",
+          "--react-lane-labels-Sync,InputContinuousHydration,InputContinuous,DefaultHydration,Default,TransitionHydration,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Retry,Retry,Retry,Retry,Retry,SelectiveHydration,IdleHydration,Idle,Offscreen",
+          "--layout-effects-start-16",
+          "--schedule-state-update-1-ErrorBoundary",
           "--layout-effects-stop",
-          "--render-start-2",
+          "--render-start-1",
           "--component-render-start-ErrorBoundary",
           "--component-render-stop",
           "--render-stop",
-          "--commit-start-2",
+          "--commit-start-1",
           "--react-version-<filtered-version>",
           "--profiler-version-1",
           "--react-internal-module-start-  at filtered (<anonymous>:0:0)",
           "--react-internal-module-stop-  at filtered (<anonymous>:1:1)",
-          "--react-lane-labels-SyncHydrationLane,Sync,InputContinuousHydration,InputContinuous,DefaultHydration,Default,TransitionHydration,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Retry,Retry,Retry,Retry,SelectiveHydration,IdleHydration,Idle,Offscreen",
+          "--react-lane-labels-Sync,InputContinuousHydration,InputContinuous,DefaultHydration,Default,TransitionHydration,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Retry,Retry,Retry,Retry,Retry,SelectiveHydration,IdleHydration,Idle,Offscreen",
           "--commit-stop",
           "--commit-stop",
         ]
       `);
     });
 
+    // @reactVersion >=18.0
     it('should mark passive and layout effects', async () => {
       function ComponentWithEffects() {
         React.useLayoutEffect(() => {
-          Scheduler.log('layout 1 mount');
+          Scheduler.unstable_yieldValue('layout 1 mount');
           return () => {
-            Scheduler.log('layout 1 unmount');
+            Scheduler.unstable_yieldValue('layout 1 unmount');
           };
         }, []);
 
         React.useEffect(() => {
-          Scheduler.log('passive 1 mount');
+          Scheduler.unstable_yieldValue('passive 1 mount');
           return () => {
-            Scheduler.log('passive 1 unmount');
+            Scheduler.unstable_yieldValue('passive 1 unmount');
           };
         }, []);
 
         React.useLayoutEffect(() => {
-          Scheduler.log('layout 2 mount');
+          Scheduler.unstable_yieldValue('layout 2 mount');
           return () => {
-            Scheduler.log('layout 2 unmount');
+            Scheduler.unstable_yieldValue('layout 2 unmount');
           };
         }, []);
 
         React.useEffect(() => {
-          Scheduler.log('passive 2 mount');
+          Scheduler.unstable_yieldValue('passive 2 mount');
           return () => {
-            Scheduler.log('passive 2 unmount');
+            Scheduler.unstable_yieldValue('passive 2 unmount');
           };
         }, []);
 
         React.useEffect(() => {
-          Scheduler.log('passive 3 mount');
+          Scheduler.unstable_yieldValue('passive 3 mount');
           return () => {
-            Scheduler.log('passive 3 unmount');
+            Scheduler.unstable_yieldValue('passive 3 unmount');
           };
         }, []);
 
@@ -947,22 +938,25 @@ describe('Timeline profiler', () => {
 
       const unmount = renderRootHelper(<ComponentWithEffects />);
 
-      await waitForPaint(['layout 1 mount', 'layout 2 mount']);
+      expect(Scheduler).toFlushUntilNextPaint([
+        'layout 1 mount',
+        'layout 2 mount',
+      ]);
 
       expect(clearedMarks).toMatchInlineSnapshot(`
-        [
-          "--schedule-render-32",
-          "--render-start-32",
+        Array [
+          "--schedule-render-16",
+          "--render-start-16",
           "--component-render-start-ComponentWithEffects",
           "--component-render-stop",
           "--render-stop",
-          "--commit-start-32",
+          "--commit-start-16",
           "--react-version-<filtered-version>",
           "--profiler-version-1",
           "--react-internal-module-start-  at filtered (<anonymous>:0:0)",
           "--react-internal-module-stop-  at filtered (<anonymous>:1:1)",
-          "--react-lane-labels-SyncHydrationLane,Sync,InputContinuousHydration,InputContinuous,DefaultHydration,Default,TransitionHydration,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Retry,Retry,Retry,Retry,SelectiveHydration,IdleHydration,Idle,Offscreen",
-          "--layout-effects-start-32",
+          "--react-lane-labels-Sync,InputContinuousHydration,InputContinuous,DefaultHydration,Default,TransitionHydration,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Retry,Retry,Retry,Retry,Retry,SelectiveHydration,IdleHydration,Idle,Offscreen",
+          "--layout-effects-start-16",
           "--component-layout-effect-mount-start-ComponentWithEffects",
           "--component-layout-effect-mount-stop",
           "--component-layout-effect-mount-start-ComponentWithEffects",
@@ -974,32 +968,32 @@ describe('Timeline profiler', () => {
 
       clearPendingMarks();
 
-      await waitForAll([
+      expect(Scheduler).toFlushAndYield([
         'passive 1 mount',
         'passive 2 mount',
         'passive 3 mount',
       ]);
 
       expect(clearedMarks).toMatchInlineSnapshot(`
-        [
-          "--passive-effects-start-32",
-          "--component-passive-effect-mount-start-ComponentWithEffects",
-          "--component-passive-effect-mount-stop",
-          "--component-passive-effect-mount-start-ComponentWithEffects",
-          "--component-passive-effect-mount-stop",
-          "--component-passive-effect-mount-start-ComponentWithEffects",
-          "--component-passive-effect-mount-stop",
-          "--passive-effects-stop",
-        ]
-      `);
+            Array [
+              "--passive-effects-start-16",
+              "--component-passive-effect-mount-start-ComponentWithEffects",
+              "--component-passive-effect-mount-stop",
+              "--component-passive-effect-mount-start-ComponentWithEffects",
+              "--component-passive-effect-mount-stop",
+              "--component-passive-effect-mount-start-ComponentWithEffects",
+              "--component-passive-effect-mount-stop",
+              "--passive-effects-stop",
+            ]
+        `);
 
       clearPendingMarks();
 
-      await waitForAll([]);
+      expect(Scheduler).toFlushAndYield([]);
 
       unmount();
 
-      assertLog([
+      expect(Scheduler).toHaveYielded([
         'layout 1 unmount',
         'layout 2 unmount',
         'passive 1 unmount',
@@ -1008,23 +1002,23 @@ describe('Timeline profiler', () => {
       ]);
 
       expect(clearedMarks).toMatchInlineSnapshot(`
-        [
-          "--schedule-render-2",
-          "--render-start-2",
+        Array [
+          "--schedule-render-1",
+          "--render-start-1",
           "--render-stop",
-          "--commit-start-2",
+          "--commit-start-1",
           "--react-version-<filtered-version>",
           "--profiler-version-1",
           "--react-internal-module-start-  at filtered (<anonymous>:0:0)",
           "--react-internal-module-stop-  at filtered (<anonymous>:1:1)",
-          "--react-lane-labels-SyncHydrationLane,Sync,InputContinuousHydration,InputContinuous,DefaultHydration,Default,TransitionHydration,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Retry,Retry,Retry,Retry,SelectiveHydration,IdleHydration,Idle,Offscreen",
+          "--react-lane-labels-Sync,InputContinuousHydration,InputContinuous,DefaultHydration,Default,TransitionHydration,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Retry,Retry,Retry,Retry,Retry,SelectiveHydration,IdleHydration,Idle,Offscreen",
           "--component-layout-effect-unmount-start-ComponentWithEffects",
           "--component-layout-effect-unmount-stop",
           "--component-layout-effect-unmount-start-ComponentWithEffects",
           "--component-layout-effect-unmount-stop",
-          "--layout-effects-start-2",
+          "--layout-effects-start-1",
           "--layout-effects-stop",
-          "--passive-effects-start-2",
+          "--passive-effects-start-1",
           "--component-passive-effect-unmount-start-ComponentWithEffects",
           "--component-passive-effect-unmount-stop",
           "--component-passive-effect-unmount-start-ComponentWithEffects",
@@ -1038,36 +1032,39 @@ describe('Timeline profiler', () => {
     });
 
     describe('lane labels', () => {
+      // @reactVersion >=18.0
       it('regression test SyncLane', () => {
         renderHelper(<div />);
 
         expect(clearedMarks).toMatchInlineSnapshot(`
-          [
-            "--schedule-render-2",
-            "--render-start-2",
+          Array [
+            "--schedule-render-1",
+            "--render-start-1",
             "--render-stop",
-            "--commit-start-2",
+            "--commit-start-1",
             "--react-version-<filtered-version>",
             "--profiler-version-1",
             "--react-internal-module-start-  at filtered (<anonymous>:0:0)",
             "--react-internal-module-stop-  at filtered (<anonymous>:1:1)",
-            "--react-lane-labels-SyncHydrationLane,Sync,InputContinuousHydration,InputContinuous,DefaultHydration,Default,TransitionHydration,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Retry,Retry,Retry,Retry,SelectiveHydration,IdleHydration,Idle,Offscreen",
-            "--layout-effects-start-2",
+            "--react-lane-labels-Sync,InputContinuousHydration,InputContinuous,DefaultHydration,Default,TransitionHydration,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Retry,Retry,Retry,Retry,Retry,SelectiveHydration,IdleHydration,Idle,Offscreen",
+            "--layout-effects-start-1",
             "--layout-effects-stop",
             "--commit-stop",
           ]
         `);
       });
 
+      // @reactVersion >=18.0
       it('regression test DefaultLane', () => {
         renderRootHelper(<div />);
         expect(clearedMarks).toMatchInlineSnapshot(`
-          [
-            "--schedule-render-32",
-          ]
-        `);
+                    Array [
+                      "--schedule-render-16",
+                    ]
+              `);
       });
 
+      // @reactVersion >=18.0
       it('regression test InputDiscreteLane', async () => {
         const targetRef = React.createRef(null);
 
@@ -1080,7 +1077,7 @@ describe('Timeline profiler', () => {
         }
 
         renderRootHelper(<App />);
-        await waitForAll([]);
+        expect(Scheduler).toFlushAndYield([]);
 
         clearedMarks.splice(0);
 
@@ -1090,25 +1087,26 @@ describe('Timeline profiler', () => {
         await Promise.resolve();
 
         expect(clearedMarks).toMatchInlineSnapshot(`
-          [
-            "--schedule-state-update-2-App",
-            "--render-start-2",
+          Array [
+            "--schedule-state-update-1-App",
+            "--render-start-1",
             "--component-render-start-App",
             "--component-render-stop",
             "--render-stop",
-            "--commit-start-2",
+            "--commit-start-1",
             "--react-version-<filtered-version>",
             "--profiler-version-1",
             "--react-internal-module-start-  at filtered (<anonymous>:0:0)",
             "--react-internal-module-stop-  at filtered (<anonymous>:1:1)",
-            "--react-lane-labels-SyncHydrationLane,Sync,InputContinuousHydration,InputContinuous,DefaultHydration,Default,TransitionHydration,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Retry,Retry,Retry,Retry,SelectiveHydration,IdleHydration,Idle,Offscreen",
-            "--layout-effects-start-2",
+            "--react-lane-labels-Sync,InputContinuousHydration,InputContinuous,DefaultHydration,Default,TransitionHydration,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Retry,Retry,Retry,Retry,Retry,SelectiveHydration,IdleHydration,Idle,Offscreen",
+            "--layout-effects-start-1",
             "--layout-effects-stop",
             "--commit-stop",
           ]
         `);
       });
 
+      // @reactVersion >=18.0
       it('regression test InputContinuousLane', async () => {
         const targetRef = React.createRef(null);
 
@@ -1119,7 +1117,7 @@ describe('Timeline profiler', () => {
         }
 
         renderRootHelper(<App />);
-        await waitForAll([]);
+        expect(Scheduler).toFlushAndYield([]);
 
         clearedMarks.splice(0);
 
@@ -1127,22 +1125,22 @@ describe('Timeline profiler', () => {
         event.initEvent('mouseover', true, true);
         dispatchAndSetCurrentEvent(targetRef.current, event);
 
-        await waitForAll([]);
+        expect(Scheduler).toFlushAndYield([]);
 
         expect(clearedMarks).toMatchInlineSnapshot(`
-          [
-            "--schedule-state-update-8-App",
-            "--render-start-8",
+          Array [
+            "--schedule-state-update-4-App",
+            "--render-start-4",
             "--component-render-start-App",
             "--component-render-stop",
             "--render-stop",
-            "--commit-start-8",
+            "--commit-start-4",
             "--react-version-<filtered-version>",
             "--profiler-version-1",
             "--react-internal-module-start-  at filtered (<anonymous>:0:0)",
             "--react-internal-module-stop-  at filtered (<anonymous>:1:1)",
-            "--react-lane-labels-SyncHydrationLane,Sync,InputContinuousHydration,InputContinuous,DefaultHydration,Default,TransitionHydration,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Retry,Retry,Retry,Retry,SelectiveHydration,IdleHydration,Idle,Offscreen",
-            "--layout-effects-start-8",
+            "--react-lane-labels-Sync,InputContinuousHydration,InputContinuous,DefaultHydration,Default,TransitionHydration,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Transition,Retry,Retry,Retry,Retry,Retry,SelectiveHydration,IdleHydration,Idle,Offscreen",
+            "--layout-effects-start-4",
             "--layout-effects-stop",
             "--commit-stop",
           ]
@@ -1177,18 +1175,6 @@ describe('Timeline profiler', () => {
         if (timelineData) {
           expect(timelineData).toHaveLength(1);
 
-          // normalize the location for component stack source
-          // for snapshot testing
-          timelineData.forEach(data => {
-            data.schedulingEvents.forEach(event => {
-              if (event.componentStack) {
-                event.componentStack = normalizeCodeLocInfo(
-                  event.componentStack,
-                );
-              }
-            });
-          });
-
           return timelineData[0];
         } else {
           return null;
@@ -1205,14 +1191,15 @@ describe('Timeline profiler', () => {
         utils.act(() => store.profilerStore.startProfiling());
       });
 
+      // @reactVersion >=18.0
       it('should mark sync render without suspends or state updates', () => {
         renderHelper(<div />);
 
         const timelineData = stopProfilingAndGetTimelineData();
         expect(timelineData.schedulingEvents).toMatchInlineSnapshot(`
-          [
-            {
-              "lanes": "0b0000000000000000000000000000010",
+          Array [
+            Object {
+              "lanes": "0b0000000000000000000000000000001",
               "timestamp": 10,
               "type": "schedule-render",
               "warning": null,
@@ -1221,14 +1208,15 @@ describe('Timeline profiler', () => {
         `);
       });
 
+      // @reactVersion >=18.0
       it('should mark concurrent render without suspends or state updates', () => {
         utils.act(() => renderRootHelper(<div />));
 
         const timelineData = stopProfilingAndGetTimelineData();
         expect(timelineData.schedulingEvents).toMatchInlineSnapshot(`
-          [
-            {
-              "lanes": "0b0000000000000000000000000100000",
+          Array [
+            Object {
+              "lanes": "0b0000000000000000000000000010000",
               "timestamp": 10,
               "type": "schedule-render",
               "warning": null,
@@ -1237,6 +1225,7 @@ describe('Timeline profiler', () => {
         `);
       });
 
+      // @reactVersion >=18.0
       it('should mark concurrent render without suspends or state updates', () => {
         let updaterFn;
 
@@ -1264,39 +1253,31 @@ describe('Timeline profiler', () => {
 
         const timelineData = stopProfilingAndGetTimelineData();
         expect(timelineData.schedulingEvents).toMatchInlineSnapshot(`
-          [
-            {
+          Array [
+            Object {
               "componentName": "Example",
-              "componentStack": "
-              in Example (at **)",
-              "lanes": "0b0000000000000000000000000001000",
+              "lanes": "0b0000000000000000000000000000100",
               "timestamp": 10,
               "type": "schedule-state-update",
               "warning": null,
             },
-            {
+            Object {
               "componentName": "Example",
-              "componentStack": "
-              in Example (at **)",
-              "lanes": "0b0000000000000000000000010000000",
+              "lanes": "0b0000000000000000000000001000000",
               "timestamp": 10,
               "type": "schedule-state-update",
               "warning": null,
             },
-            {
+            Object {
               "componentName": "Example",
-              "componentStack": "
-              in Example (at **)",
-              "lanes": "0b0000000000000000000000010000000",
+              "lanes": "0b0000000000000000000000001000000",
               "timestamp": 10,
               "type": "schedule-state-update",
               "warning": null,
             },
-            {
+            Object {
               "componentName": "Example",
-              "componentStack": "
-              in Example (at **)",
-              "lanes": "0b0000000000000000000000000100000",
+              "lanes": "0b0000000000000000000000000010000",
               "timestamp": 10,
               "type": "schedule-state-update",
               "warning": null,
@@ -1304,15 +1285,15 @@ describe('Timeline profiler', () => {
           ]
         `);
         expect(timelineData.componentMeasures).toMatchInlineSnapshot(`
-          [
-            {
+          Array [
+            Object {
               "componentName": "Example",
               "duration": 0,
               "timestamp": 10,
               "type": "render",
               "warning": null,
             },
-            {
+            Object {
               "componentName": "Example",
               "duration": 10,
               "timestamp": 10,
@@ -1327,12 +1308,12 @@ describe('Timeline profiler', () => {
       // @reactVersion >=18.0
       it('should mark render yields', async () => {
         function Bar() {
-          Scheduler.log('Bar');
+          Scheduler.unstable_yieldValue('Bar');
           return null;
         }
 
         function Foo() {
-          Scheduler.log('Foo');
+          Scheduler.unstable_yieldValue('Foo');
           return <Bar />;
         }
 
@@ -1341,11 +1322,11 @@ describe('Timeline profiler', () => {
         });
 
         // Do one step of work.
-        await waitFor(['Foo']);
+        expect(Scheduler).toFlushAndYieldThrough(['Foo']);
 
         // Finish flushing so React commits;
         // Unless we do this, the ProfilerStore won't collect Profiling data.
-        await waitForAll(['Bar']);
+        expect(Scheduler).toFlushAndYield(['Bar']);
 
         // Since we yielded, the batch should report two separate "render" chunks.
         const batch = getBatchOfWork(0);
@@ -1363,7 +1344,7 @@ describe('Timeline profiler', () => {
         });
 
         function Example() {
-          Scheduler.log(resolved ? 'resolved' : 'suspended');
+          Scheduler.unstable_yieldValue(resolved ? 'resolved' : 'suspended');
           if (!resolved) {
             throw suspensePromise;
           }
@@ -1376,13 +1357,13 @@ describe('Timeline profiler', () => {
           </React.Suspense>,
         );
 
-        assertLog(['suspended']);
+        expect(Scheduler).toHaveYielded(['suspended']);
 
         Scheduler.unstable_advanceTime(10);
         resolveFn();
         await suspensePromise;
 
-        await waitForAll(['resolved']);
+        expect(Scheduler).toFlushAndYield(['resolved']);
 
         const timelineData = stopProfilingAndGetTimelineData();
 
@@ -1390,7 +1371,7 @@ describe('Timeline profiler', () => {
         expect(timelineData.suspenseEvents).toHaveLength(1);
         const suspenseEvent = timelineData.suspenseEvents[0];
         expect(suspenseEvent).toMatchInlineSnapshot(`
-          {
+          Object {
             "componentName": "Example",
             "depth": 0,
             "duration": 10,
@@ -1421,7 +1402,7 @@ describe('Timeline profiler', () => {
         });
 
         function Example() {
-          Scheduler.log(rejected ? 'rejected' : 'suspended');
+          Scheduler.unstable_yieldValue(rejected ? 'rejected' : 'suspended');
           if (!rejected) {
             throw suspensePromise;
           }
@@ -1434,13 +1415,13 @@ describe('Timeline profiler', () => {
           </React.Suspense>,
         );
 
-        assertLog(['suspended']);
+        expect(Scheduler).toHaveYielded(['suspended']);
 
         Scheduler.unstable_advanceTime(10);
         rejectFn();
         await expect(suspensePromise).rejects.toThrow();
 
-        assertLog(['rejected']);
+        expect(Scheduler).toHaveYielded(['rejected']);
 
         const timelineData = stopProfilingAndGetTimelineData();
 
@@ -1448,7 +1429,7 @@ describe('Timeline profiler', () => {
         expect(timelineData.suspenseEvents).toHaveLength(1);
         const suspenseEvent = timelineData.suspenseEvents[0];
         expect(suspenseEvent).toMatchInlineSnapshot(`
-          {
+          Object {
             "componentName": "Example",
             "depth": 0,
             "duration": 10,
@@ -1479,7 +1460,7 @@ describe('Timeline profiler', () => {
         });
 
         function Example() {
-          Scheduler.log(resolved ? 'resolved' : 'suspended');
+          Scheduler.unstable_yieldValue(resolved ? 'resolved' : 'suspended');
           if (!resolved) {
             throw suspensePromise;
           }
@@ -1492,13 +1473,13 @@ describe('Timeline profiler', () => {
           </React.Suspense>,
         );
 
-        await waitForAll(['suspended']);
+        expect(Scheduler).toFlushAndYield(['suspended']);
 
         Scheduler.unstable_advanceTime(10);
         resolveFn();
         await suspensePromise;
 
-        await waitForAll(['resolved']);
+        expect(Scheduler).toFlushAndYield(['resolved']);
 
         const timelineData = stopProfilingAndGetTimelineData();
 
@@ -1506,7 +1487,7 @@ describe('Timeline profiler', () => {
         expect(timelineData.suspenseEvents).toHaveLength(1);
         const suspenseEvent = timelineData.suspenseEvents[0];
         expect(suspenseEvent).toMatchInlineSnapshot(`
-          {
+          Object {
             "componentName": "Example",
             "depth": 0,
             "duration": 10,
@@ -1537,7 +1518,7 @@ describe('Timeline profiler', () => {
         });
 
         function Example() {
-          Scheduler.log(rejected ? 'rejected' : 'suspended');
+          Scheduler.unstable_yieldValue(rejected ? 'rejected' : 'suspended');
           if (!rejected) {
             throw suspensePromise;
           }
@@ -1550,13 +1531,13 @@ describe('Timeline profiler', () => {
           </React.Suspense>,
         );
 
-        await waitForAll(['suspended']);
+        expect(Scheduler).toFlushAndYield(['suspended']);
 
         Scheduler.unstable_advanceTime(10);
         rejectFn();
         await expect(suspensePromise).rejects.toThrow();
 
-        await waitForAll(['rejected']);
+        expect(Scheduler).toFlushAndYield(['rejected']);
 
         const timelineData = stopProfilingAndGetTimelineData();
 
@@ -1564,7 +1545,7 @@ describe('Timeline profiler', () => {
         expect(timelineData.suspenseEvents).toHaveLength(1);
         const suspenseEvent = timelineData.suspenseEvents[0];
         expect(suspenseEvent).toMatchInlineSnapshot(`
-          {
+          Object {
             "componentName": "Example",
             "depth": 0,
             "duration": 10,
@@ -1583,7 +1564,8 @@ describe('Timeline profiler', () => {
         expect(timelineData.componentMeasures).toHaveLength(2);
       });
 
-      it('should mark cascading class component state updates', async () => {
+      // @reactVersion >=18.0
+      it('should mark cascading class component state updates', () => {
         class Example extends React.Component {
           state = {didMount: false};
           componentDidMount() {
@@ -1591,27 +1573,29 @@ describe('Timeline profiler', () => {
           }
           render() {
             Scheduler.unstable_advanceTime(10);
-            Scheduler.log(this.state.didMount ? 'update' : 'mount');
+            Scheduler.unstable_yieldValue(
+              this.state.didMount ? 'update' : 'mount',
+            );
             return null;
           }
         }
 
         renderRootHelper(<Example />);
 
-        await waitForPaint(['mount', 'update']);
+        expect(Scheduler).toFlushUntilNextPaint(['mount', 'update']);
 
         const timelineData = stopProfilingAndGetTimelineData();
         expect(timelineData.batchUIDToMeasuresMap.size).toBe(2);
         expect(timelineData.componentMeasures).toMatchInlineSnapshot(`
-          [
-            {
+          Array [
+            Object {
               "componentName": "Example",
               "duration": 10,
               "timestamp": 10,
               "type": "render",
               "warning": null,
             },
-            {
+            Object {
               "componentName": "Example",
               "duration": 10,
               "timestamp": 20,
@@ -1621,18 +1605,16 @@ describe('Timeline profiler', () => {
           ]
         `);
         expect(timelineData.schedulingEvents).toMatchInlineSnapshot(`
-          [
-            {
-              "lanes": "0b0000000000000000000000000100000",
+          Array [
+            Object {
+              "lanes": "0b0000000000000000000000000010000",
               "timestamp": 10,
               "type": "schedule-render",
               "warning": null,
             },
-            {
+            Object {
               "componentName": "Example",
-              "componentStack": "
-              in Example (at **)",
-              "lanes": "0b0000000000000000000000000000010",
+              "lanes": "0b0000000000000000000000000000001",
               "timestamp": 20,
               "type": "schedule-state-update",
               "warning": null,
@@ -1641,7 +1623,8 @@ describe('Timeline profiler', () => {
         `);
       });
 
-      it('should mark cascading class component force updates', async () => {
+      // @reactVersion >=18.0
+      it('should mark cascading class component force updates', () => {
         let forced = false;
         class Example extends React.Component {
           componentDidMount() {
@@ -1650,27 +1633,27 @@ describe('Timeline profiler', () => {
           }
           render() {
             Scheduler.unstable_advanceTime(10);
-            Scheduler.log(forced ? 'force update' : 'mount');
+            Scheduler.unstable_yieldValue(forced ? 'force update' : 'mount');
             return null;
           }
         }
 
         renderRootHelper(<Example />);
 
-        await waitForPaint(['mount', 'force update']);
+        expect(Scheduler).toFlushUntilNextPaint(['mount', 'force update']);
 
         const timelineData = stopProfilingAndGetTimelineData();
         expect(timelineData.batchUIDToMeasuresMap.size).toBe(2);
         expect(timelineData.componentMeasures).toMatchInlineSnapshot(`
-          [
-            {
+          Array [
+            Object {
               "componentName": "Example",
               "duration": 10,
               "timestamp": 10,
               "type": "render",
               "warning": null,
             },
-            {
+            Object {
               "componentName": "Example",
               "duration": 10,
               "timestamp": 20,
@@ -1680,16 +1663,16 @@ describe('Timeline profiler', () => {
           ]
         `);
         expect(timelineData.schedulingEvents).toMatchInlineSnapshot(`
-          [
-            {
-              "lanes": "0b0000000000000000000000000100000",
+          Array [
+            Object {
+              "lanes": "0b0000000000000000000000000010000",
               "timestamp": 10,
               "type": "schedule-render",
               "warning": null,
             },
-            {
+            Object {
               "componentName": "Example",
-              "lanes": "0b0000000000000000000000000000010",
+              "lanes": "0b0000000000000000000000000000001",
               "timestamp": 20,
               "type": "schedule-force-update",
               "warning": null,
@@ -1698,7 +1681,8 @@ describe('Timeline profiler', () => {
         `);
       });
 
-      it('should mark render phase state updates for class component', async () => {
+      // @reactVersion >=18.0
+      it('should mark render phase state updates for class component', () => {
         class Example extends React.Component {
           state = {didRender: false};
           render() {
@@ -1706,7 +1690,7 @@ describe('Timeline profiler', () => {
               this.setState({didRender: true});
             }
             Scheduler.unstable_advanceTime(10);
-            Scheduler.log(
+            Scheduler.unstable_yieldValue(
               this.state.didRender ? 'second render' : 'first render',
             );
             return null;
@@ -1716,11 +1700,11 @@ describe('Timeline profiler', () => {
         renderRootHelper(<Example />);
 
         let errorMessage;
-        jest.spyOn(console, 'error').mockImplementation(message => {
+        spyOn(console, 'error').and.callFake(message => {
           errorMessage = message;
         });
 
-        await waitForAll(['first render', 'second render']);
+        expect(Scheduler).toFlushAndYield(['first render', 'second render']);
 
         expect(console.error).toHaveBeenCalledTimes(1);
         expect(errorMessage).toContain(
@@ -1730,15 +1714,15 @@ describe('Timeline profiler', () => {
         const timelineData = stopProfilingAndGetTimelineData();
         expect(timelineData.batchUIDToMeasuresMap.size).toBe(2);
         expect(timelineData.componentMeasures).toMatchInlineSnapshot(`
-          [
-            {
+          Array [
+            Object {
               "componentName": "Example",
               "duration": 10,
               "timestamp": 10,
               "type": "render",
               "warning": null,
             },
-            {
+            Object {
               "componentName": "Example",
               "duration": 10,
               "timestamp": 20,
@@ -1748,18 +1732,16 @@ describe('Timeline profiler', () => {
           ]
         `);
         expect(timelineData.schedulingEvents).toMatchInlineSnapshot(`
-          [
-            {
-              "lanes": "0b0000000000000000000000000100000",
+          Array [
+            Object {
+              "lanes": "0b0000000000000000000000000010000",
               "timestamp": 10,
               "type": "schedule-render",
               "warning": null,
             },
-            {
+            Object {
               "componentName": "Example",
-              "componentStack": "
-              in Example (at **)",
-              "lanes": "0b0000000000000000000000000100000",
+              "lanes": "0b0000000000000000000000000010000",
               "timestamp": 10,
               "type": "schedule-state-update",
               "warning": null,
@@ -1768,12 +1750,13 @@ describe('Timeline profiler', () => {
         `);
       });
 
-      it('should mark render phase force updates for class component', async () => {
+      // @reactVersion >=18.0
+      it('should mark render phase force updates for class component', () => {
         let forced = false;
         class Example extends React.Component {
           render() {
             Scheduler.unstable_advanceTime(10);
-            Scheduler.log(forced ? 'force update' : 'render');
+            Scheduler.unstable_yieldValue(forced ? 'force update' : 'render');
             if (!forced) {
               forced = true;
               this.forceUpdate();
@@ -1785,11 +1768,11 @@ describe('Timeline profiler', () => {
         renderRootHelper(<Example />);
 
         let errorMessage;
-        jest.spyOn(console, 'error').mockImplementation(message => {
+        spyOn(console, 'error').and.callFake(message => {
           errorMessage = message;
         });
 
-        await waitForAll(['render', 'force update']);
+        expect(Scheduler).toFlushAndYield(['render', 'force update']);
 
         expect(console.error).toHaveBeenCalledTimes(1);
         expect(errorMessage).toContain(
@@ -1799,15 +1782,15 @@ describe('Timeline profiler', () => {
         const timelineData = stopProfilingAndGetTimelineData();
         expect(timelineData.batchUIDToMeasuresMap.size).toBe(2);
         expect(timelineData.componentMeasures).toMatchInlineSnapshot(`
-          [
-            {
+          Array [
+            Object {
               "componentName": "Example",
               "duration": 10,
               "timestamp": 10,
               "type": "render",
               "warning": null,
             },
-            {
+            Object {
               "componentName": "Example",
               "duration": 10,
               "timestamp": 20,
@@ -1817,16 +1800,16 @@ describe('Timeline profiler', () => {
           ]
         `);
         expect(timelineData.schedulingEvents).toMatchInlineSnapshot(`
-          [
-            {
-              "lanes": "0b0000000000000000000000000100000",
+          Array [
+            Object {
+              "lanes": "0b0000000000000000000000000010000",
               "timestamp": 10,
               "type": "schedule-render",
               "warning": null,
             },
-            {
+            Object {
               "componentName": "Example",
-              "lanes": "0b0000000000000000000000000100000",
+              "lanes": "0b0000000000000000000000000010000",
               "timestamp": 20,
               "type": "schedule-force-update",
               "warning": null,
@@ -1835,7 +1818,8 @@ describe('Timeline profiler', () => {
         `);
       });
 
-      it('should mark cascading layout updates', async () => {
+      // @reactVersion >=18.0
+      it('should mark cascading layout updates', () => {
         function Example() {
           const [didMount, setDidMount] = React.useState(false);
           React.useLayoutEffect(() => {
@@ -1843,33 +1827,33 @@ describe('Timeline profiler', () => {
             setDidMount(true);
           }, []);
           Scheduler.unstable_advanceTime(10);
-          Scheduler.log(didMount ? 'update' : 'mount');
+          Scheduler.unstable_yieldValue(didMount ? 'update' : 'mount');
           return didMount;
         }
 
         renderRootHelper(<Example />);
 
-        await waitForAll(['mount', 'update']);
+        expect(Scheduler).toFlushAndYield(['mount', 'update']);
 
         const timelineData = stopProfilingAndGetTimelineData();
         expect(timelineData.batchUIDToMeasuresMap.size).toBe(2);
         expect(timelineData.componentMeasures).toMatchInlineSnapshot(`
-          [
-            {
+          Array [
+            Object {
               "componentName": "Example",
               "duration": 10,
               "timestamp": 10,
               "type": "render",
               "warning": null,
             },
-            {
+            Object {
               "componentName": "Example",
               "duration": 1,
               "timestamp": 20,
               "type": "layout-effect-mount",
               "warning": null,
             },
-            {
+            Object {
               "componentName": "Example",
               "duration": 10,
               "timestamp": 21,
@@ -1879,18 +1863,16 @@ describe('Timeline profiler', () => {
           ]
         `);
         expect(timelineData.schedulingEvents).toMatchInlineSnapshot(`
-          [
-            {
-              "lanes": "0b0000000000000000000000000100000",
+          Array [
+            Object {
+              "lanes": "0b0000000000000000000000000010000",
               "timestamp": 10,
               "type": "schedule-render",
               "warning": null,
             },
-            {
+            Object {
               "componentName": "Example",
-              "componentStack": "
-              in Example (at **)",
-              "lanes": "0b0000000000000000000000000000010",
+              "lanes": "0b0000000000000000000000000000001",
               "timestamp": 21,
               "type": "schedule-state-update",
               "warning": null,
@@ -1899,7 +1881,8 @@ describe('Timeline profiler', () => {
         `);
       });
 
-      it('should mark cascading passive updates', async () => {
+      // @reactVersion >=18.0
+      it('should mark cascading passive updates', () => {
         function Example() {
           const [didMount, setDidMount] = React.useState(false);
           React.useEffect(() => {
@@ -1907,32 +1890,32 @@ describe('Timeline profiler', () => {
             setDidMount(true);
           }, []);
           Scheduler.unstable_advanceTime(10);
-          Scheduler.log(didMount ? 'update' : 'mount');
+          Scheduler.unstable_yieldValue(didMount ? 'update' : 'mount');
           return didMount;
         }
 
         renderRootHelper(<Example />);
-        await waitForAll(['mount', 'update']);
+        expect(Scheduler).toFlushAndYield(['mount', 'update']);
 
         const timelineData = stopProfilingAndGetTimelineData();
         expect(timelineData.batchUIDToMeasuresMap.size).toBe(2);
         expect(timelineData.componentMeasures).toMatchInlineSnapshot(`
-          [
-            {
+          Array [
+            Object {
               "componentName": "Example",
               "duration": 10,
               "timestamp": 10,
               "type": "render",
               "warning": null,
             },
-            {
+            Object {
               "componentName": "Example",
               "duration": 1,
               "timestamp": 20,
               "type": "passive-effect-mount",
               "warning": null,
             },
-            {
+            Object {
               "componentName": "Example",
               "duration": 10,
               "timestamp": 21,
@@ -1942,18 +1925,16 @@ describe('Timeline profiler', () => {
           ]
         `);
         expect(timelineData.schedulingEvents).toMatchInlineSnapshot(`
-          [
-            {
-              "lanes": "0b0000000000000000000000000100000",
+          Array [
+            Object {
+              "lanes": "0b0000000000000000000000000010000",
               "timestamp": 10,
               "type": "schedule-render",
               "warning": null,
             },
-            {
+            Object {
               "componentName": "Example",
-              "componentStack": "
-              in Example (at **)",
-              "lanes": "0b0000000000000000000000000100000",
+              "lanes": "0b0000000000000000000000000010000",
               "timestamp": 21,
               "type": "schedule-state-update",
               "warning": null,
@@ -1962,26 +1943,27 @@ describe('Timeline profiler', () => {
         `);
       });
 
-      it('should mark render phase updates', async () => {
+      // @reactVersion >=18.0
+      it('should mark render phase updates', () => {
         function Example() {
           const [didRender, setDidRender] = React.useState(false);
           Scheduler.unstable_advanceTime(10);
           if (!didRender) {
             setDidRender(true);
           }
-          Scheduler.log(didRender ? 'update' : 'mount');
+          Scheduler.unstable_yieldValue(didRender ? 'update' : 'mount');
           return didRender;
         }
 
         renderRootHelper(<Example />);
-        await waitForAll(['mount', 'update']);
+        expect(Scheduler).toFlushAndYield(['mount', 'update']);
 
         const timelineData = stopProfilingAndGetTimelineData();
         // Render phase updates should be retried as part of the same batch.
         expect(timelineData.batchUIDToMeasuresMap.size).toBe(1);
         expect(timelineData.componentMeasures).toMatchInlineSnapshot(`
-          [
-            {
+          Array [
+            Object {
               "componentName": "Example",
               "duration": 20,
               "timestamp": 10,
@@ -1991,18 +1973,16 @@ describe('Timeline profiler', () => {
           ]
         `);
         expect(timelineData.schedulingEvents).toMatchInlineSnapshot(`
-          [
-            {
-              "lanes": "0b0000000000000000000000000100000",
+          Array [
+            Object {
+              "lanes": "0b0000000000000000000000000010000",
               "timestamp": 10,
               "type": "schedule-render",
               "warning": null,
             },
-            {
+            Object {
               "componentName": "Example",
-              "componentStack": "
-              in Example (at **)",
-              "lanes": "0b0000000000000000000000000100000",
+              "lanes": "0b0000000000000000000000000010000",
               "timestamp": 20,
               "type": "schedule-state-update",
               "warning": null,
@@ -2011,8 +1991,9 @@ describe('Timeline profiler', () => {
         `);
       });
 
+      // @reactVersion >=18.0
       it('should mark sync render that throws', async () => {
-        jest.spyOn(console, 'error').mockImplementation(() => {});
+        spyOn(console, 'error');
 
         class ErrorBoundary extends React.Component {
           state = {error: null};
@@ -2022,16 +2003,16 @@ describe('Timeline profiler', () => {
           render() {
             Scheduler.unstable_advanceTime(10);
             if (this.state.error) {
-              Scheduler.log('ErrorBoundary fallback');
+              Scheduler.unstable_yieldValue('ErrorBoundary fallback');
               return null;
             }
-            Scheduler.log('ErrorBoundary render');
+            Scheduler.unstable_yieldValue('ErrorBoundary render');
             return this.props.children;
           }
         }
 
         function ExampleThatThrows() {
-          Scheduler.log('ExampleThatThrows');
+          Scheduler.unstable_yieldValue('ExampleThatThrows');
           throw Error('Expected error');
         }
 
@@ -2041,7 +2022,7 @@ describe('Timeline profiler', () => {
           </ErrorBoundary>,
         );
 
-        assertLog([
+        expect(Scheduler).toHaveYielded([
           'ErrorBoundary render',
           'ExampleThatThrows',
           'ExampleThatThrows',
@@ -2050,22 +2031,22 @@ describe('Timeline profiler', () => {
 
         const timelineData = stopProfilingAndGetTimelineData();
         expect(timelineData.componentMeasures).toMatchInlineSnapshot(`
-          [
-            {
+          Array [
+            Object {
               "componentName": "ErrorBoundary",
               "duration": 10,
               "timestamp": 10,
               "type": "render",
               "warning": null,
             },
-            {
+            Object {
               "componentName": "ExampleThatThrows",
               "duration": 0,
               "timestamp": 20,
               "type": "render",
               "warning": null,
             },
-            {
+            Object {
               "componentName": "ErrorBoundary",
               "duration": 10,
               "timestamp": 20,
@@ -2075,18 +2056,16 @@ describe('Timeline profiler', () => {
           ]
         `);
         expect(timelineData.schedulingEvents).toMatchInlineSnapshot(`
-          [
-            {
-              "lanes": "0b0000000000000000000000000000010",
+          Array [
+            Object {
+              "lanes": "0b0000000000000000000000000000001",
               "timestamp": 10,
               "type": "schedule-render",
               "warning": null,
             },
-            {
+            Object {
               "componentName": "ErrorBoundary",
-              "componentStack": "
-              in ErrorBoundary (at **)",
-              "lanes": "0b0000000000000000000000000000010",
+              "lanes": "0b0000000000000000000000000000001",
               "timestamp": 20,
               "type": "schedule-state-update",
               "warning": null,
@@ -2094,8 +2073,8 @@ describe('Timeline profiler', () => {
           ]
         `);
         expect(timelineData.thrownErrors).toMatchInlineSnapshot(`
-          [
-            {
+          Array [
+            Object {
               "componentName": "ExampleThatThrows",
               "message": "Expected error",
               "phase": "mount",
@@ -2106,8 +2085,9 @@ describe('Timeline profiler', () => {
         `);
       });
 
+      // @reactVersion >=18.0
       it('should mark concurrent render that throws', async () => {
-        jest.spyOn(console, 'error').mockImplementation(() => {});
+        spyOn(console, 'error');
 
         class ErrorBoundary extends React.Component {
           state = {error: null};
@@ -2117,16 +2097,16 @@ describe('Timeline profiler', () => {
           render() {
             Scheduler.unstable_advanceTime(10);
             if (this.state.error) {
-              Scheduler.log('ErrorBoundary fallback');
+              Scheduler.unstable_yieldValue('ErrorBoundary fallback');
               return null;
             }
-            Scheduler.log('ErrorBoundary render');
+            Scheduler.unstable_yieldValue('ErrorBoundary render');
             return this.props.children;
           }
         }
 
         function ExampleThatThrows() {
-          Scheduler.log('ExampleThatThrows');
+          Scheduler.unstable_yieldValue('ExampleThatThrows');
           // eslint-disable-next-line no-throw-literal
           throw 'Expected error';
         }
@@ -2137,7 +2117,7 @@ describe('Timeline profiler', () => {
           </ErrorBoundary>,
         );
 
-        await waitForAll([
+        expect(Scheduler).toFlushAndYield([
           'ErrorBoundary render',
           'ExampleThatThrows',
           'ExampleThatThrows',
@@ -2149,36 +2129,36 @@ describe('Timeline profiler', () => {
 
         const timelineData = stopProfilingAndGetTimelineData();
         expect(timelineData.componentMeasures).toMatchInlineSnapshot(`
-          [
-            {
+          Array [
+            Object {
               "componentName": "ErrorBoundary",
               "duration": 10,
               "timestamp": 10,
               "type": "render",
               "warning": null,
             },
-            {
+            Object {
               "componentName": "ExampleThatThrows",
               "duration": 0,
               "timestamp": 20,
               "type": "render",
               "warning": null,
             },
-            {
+            Object {
               "componentName": "ErrorBoundary",
               "duration": 10,
               "timestamp": 20,
               "type": "render",
               "warning": null,
             },
-            {
+            Object {
               "componentName": "ExampleThatThrows",
               "duration": 0,
               "timestamp": 30,
               "type": "render",
               "warning": null,
             },
-            {
+            Object {
               "componentName": "ErrorBoundary",
               "duration": 10,
               "timestamp": 30,
@@ -2188,18 +2168,16 @@ describe('Timeline profiler', () => {
           ]
         `);
         expect(timelineData.schedulingEvents).toMatchInlineSnapshot(`
-          [
-            {
-              "lanes": "0b0000000000000000000000000100000",
+          Array [
+            Object {
+              "lanes": "0b0000000000000000000000000010000",
               "timestamp": 10,
               "type": "schedule-render",
               "warning": null,
             },
-            {
+            Object {
               "componentName": "ErrorBoundary",
-              "componentStack": "
-              in ErrorBoundary (at **)",
-              "lanes": "0b0000000000000000000000000000010",
+              "lanes": "0b0000000000000000000000000000001",
               "timestamp": 30,
               "type": "schedule-state-update",
               "warning": null,
@@ -2207,15 +2185,15 @@ describe('Timeline profiler', () => {
           ]
         `);
         expect(timelineData.thrownErrors).toMatchInlineSnapshot(`
-          [
-            {
+          Array [
+            Object {
               "componentName": "ExampleThatThrows",
               "message": "Expected error",
               "phase": "mount",
               "timestamp": 20,
               "type": "thrown-error",
             },
-            {
+            Object {
               "componentName": "ExampleThatThrows",
               "message": "Expected error",
               "phase": "mount",
@@ -2226,40 +2204,41 @@ describe('Timeline profiler', () => {
         `);
       });
 
+      // @reactVersion >=18.0
       it('should mark passive and layout effects', async () => {
         function ComponentWithEffects() {
           React.useLayoutEffect(() => {
-            Scheduler.log('layout 1 mount');
+            Scheduler.unstable_yieldValue('layout 1 mount');
             return () => {
-              Scheduler.log('layout 1 unmount');
+              Scheduler.unstable_yieldValue('layout 1 unmount');
             };
           }, []);
 
           React.useEffect(() => {
-            Scheduler.log('passive 1 mount');
+            Scheduler.unstable_yieldValue('passive 1 mount');
             return () => {
-              Scheduler.log('passive 1 unmount');
+              Scheduler.unstable_yieldValue('passive 1 unmount');
             };
           }, []);
 
           React.useLayoutEffect(() => {
-            Scheduler.log('layout 2 mount');
+            Scheduler.unstable_yieldValue('layout 2 mount');
             return () => {
-              Scheduler.log('layout 2 unmount');
+              Scheduler.unstable_yieldValue('layout 2 unmount');
             };
           }, []);
 
           React.useEffect(() => {
-            Scheduler.log('passive 2 mount');
+            Scheduler.unstable_yieldValue('passive 2 mount');
             return () => {
-              Scheduler.log('passive 2 unmount');
+              Scheduler.unstable_yieldValue('passive 2 unmount');
             };
           }, []);
 
           React.useEffect(() => {
-            Scheduler.log('passive 3 mount');
+            Scheduler.unstable_yieldValue('passive 3 mount');
             return () => {
-              Scheduler.log('passive 3 unmount');
+              Scheduler.unstable_yieldValue('passive 3 unmount');
             };
           }, []);
 
@@ -2268,19 +2247,22 @@ describe('Timeline profiler', () => {
 
         const unmount = renderRootHelper(<ComponentWithEffects />);
 
-        await waitForPaint(['layout 1 mount', 'layout 2 mount']);
+        expect(Scheduler).toFlushUntilNextPaint([
+          'layout 1 mount',
+          'layout 2 mount',
+        ]);
 
-        await waitForAll([
+        expect(Scheduler).toFlushAndYield([
           'passive 1 mount',
           'passive 2 mount',
           'passive 3 mount',
         ]);
 
-        await waitForAll([]);
+        expect(Scheduler).toFlushAndYield([]);
 
         unmount();
 
-        assertLog([
+        expect(Scheduler).toHaveYielded([
           'layout 1 unmount',
           'layout 2 unmount',
           'passive 1 unmount',
@@ -2290,78 +2272,78 @@ describe('Timeline profiler', () => {
 
         const timelineData = stopProfilingAndGetTimelineData();
         expect(timelineData.componentMeasures).toMatchInlineSnapshot(`
-          [
-            {
+          Array [
+            Object {
               "componentName": "ComponentWithEffects",
               "duration": 0,
               "timestamp": 10,
               "type": "render",
               "warning": null,
             },
-            {
+            Object {
               "componentName": "ComponentWithEffects",
               "duration": 0,
               "timestamp": 10,
               "type": "layout-effect-mount",
               "warning": null,
             },
-            {
+            Object {
               "componentName": "ComponentWithEffects",
               "duration": 0,
               "timestamp": 10,
               "type": "layout-effect-mount",
               "warning": null,
             },
-            {
+            Object {
               "componentName": "ComponentWithEffects",
               "duration": 0,
               "timestamp": 10,
               "type": "passive-effect-mount",
               "warning": null,
             },
-            {
+            Object {
               "componentName": "ComponentWithEffects",
               "duration": 0,
               "timestamp": 10,
               "type": "passive-effect-mount",
               "warning": null,
             },
-            {
+            Object {
               "componentName": "ComponentWithEffects",
               "duration": 0,
               "timestamp": 10,
               "type": "passive-effect-mount",
               "warning": null,
             },
-            {
+            Object {
               "componentName": "ComponentWithEffects",
               "duration": 0,
               "timestamp": 10,
               "type": "layout-effect-unmount",
               "warning": null,
             },
-            {
+            Object {
               "componentName": "ComponentWithEffects",
               "duration": 0,
               "timestamp": 10,
               "type": "layout-effect-unmount",
               "warning": null,
             },
-            {
+            Object {
               "componentName": "ComponentWithEffects",
               "duration": 0,
               "timestamp": 10,
               "type": "passive-effect-unmount",
               "warning": null,
             },
-            {
+            Object {
               "componentName": "ComponentWithEffects",
               "duration": 0,
               "timestamp": 10,
               "type": "passive-effect-unmount",
               "warning": null,
             },
-            {
+            Object {
               "componentName": "ComponentWithEffects",
               "duration": 0,
               "timestamp": 10,
@@ -2372,137 +2354,91 @@ describe('Timeline profiler', () => {
         `);
         expect(timelineData.batchUIDToMeasuresMap).toMatchInlineSnapshot(`
           Map {
-            1 => [
-              {
+            1 => Array [
+              Object {
                 "batchUID": 1,
                 "depth": 0,
                 "duration": 0,
-                "lanes": "0b0000000000000000000000000100000",
+                "lanes": "0b0000000000000000000000000010000",
                 "timestamp": 10,
                 "type": "render-idle",
               },
-              {
+              Object {
                 "batchUID": 1,
                 "depth": 0,
                 "duration": 0,
-                "lanes": "0b0000000000000000000000000100000",
+                "lanes": "0b0000000000000000000000000010000",
                 "timestamp": 10,
                 "type": "render",
               },
-              {
+              Object {
                 "batchUID": 1,
                 "depth": 0,
                 "duration": 0,
-                "lanes": "0b0000000000000000000000000100000",
+                "lanes": "0b0000000000000000000000000010000",
                 "timestamp": 10,
                 "type": "commit",
               },
-              {
+              Object {
                 "batchUID": 1,
                 "depth": 1,
                 "duration": 0,
-                "lanes": "0b0000000000000000000000000100000",
+                "lanes": "0b0000000000000000000000000010000",
                 "timestamp": 10,
                 "type": "layout-effects",
               },
-              {
+              Object {
                 "batchUID": 1,
                 "depth": 0,
                 "duration": 0,
-                "lanes": "0b0000000000000000000000000100000",
+                "lanes": "0b0000000000000000000000000010000",
                 "timestamp": 10,
                 "type": "passive-effects",
               },
             ],
-            2 => [
-              {
+            2 => Array [
+              Object {
                 "batchUID": 2,
                 "depth": 0,
                 "duration": 0,
-                "lanes": "0b0000000000000000000000000000010",
+                "lanes": "0b0000000000000000000000000000001",
                 "timestamp": 10,
                 "type": "render-idle",
               },
-              {
+              Object {
                 "batchUID": 2,
                 "depth": 0,
                 "duration": 0,
-                "lanes": "0b0000000000000000000000000000010",
+                "lanes": "0b0000000000000000000000000000001",
                 "timestamp": 10,
                 "type": "render",
               },
-              {
+              Object {
                 "batchUID": 2,
                 "depth": 0,
                 "duration": 0,
-                "lanes": "0b0000000000000000000000000000010",
+                "lanes": "0b0000000000000000000000000000001",
                 "timestamp": 10,
                 "type": "commit",
               },
-              {
+              Object {
                 "batchUID": 2,
                 "depth": 1,
                 "duration": 0,
-                "lanes": "0b0000000000000000000000000000010",
+                "lanes": "0b0000000000000000000000000000001",
                 "timestamp": 10,
                 "type": "layout-effects",
               },
-              {
+              Object {
                 "batchUID": 2,
                 "depth": 1,
                 "duration": 0,
-                "lanes": "0b0000000000000000000000000000010",
+                "lanes": "0b0000000000000000000000000000001",
                 "timestamp": 10,
                 "type": "passive-effects",
               },
             ],
           }
-        `);
-      });
-
-      it('should generate component stacks for state update', async () => {
-        function CommponentWithChildren({initialRender}) {
-          Scheduler.log('Render ComponentWithChildren');
-          return <Child initialRender={initialRender} />;
-        }
-
-        function Child({initialRender}) {
-          const [didRender, setDidRender] = React.useState(initialRender);
-          if (!didRender) {
-            setDidRender(true);
-          }
-          Scheduler.log('Render Child');
-          return null;
-        }
-
-        renderRootHelper(<CommponentWithChildren initialRender={false} />);
-
-        await waitForAll([
-          'Render ComponentWithChildren',
-          'Render Child',
-          'Render Child',
-        ]);
-
-        const timelineData = stopProfilingAndGetTimelineData();
-        expect(timelineData.schedulingEvents).toMatchInlineSnapshot(`
-          [
-            {
-              "lanes": "0b0000000000000000000000000100000",
-              "timestamp": 10,
-              "type": "schedule-render",
-              "warning": null,
-            },
-            {
-              "componentName": "Child",
-              "componentStack": "
-              in Child (at **)
-              in CommponentWithChildren (at **)",
-              "lanes": "0b0000000000000000000000000100000",
-              "timestamp": 10,
-              "type": "schedule-state-update",
-              "warning": null,
-            },
-          ]
         `);
       });
     });

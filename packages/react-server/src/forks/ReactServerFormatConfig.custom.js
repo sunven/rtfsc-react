@@ -1,5 +1,5 @@
 /**
- * Copyright (c) Meta Platforms, Inc. and affiliates.
+ * Copyright (c) Facebook, Inc. and its affiliates.
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
@@ -26,8 +26,6 @@
 declare var $$$hostConfig: any;
 export opaque type Destination = mixed; // eslint-disable-line no-undef
 export opaque type ResponseState = mixed;
-export opaque type Resources = mixed;
-export opaque type BoundaryResources = mixed;
 export opaque type FormatContext = mixed;
 export opaque type SuspenseBoundaryID = mixed;
 
@@ -68,19 +66,3 @@ export const writeCompletedBoundaryInstruction =
   $$$hostConfig.writeCompletedBoundaryInstruction;
 export const writeClientRenderBoundaryInstruction =
   $$$hostConfig.writeClientRenderBoundaryInstruction;
-export const prepareToRender = $$$hostConfig.prepareToRender;
-export const cleanupAfterRender = $$$hostConfig.cleanupAfterRender;
-
-// -------------------------
-//     Resources
-// -------------------------
-export const writePreamble = $$$hostConfig.writePreamble;
-export const writeHoistables = $$$hostConfig.writeHoistables;
-export const writePostamble = $$$hostConfig.writePostamble;
-export const hoistResources = $$$hostConfig.hoistResources;
-export const createResources = $$$hostConfig.createResources;
-export const createBoundaryResources = $$$hostConfig.createBoundaryResources;
-export const setCurrentlyRenderingBoundaryResourcesTarget =
-  $$$hostConfig.setCurrentlyRenderingBoundaryResourcesTarget;
-export const writeResourcesForBoundary =
-  $$$hostConfig.writeResourcesForBoundary;

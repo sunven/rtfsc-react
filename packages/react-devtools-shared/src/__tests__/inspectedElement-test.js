@@ -1,5 +1,5 @@
 /**
- * Copyright (c) Meta Platforms, Inc. and affiliates.
+ * Copyright (c) Facebook, Inc. and its affiliates.
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
@@ -55,22 +55,22 @@ describe('InspectedElement', () => {
     ReactDOM = require('react-dom');
     ReactDOMClient = require('react-dom/client');
     PropTypes = require('prop-types');
-    TestUtilsAct = require('internal-test-utils').act;
+    TestUtilsAct = require('jest-react').act;
     TestRenderer = utils.requireTestRenderer();
-    TestRendererAct = require('internal-test-utils').act;
+    TestRendererAct = require('jest-react').act;
 
-    BridgeContext =
-      require('react-devtools-shared/src/devtools/views/context').BridgeContext;
-    InspectedElementContext =
-      require('react-devtools-shared/src/devtools/views/Components/InspectedElementContext').InspectedElementContext;
-    InspectedElementContextController =
-      require('react-devtools-shared/src/devtools/views/Components/InspectedElementContext').InspectedElementContextController;
-    SettingsContextController =
-      require('react-devtools-shared/src/devtools/views/Settings/SettingsContext').SettingsContextController;
-    StoreContext =
-      require('react-devtools-shared/src/devtools/views/context').StoreContext;
-    TreeContextController =
-      require('react-devtools-shared/src/devtools/views/Components/TreeContext').TreeContextController;
+    BridgeContext = require('react-devtools-shared/src/devtools/views/context')
+      .BridgeContext;
+    InspectedElementContext = require('react-devtools-shared/src/devtools/views/Components/InspectedElementContext')
+      .InspectedElementContext;
+    InspectedElementContextController = require('react-devtools-shared/src/devtools/views/Components/InspectedElementContext')
+      .InspectedElementContextController;
+    SettingsContextController = require('react-devtools-shared/src/devtools/views/Settings/SettingsContext')
+      .SettingsContextController;
+    StoreContext = require('react-devtools-shared/src/devtools/views/context')
+      .StoreContext;
+    TreeContextController = require('react-devtools-shared/src/devtools/views/Components/TreeContext')
+      .TreeContextController;
 
     // Used by inspectElementAtIndex() helper function
     utils.act(() => {
@@ -186,12 +186,12 @@ describe('InspectedElement', () => {
 
     const inspectedElement = await inspectElementAtIndex(0);
     expect(inspectedElement).toMatchInlineSnapshot(`
-      {
+      Object {
         "context": null,
         "events": undefined,
-        "hooks": [
-          {
-            "hookSource": {
+        "hooks": Array [
+          Object {
+            "hookSource": Object {
               "columnNumber": "removed by Jest serializer",
               "fileName": "react-devtools-shared/src/__tests__/inspectedElement-test.js",
               "functionName": "Example",
@@ -200,13 +200,13 @@ describe('InspectedElement', () => {
             "id": 0,
             "isStateEditable": true,
             "name": "State",
-            "subHooks": [],
+            "subHooks": Array [],
             "value": 1,
           },
         ],
         "id": 2,
         "owners": null,
-        "props": {
+        "props": Object {
           "a": 1,
           "b": "abc",
         },
@@ -330,7 +330,7 @@ describe('InspectedElement', () => {
 
     let inspectedElement = await inspectElementAtIndex(0);
     expect(inspectedElement.props).toMatchInlineSnapshot(`
-      {
+      Object {
         "a": 1,
         "b": "abc",
       }
@@ -353,7 +353,7 @@ describe('InspectedElement', () => {
 
     inspectedElement = await inspectElementAtIndex(0);
     expect(inspectedElement.props).toMatchInlineSnapshot(`
-      {
+      Object {
         "a": 2,
         "b": "def",
       }
@@ -386,7 +386,7 @@ describe('InspectedElement', () => {
     let inspectedElement = await inspectElementAtIndex(1);
     expect(targetRenderCount).toBe(1);
     expect(inspectedElement.props).toMatchInlineSnapshot(`
-      {
+      Object {
         "a": 1,
         "b": "abc",
       }
@@ -416,7 +416,7 @@ describe('InspectedElement', () => {
     inspectedElement = await inspectElementAtIndex(1);
     expect(targetRenderCount).toBe(2);
     expect(inspectedElement.props).toMatchInlineSnapshot(`
-      {
+      Object {
         "a": 2,
         "b": "def",
       }
@@ -450,7 +450,7 @@ describe('InspectedElement', () => {
     let inspectedElement = await inspectElementAtIndex(1);
     expect(targetRenderCount).toBe(1);
     expect(inspectedElement.props).toMatchInlineSnapshot(`
-      {
+      Object {
         "a": 1,
         "b": "abc",
       }
@@ -557,7 +557,7 @@ describe('InspectedElement', () => {
     const inspectedElement = await inspectElementAtIndex(0);
 
     expect(inspectedElement.props).toMatchInlineSnapshot(`
-      {
+      Object {
         "boolean_false": false,
         "boolean_true": true,
         "float": 1.23,
@@ -616,8 +616,8 @@ describe('InspectedElement', () => {
     const instance = new Class();
 
     const proxyInstance = new Proxy(() => {}, {
-      get: function (_, name) {
-        return function () {
+      get: function(_, name) {
+        return function() {
           return null;
         };
       },
@@ -657,7 +657,7 @@ describe('InspectedElement', () => {
     const inspectedElement = await inspectElementAtIndex(0);
 
     expect(inspectedElement.props).toMatchInlineSnapshot(`
-      {
+      Object {
         "anonymous_fn": Dehydrated {
           "preview_short": ƒ () {},
           "preview_long": ƒ () {},
@@ -666,7 +666,7 @@ describe('InspectedElement', () => {
           "preview_short": ArrayBuffer(3),
           "preview_long": ArrayBuffer(3),
         },
-        "array_of_arrays": [
+        "array_of_arrays": Array [
           Dehydrated {
             "preview_short": Array(2),
             "preview_long": [Array(3), Array(0)],
@@ -696,7 +696,7 @@ describe('InspectedElement', () => {
           "preview_short": <div />,
           "preview_long": <div />,
         },
-        "immutable": {
+        "immutable": Object {
           "0": Dehydrated {
             "preview_short": Array(2),
             "preview_long": ["a", List(3)],
@@ -710,7 +710,7 @@ describe('InspectedElement', () => {
             "preview_long": ["c", Map(2)],
           },
         },
-        "map": {
+        "map": Object {
           "0": Dehydrated {
             "preview_short": Array(2),
             "preview_long": ["name", "Brian"],
@@ -720,7 +720,7 @@ describe('InspectedElement', () => {
             "preview_long": ["food", "sushi"],
           },
         },
-        "map_of_maps": {
+        "map_of_maps": Object {
           "0": Dehydrated {
             "preview_short": Array(2),
             "preview_long": ["first", Map(2)],
@@ -730,13 +730,13 @@ describe('InspectedElement', () => {
             "preview_long": ["second", Map(2)],
           },
         },
-        "object_of_objects": {
+        "object_of_objects": Object {
           "inner": Dehydrated {
             "preview_short": {…},
             "preview_long": {boolean: true, number: 123, string: "abc"},
           },
         },
-        "object_with_symbol": {
+        "object_with_symbol": Object {
           "Symbol(name)": "hello",
         },
         "proxy": Dehydrated {
@@ -751,11 +751,11 @@ describe('InspectedElement', () => {
           "preview_short": /abc/giu,
           "preview_long": /abc/giu,
         },
-        "set": {
+        "set": Object {
           "0": "abc",
           "1": 123,
         },
-        "set_of_sets": {
+        "set_of_sets": Object {
           "0": Dehydrated {
             "preview_short": Set(3),
             "preview_long": Set(3) {"a", "b", "c"},
@@ -769,7 +769,7 @@ describe('InspectedElement', () => {
           "preview_short": Symbol(symbol),
           "preview_long": Symbol(symbol),
         },
-        "typed_array": {
+        "typed_array": Object {
           "0": 100,
           "1": -100,
           "2": 0,
@@ -794,7 +794,7 @@ describe('InspectedElement', () => {
 
     const inspectedElement = await inspectElementAtIndex(0);
     expect(inspectedElement.props).toMatchInlineSnapshot(`
-      {
+      Object {
         "prop": Dehydrated {
           "preview_short": Generator,
           "preview_long": Generator,
@@ -818,8 +818,8 @@ describe('InspectedElement', () => {
 
     const inspectedElement = await inspectElementAtIndex(0);
     expect(inspectedElement.props).toMatchInlineSnapshot(`
-      {
-        "object": {
+      Object {
+        "object": Object {
           "boolean": true,
           "number": 123,
           "string": "abc",
@@ -844,8 +844,8 @@ describe('InspectedElement', () => {
     const inspectedElement = await inspectElementAtIndex(0);
 
     expect(inspectedElement.props).toMatchInlineSnapshot(`
-      {
-        "object": {
+      Object {
+        "object": Object {
           "hasOwnProperty": true,
           "name": "blah",
         },
@@ -880,8 +880,8 @@ describe('InspectedElement', () => {
 
     const inspectedElement = await inspectElementAtIndex(0);
     expect(inspectedElement.props).toMatchInlineSnapshot(`
-      {
-        "data": {
+      Object {
+        "data": Object {
           "_number": 42,
           "number": 42,
         },
@@ -889,7 +889,7 @@ describe('InspectedElement', () => {
     `);
   });
 
-  it('should support objects with inherited keys', async () => {
+  it('should support objects with with inherited keys', async () => {
     const Example = () => null;
 
     const base = Object.create(Object.prototype, {
@@ -959,8 +959,8 @@ describe('InspectedElement', () => {
 
     const inspectedElement = await inspectElementAtIndex(0);
     expect(inspectedElement.props).toMatchInlineSnapshot(`
-      {
-        "object": {
+      Object {
+        "object": Object {
           "123": 3,
           "Symbol(enumerableSymbol)": 3,
           "Symbol(enumerableSymbolBase)": 1,
@@ -1014,8 +1014,8 @@ describe('InspectedElement', () => {
 
     const inspectedElement = await inspectElementAtIndex(0);
     expect(inspectedElement.props).toMatchInlineSnapshot(`
-      {
-        "data": {
+      Object {
+        "data": Object {
           "a": undefined,
           "b": Infinity,
           "c": NaN,
@@ -1069,8 +1069,8 @@ describe('InspectedElement', () => {
     });
 
     async function loadPath(path) {
-      await TestUtilsAct(async () => {
-        await TestRendererAct(async () => {
+      TestUtilsAct(() => {
+        TestRendererAct(() => {
           inspectElementPath(path);
           jest.runOnlyPendingTimers();
         });
@@ -1080,8 +1080,8 @@ describe('InspectedElement', () => {
     }
 
     expect(inspectedElement.props).toMatchInlineSnapshot(`
-      {
-        "nestedObject": {
+      Object {
+        "nestedObject": Object {
           "a": Dehydrated {
             "preview_short": {…},
             "preview_long": {b: {…}},
@@ -1093,10 +1093,10 @@ describe('InspectedElement', () => {
     await loadPath(['props', 'nestedObject', 'a']);
 
     expect(inspectedElement.props).toMatchInlineSnapshot(`
-      {
-        "nestedObject": {
-          "a": {
-            "b": {
+      Object {
+        "nestedObject": Object {
+          "a": Object {
+            "b": Object {
               "c": Dehydrated {
                 "preview_short": Array(1),
                 "preview_long": [{…}],
@@ -1110,12 +1110,12 @@ describe('InspectedElement', () => {
     await loadPath(['props', 'nestedObject', 'a', 'b', 'c']);
 
     expect(inspectedElement.props).toMatchInlineSnapshot(`
-      {
-        "nestedObject": {
-          "a": {
-            "b": {
-              "c": [
-                {
+      Object {
+        "nestedObject": Object {
+          "a": Object {
+            "b": Object {
+              "c": Array [
+                Object {
                   "d": Dehydrated {
                     "preview_short": {…},
                     "preview_long": {e: {…}},
@@ -1131,14 +1131,14 @@ describe('InspectedElement', () => {
     await loadPath(['props', 'nestedObject', 'a', 'b', 'c', 0, 'd']);
 
     expect(inspectedElement.props).toMatchInlineSnapshot(`
-      {
-        "nestedObject": {
-          "a": {
-            "b": {
-              "c": [
-                {
-                  "d": {
-                    "e": {},
+      Object {
+        "nestedObject": Object {
+          "a": Object {
+            "b": Object {
+              "c": Array [
+                Object {
+                  "d": Object {
+                    "e": Object {},
                   },
                 },
               ],
@@ -1151,9 +1151,9 @@ describe('InspectedElement', () => {
     await loadPath(['hooks', 0, 'value']);
 
     expect(inspectedElement.hooks).toMatchInlineSnapshot(`
-      [
-        {
-          "hookSource": {
+      Array [
+        Object {
+          "hookSource": Object {
             "columnNumber": "removed by Jest serializer",
             "fileName": "react-devtools-shared/src/__tests__/inspectedElement-test.js",
             "functionName": "Example",
@@ -1162,9 +1162,9 @@ describe('InspectedElement', () => {
           "id": 0,
           "isStateEditable": true,
           "name": "State",
-          "subHooks": [],
-          "value": {
-            "foo": {
+          "subHooks": Array [],
+          "value": Object {
+            "foo": Object {
               "bar": Dehydrated {
                 "preview_short": {…},
                 "preview_long": {baz: "hi"},
@@ -1178,9 +1178,9 @@ describe('InspectedElement', () => {
     await loadPath(['hooks', 0, 'value', 'foo', 'bar']);
 
     expect(inspectedElement.hooks).toMatchInlineSnapshot(`
-      [
-        {
-          "hookSource": {
+      Array [
+        Object {
+          "hookSource": Object {
             "columnNumber": "removed by Jest serializer",
             "fileName": "react-devtools-shared/src/__tests__/inspectedElement-test.js",
             "functionName": "Example",
@@ -1189,10 +1189,10 @@ describe('InspectedElement', () => {
           "id": 0,
           "isStateEditable": true,
           "name": "State",
-          "subHooks": [],
-          "value": {
-            "foo": {
-              "bar": {
+          "subHooks": Array [],
+          "value": Object {
+            "foo": Object {
+              "bar": Object {
                 "baz": "hi",
               },
             },
@@ -1224,8 +1224,8 @@ describe('InspectedElement', () => {
     });
 
     async function loadPath(path) {
-      await TestUtilsAct(async () => {
-        await TestRendererAct(async () => {
+      TestUtilsAct(() => {
+        TestRendererAct(() => {
           inspectElementPath(path);
           jest.runOnlyPendingTimers();
         });
@@ -1235,8 +1235,8 @@ describe('InspectedElement', () => {
     }
 
     expect(inspectedElement.props).toMatchInlineSnapshot(`
-      {
-        "set_of_sets": {
+      Object {
+        "set_of_sets": Object {
           "0": Dehydrated {
             "preview_short": Set(3),
             "preview_long": Set(3) {1, 2, 3},
@@ -1252,9 +1252,9 @@ describe('InspectedElement', () => {
     await loadPath(['props', 'set_of_sets', 0]);
 
     expect(inspectedElement.props).toMatchInlineSnapshot(`
-      {
-        "set_of_sets": {
-          "0": {
+      Object {
+        "set_of_sets": Object {
+          "0": Object {
             "0": 1,
             "1": 2,
             "2": 3,
@@ -1306,8 +1306,8 @@ describe('InspectedElement', () => {
     });
 
     async function loadPath(path) {
-      await TestUtilsAct(async () => {
-        await TestRendererAct(async () => {
+      TestUtilsAct(() => {
+        TestRendererAct(() => {
           inspectElementPath(path);
           jest.runOnlyPendingTimers();
         });
@@ -1317,8 +1317,8 @@ describe('InspectedElement', () => {
     }
 
     expect(inspectedElement.props).toMatchInlineSnapshot(`
-      {
-        "nestedObject": {
+      Object {
+        "nestedObject": Object {
           "a": Dehydrated {
             "preview_short": {…},
             "preview_long": {b: {…}, value: 1},
@@ -1334,10 +1334,10 @@ describe('InspectedElement', () => {
     await loadPath(['props', 'nestedObject', 'a']);
 
     expect(inspectedElement.props).toMatchInlineSnapshot(`
-      {
-        "nestedObject": {
-          "a": {
-            "b": {
+      Object {
+        "nestedObject": Object {
+          "a": Object {
+            "b": Object {
               "value": 1,
             },
             "value": 1,
@@ -1353,16 +1353,16 @@ describe('InspectedElement', () => {
     await loadPath(['props', 'nestedObject', 'c']);
 
     expect(inspectedElement.props).toMatchInlineSnapshot(`
-      {
-        "nestedObject": {
-          "a": {
-            "b": {
+      Object {
+        "nestedObject": Object {
+          "a": Object {
+            "b": Object {
               "value": 1,
             },
             "value": 1,
           },
-          "c": {
-            "d": {
+          "c": Object {
+            "d": Object {
               "e": Dehydrated {
                 "preview_short": {…},
                 "preview_long": {value: 1},
@@ -1375,8 +1375,8 @@ describe('InspectedElement', () => {
       }
     `);
 
-    await TestRendererAct(async () => {
-      await TestUtilsAct(async () => {
+    TestRendererAct(() => {
+      TestUtilsAct(() => {
         legacyRender(
           <Example
             nestedObject={{
@@ -1408,16 +1408,16 @@ describe('InspectedElement', () => {
     inspectedElement = await inspectElementAtIndex(0);
 
     expect(inspectedElement.props).toMatchInlineSnapshot(`
-      {
-        "nestedObject": {
-          "a": {
-            "b": {
+      Object {
+        "nestedObject": Object {
+          "a": Object {
+            "b": Object {
               "value": 2,
             },
             "value": 2,
           },
-          "c": {
-            "d": {
+          "c": Object {
+            "d": Object {
               "e": Dehydrated {
                 "preview_short": {…},
                 "preview_long": {value: 2},
@@ -1469,8 +1469,8 @@ describe('InspectedElement', () => {
     });
 
     async function loadPath(path) {
-      await TestUtilsAct(async () => {
-        await TestRendererAct(async () => {
+      TestUtilsAct(() => {
+        TestRendererAct(() => {
           inspectElementPath(path);
           jest.runOnlyPendingTimers();
         });
@@ -1480,8 +1480,8 @@ describe('InspectedElement', () => {
     }
 
     expect(inspectedElement.props).toMatchInlineSnapshot(`
-      {
-        "nestedObject": {
+      Object {
+        "nestedObject": Object {
           "a": Dehydrated {
             "preview_short": {…},
             "preview_long": {b: {…}, value: 1},
@@ -1497,10 +1497,10 @@ describe('InspectedElement', () => {
     await loadPath(['props', 'nestedObject', 'a']);
 
     expect(inspectedElement.props).toMatchInlineSnapshot(`
-      {
-        "nestedObject": {
-          "a": {
-            "b": {
+      Object {
+        "nestedObject": Object {
+          "a": Object {
+            "b": Object {
               "value": 1,
             },
             "value": 1,
@@ -1513,8 +1513,8 @@ describe('InspectedElement', () => {
       }
     `);
 
-    await TestRendererAct(async () => {
-      await TestUtilsAct(async () => {
+    TestRendererAct(() => {
+      TestUtilsAct(() => {
         legacyRender(
           <Example
             nestedObject={{
@@ -1543,16 +1543,16 @@ describe('InspectedElement', () => {
     await loadPath(['props', 'nestedObject', 'c']);
 
     expect(inspectedElement.props).toMatchInlineSnapshot(`
-      {
-        "nestedObject": {
-          "a": {
-            "b": {
+      Object {
+        "nestedObject": Object {
+          "a": Object {
+            "b": Object {
               "value": 2,
             },
             "value": 2,
           },
-          "c": {
-            "d": {
+          "c": Object {
+            "d": Object {
               "e": Dehydrated {
                 "preview_short": {…},
                 "preview_long": {value: 2},
@@ -1596,8 +1596,8 @@ describe('InspectedElement', () => {
     });
 
     async function loadPath(path) {
-      await TestUtilsAct(async () => {
-        await TestRendererAct(async () => {
+      TestUtilsAct(() => {
+        TestRendererAct(() => {
           inspectElementPath(path);
           jest.runOnlyPendingTimers();
         });
@@ -1607,8 +1607,8 @@ describe('InspectedElement', () => {
     }
 
     expect(inspectedElement.props).toMatchInlineSnapshot(`
-      {
-        "nestedObject": {
+      Object {
+        "nestedObject": Object {
           "a": Dehydrated {
             "preview_short": {…},
             "preview_long": {b: {…}, value: 1},
@@ -1618,7 +1618,7 @@ describe('InspectedElement', () => {
       }
     `);
 
-    await TestUtilsAct(async () => {
+    TestUtilsAct(() => {
       legacyRender(
         <Example
           nestedObject={{
@@ -1638,11 +1638,13 @@ describe('InspectedElement', () => {
     await loadPath(['props', 'nestedObject', 'a']);
 
     expect(inspectedElement.props).toMatchInlineSnapshot(`
-      {
-        "nestedObject": {
-          "a": Dehydrated {
-            "preview_short": {…},
-            "preview_long": {b: {…}, value: 2},
+      Object {
+        "nestedObject": Object {
+          "a": Object {
+            "b": Object {
+              "value": 2,
+            },
+            "value": 2,
           },
           "value": 2,
         },
@@ -1664,12 +1666,12 @@ describe('InspectedElement', () => {
 
     const inspectedElement = await inspectElementAtIndex(0);
     expect(inspectedElement).toMatchInlineSnapshot(`
-      {
+      Object {
         "context": null,
         "events": undefined,
-        "hooks": [
-          {
-            "hookSource": {
+        "hooks": Array [
+          Object {
+            "hookSource": Object {
               "columnNumber": "removed by Jest serializer",
               "fileName": "react-devtools-shared/src/__tests__/inspectedElement-test.js",
               "functionName": "Example",
@@ -1678,13 +1680,13 @@ describe('InspectedElement', () => {
             "id": null,
             "isStateEditable": false,
             "name": "Context",
-            "subHooks": [],
+            "subHooks": Array [],
             "value": true,
           },
         ],
         "id": 2,
         "owners": null,
-        "props": {
+        "props": Object {
           "a": 1,
           "b": "abc",
         },
@@ -1775,8 +1777,7 @@ describe('InspectedElement', () => {
       ),
     );
 
-    let copyPath: CopyInspectedElementPath =
-      ((null: any): CopyInspectedElementPath);
+    let copyPath: CopyInspectedElementPath = ((null: any): CopyInspectedElementPath);
 
     const id = ((store.getElementIDAtIndex(0): any): number);
     await inspectElementAtIndex(0, () => {
@@ -1863,8 +1864,7 @@ describe('InspectedElement', () => {
 
     const id = ((store.getElementIDAtIndex(0): any): number);
 
-    let copyPath: CopyInspectedElementPath =
-      ((null: any): CopyInspectedElementPath);
+    let copyPath: CopyInspectedElementPath = ((null: any): CopyInspectedElementPath);
 
     await inspectElementAtIndex(0, () => {
       copyPath = (path: Array<string | number>) => {
@@ -1928,9 +1928,9 @@ describe('InspectedElement', () => {
 
     const {hooks} = await inspectElementAtIndex(0);
     expect(hooks).toMatchInlineSnapshot(`
-      [
-        {
-          "hookSource": {
+      Array [
+        Object {
+          "hookSource": Object {
             "columnNumber": "removed by Jest serializer",
             "fileName": "react-devtools-shared/src/__tests__/inspectedElement-test.js",
             "functionName": "DisplayedComplexValue",
@@ -1939,9 +1939,9 @@ describe('InspectedElement', () => {
           "id": null,
           "isStateEditable": false,
           "name": "DebuggableHook",
-          "subHooks": [
-            {
-              "hookSource": {
+          "subHooks": Array [
+            Object {
+              "hookSource": Object {
                 "columnNumber": "removed by Jest serializer",
                 "fileName": "react-devtools-shared/src/__tests__/inspectedElement-test.js",
                 "functionName": "useDebuggableHook",
@@ -1950,11 +1950,11 @@ describe('InspectedElement', () => {
               "id": 0,
               "isStateEditable": true,
               "name": "State",
-              "subHooks": [],
+              "subHooks": Array [],
               "value": 1,
             },
           ],
-          "value": {
+          "value": Object {
             "foo": 2,
           },
         },
@@ -1983,8 +1983,8 @@ describe('InspectedElement', () => {
     const inspectedElement = await inspectElementAtIndex(0);
 
     expect(inspectedElement.props).toMatchInlineSnapshot(`
-      {
-        "proxy": {
+      Object {
+        "proxy": Object {
           "$$typeof": Dehydrated {
             "preview_short": ƒ () {},
             "preview_long": ƒ () {},
@@ -2012,13 +2012,13 @@ describe('InspectedElement', () => {
     // Select/inspect element
     let inspectedElement = await inspectElementAtIndex(0);
     expect(inspectedElement).toMatchInlineSnapshot(`
-      {
+      Object {
         "context": null,
         "events": undefined,
         "hooks": null,
         "id": 2,
         "owners": null,
-        "props": {},
+        "props": Object {},
         "rootType": "render()",
         "state": null,
       }
@@ -2050,13 +2050,13 @@ describe('InspectedElement', () => {
     // Select/inspect the same element again
     inspectedElement = await inspectElementAtIndex(0);
     expect(inspectedElement).toMatchInlineSnapshot(`
-      {
+      Object {
         "context": null,
         "events": undefined,
         "hooks": null,
         "id": 2,
         "owners": null,
-        "props": {},
+        "props": Object {},
         "rootType": "render()",
         "state": null,
       }
@@ -2119,7 +2119,7 @@ describe('InspectedElement', () => {
   });
 
   it('should gracefully surface backend errors on the frontend rather than timing out', async () => {
-    jest.spyOn(console, 'error').mockImplementation(() => {});
+    spyOn(console, 'error');
 
     let shouldThrow = false;
 
@@ -2164,10 +2164,10 @@ describe('InspectedElement', () => {
       await inspectElementAtIndex(0);
 
       expect(global.$r).toMatchInlineSnapshot(`
-        {
-          "hooks": [
-            {
-              "hookSource": {
+        Object {
+          "hooks": Array [
+            Object {
+              "hookSource": Object {
                 "columnNumber": "removed by Jest serializer",
                 "fileName": "react-devtools-shared/src/__tests__/inspectedElement-test.js",
                 "functionName": "Example",
@@ -2176,11 +2176,11 @@ describe('InspectedElement', () => {
               "id": 0,
               "isStateEditable": true,
               "name": "State",
-              "subHooks": [],
+              "subHooks": Array [],
               "value": 1,
             },
           ],
-          "props": {
+          "props": Object {
             "a": 1,
             "b": "abc",
           },
@@ -2203,10 +2203,10 @@ describe('InspectedElement', () => {
       await inspectElementAtIndex(0);
 
       expect(global.$r).toMatchInlineSnapshot(`
-        {
-          "hooks": [
-            {
-              "hookSource": {
+        Object {
+          "hooks": Array [
+            Object {
+              "hookSource": Object {
                 "columnNumber": "removed by Jest serializer",
                 "fileName": "react-devtools-shared/src/__tests__/inspectedElement-test.js",
                 "functionName": "Example",
@@ -2215,11 +2215,11 @@ describe('InspectedElement', () => {
               "id": 0,
               "isStateEditable": true,
               "name": "State",
-              "subHooks": [],
+              "subHooks": Array [],
               "value": 1,
             },
           ],
-          "props": {
+          "props": Object {
             "a": 1,
             "b": "abc",
           },
@@ -2242,10 +2242,10 @@ describe('InspectedElement', () => {
       await inspectElementAtIndex(0);
 
       expect(global.$r).toMatchInlineSnapshot(`
-        {
-          "hooks": [
-            {
-              "hookSource": {
+        Object {
+          "hooks": Array [
+            Object {
+              "hookSource": Object {
                 "columnNumber": "removed by Jest serializer",
                 "fileName": "react-devtools-shared/src/__tests__/inspectedElement-test.js",
                 "functionName": "Example",
@@ -2254,11 +2254,11 @@ describe('InspectedElement', () => {
               "id": 0,
               "isStateEditable": true,
               "name": "State",
-              "subHooks": [],
+              "subHooks": Array [],
               "value": 1,
             },
           ],
-          "props": {
+          "props": Object {
             "a": 1,
             "b": "abc",
           },
@@ -2285,13 +2285,13 @@ describe('InspectedElement', () => {
       await inspectElementAtIndex(0);
 
       expect(global.$r.props).toMatchInlineSnapshot(`
-              {
+              Object {
                 "a": 1,
                 "b": "abc",
               }
             `);
       expect(global.$r.state).toMatchInlineSnapshot(`
-              {
+              Object {
                 "count": 0,
               }
             `);
@@ -2352,15 +2352,15 @@ describe('InspectedElement', () => {
 
       const data = await getErrorsAndWarningsForElementAtIndex(0);
       expect(data).toMatchInlineSnapshot(`
-        {
-          "errors": [
-            [
+        Object {
+          "errors": Array [
+            Array [
               "test-only: render error",
               1,
             ],
           ],
-          "warnings": [
-            [
+          "warnings": Array [
+            Array [
               "test-only: render warning",
               1,
             ],
@@ -2387,15 +2387,15 @@ describe('InspectedElement', () => {
       });
       const data = await getErrorsAndWarningsForElementAtIndex(0);
       expect(data).toMatchInlineSnapshot(`
-        {
-          "errors": [
-            [
+        Object {
+          "errors": Array [
+            Array [
               "test-only: render error",
               2,
             ],
           ],
-          "warnings": [
-            [
+          "warnings": Array [
+            Array [
               "test-only: render warning",
               3,
             ],
@@ -2424,15 +2424,15 @@ describe('InspectedElement', () => {
 
       const data = await getErrorsAndWarningsForElementAtIndex(0);
       expect(data).toMatchInlineSnapshot(`
-        {
-          "errors": [
-            [
+        Object {
+          "errors": Array [
+            Array [
               "test-only: useLayoutEffect error",
               1,
             ],
           ],
-          "warnings": [
-            [
+          "warnings": Array [
+            Array [
               "test-only: useLayoutEffect warning",
               1,
             ],
@@ -2461,15 +2461,15 @@ describe('InspectedElement', () => {
 
       const data = await getErrorsAndWarningsForElementAtIndex(0);
       expect(data).toMatchInlineSnapshot(`
-        {
-          "errors": [
-            [
+        Object {
+          "errors": Array [
+            Array [
               "test-only: useEffect error",
               1,
             ],
           ],
-          "warnings": [
-            [
+          "warnings": Array [
+            Array [
               "test-only: useEffect warning",
               1,
             ],
@@ -2495,15 +2495,15 @@ describe('InspectedElement', () => {
 
       const data = await getErrorsAndWarningsForElementAtIndex(0);
       expect(data).toMatchInlineSnapshot(`
-        {
-          "errors": [
-            [
-              "Warning: Each child in a list should have a unique "key" prop. See https://reactjs.org/link/warning-keys for more information.
+        Object {
+          "errors": Array [
+            Array [
+              "Warning: Each child in a list should have a unique \\"key\\" prop. See https://reactjs.org/link/warning-keys for more information.
             at Example",
               1,
             ],
           ],
-          "warnings": [],
+          "warnings": Array [],
         }
       `);
     });
@@ -2532,9 +2532,9 @@ describe('InspectedElement', () => {
 
       const data = await getErrorsAndWarningsForElementAtIndex(0);
       expect(data).toMatchInlineSnapshot(`
-        {
-          "errors": [],
-          "warnings": [],
+        Object {
+          "errors": Array [],
+          "warnings": Array [],
         }
       `);
     });
@@ -2575,29 +2575,29 @@ describe('InspectedElement', () => {
         await getErrorsAndWarningsForElementAtIndex(1),
       ];
       expect(data).toMatchInlineSnapshot(`
-        [
-          {
-            "errors": [
-              [
+        Array [
+          Object {
+            "errors": Array [
+              Array [
                 "test-only: render error #1",
                 1,
               ],
             ],
-            "warnings": [
-              [
+            "warnings": Array [
+              Array [
                 "test-only: render warning #1",
                 1,
               ],
             ],
           },
-          {
-            "errors": [
-              [
+          Object {
+            "errors": Array [
+              Array [
                 "test-only: render error #2",
                 1,
               ],
             ],
-            "warnings": [],
+            "warnings": Array [],
           },
         ]
       `);
@@ -2613,24 +2613,24 @@ describe('InspectedElement', () => {
         await getErrorsAndWarningsForElementAtIndex(1),
       ];
       expect(data).toMatchInlineSnapshot(`
-        [
-          {
-            "errors": [
-              [
+        Array [
+          Object {
+            "errors": Array [
+              Array [
                 "test-only: render error #1",
                 1,
               ],
             ],
-            "warnings": [],
+            "warnings": Array [],
           },
-          {
-            "errors": [
-              [
+          Object {
+            "errors": Array [
+              Array [
                 "test-only: render error #2",
                 1,
               ],
             ],
-            "warnings": [],
+            "warnings": Array [],
           },
         ]
       `);
@@ -2672,25 +2672,25 @@ describe('InspectedElement', () => {
         await getErrorsAndWarningsForElementAtIndex(1),
       ];
       expect(data).toMatchInlineSnapshot(`
-        [
-          {
-            "errors": [
-              [
+        Array [
+          Object {
+            "errors": Array [
+              Array [
                 "test-only: render error #1",
                 1,
               ],
             ],
-            "warnings": [
-              [
+            "warnings": Array [
+              Array [
                 "test-only: render warning #1",
                 1,
               ],
             ],
           },
-          {
-            "errors": [],
-            "warnings": [
-              [
+          Object {
+            "errors": Array [],
+            "warnings": Array [
+              Array [
                 "test-only: render warning #2",
                 1,
               ],
@@ -2710,20 +2710,20 @@ describe('InspectedElement', () => {
         await getErrorsAndWarningsForElementAtIndex(1),
       ];
       expect(data).toMatchInlineSnapshot(`
-        [
-          {
-            "errors": [],
-            "warnings": [
-              [
+        Array [
+          Object {
+            "errors": Array [],
+            "warnings": Array [
+              Array [
                 "test-only: render warning #1",
                 1,
               ],
             ],
           },
-          {
-            "errors": [],
-            "warnings": [
-              [
+          Object {
+            "errors": Array [],
+            "warnings": Array [
+              Array [
                 "test-only: render warning #2",
                 1,
               ],
@@ -2736,7 +2736,7 @@ describe('InspectedElement', () => {
 
   it('inspecting nested renderers should not throw', async () => {
     // Ignoring react art warnings
-    jest.spyOn(console, 'error').mockImplementation(() => {});
+    spyOn(console, 'error');
     const ReactArt = require('react-art');
     const ArtSVGMode = require('art/modes/svg');
     const ARTCurrentMode = require('art/modes/current');
@@ -2771,15 +2771,15 @@ describe('InspectedElement', () => {
 
     const inspectedElement = await inspectElementAtIndex(4);
     expect(inspectedElement.owners).toMatchInlineSnapshot(`
-      [
-        {
+      Array [
+        Object {
           "displayName": "Child",
           "hocDisplayNames": null,
           "id": 3,
           "key": null,
           "type": 5,
         },
-        {
+        Object {
           "displayName": "App",
           "hocDisplayNames": null,
           "id": 2,
@@ -2831,7 +2831,7 @@ describe('InspectedElement', () => {
       };
       const toggleError = async forceError => {
         await withErrorsOrWarningsIgnored(['ErrorBoundary'], async () => {
-          await TestUtilsAct(async () => {
+          await TestUtilsAct(() => {
             bridge.send('overrideError', {
               id: targetErrorBoundaryID,
               rendererID: store.getRendererIDForElement(targetErrorBoundaryID),
@@ -2840,7 +2840,7 @@ describe('InspectedElement', () => {
           });
         });
 
-        await TestUtilsAct(async () => {
+        TestUtilsAct(() => {
           jest.runOnlyPendingTimers();
         });
       };

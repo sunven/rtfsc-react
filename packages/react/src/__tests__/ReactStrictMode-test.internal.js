@@ -1,5 +1,5 @@
 /**
- * Copyright (c) Meta Platforms, Inc. and affiliates.
+ * Copyright (c) Facebook, Inc. and its affiliates.
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
@@ -19,7 +19,10 @@ describe('ReactStrictMode', () => {
     React = require('react');
     ReactDOMClient = require('react-dom/client');
 
-    act = require('internal-test-utils').act;
+    act = require('jest-react').act;
+
+    const ReactFeatureFlags = require('shared/ReactFeatureFlags');
+    ReactFeatureFlags.enableStrictEffects = __DEV__;
   });
 
   describe('levels', () => {
@@ -45,8 +48,8 @@ describe('ReactStrictMode', () => {
       return null;
     }
 
-    it('should default to not strict', async () => {
-      await act(() => {
+    it('should default to not strict', () => {
+      act(() => {
         const container = document.createElement('div');
         const root = ReactDOMClient.createRoot(container);
         root.render(<Component label="A" />);
@@ -60,8 +63,8 @@ describe('ReactStrictMode', () => {
     });
 
     if (__DEV__) {
-      it('should support enabling strict mode via createRoot option', async () => {
-        await act(() => {
+      it('should support enabling strict mode via createRoot option', () => {
+        act(() => {
           const container = document.createElement('div');
           const root = ReactDOMClient.createRoot(container, {
             unstable_strictMode: true,
@@ -81,8 +84,8 @@ describe('ReactStrictMode', () => {
         ]);
       });
 
-      it('should include legacy + strict effects mode', async () => {
-        await act(() => {
+      it('should include legacy + strict effects mode', () => {
+        act(() => {
           const container = document.createElement('div');
           const root = ReactDOMClient.createRoot(container);
           root.render(
@@ -104,8 +107,8 @@ describe('ReactStrictMode', () => {
         ]);
       });
 
-      it('should allow level to be increased with nesting', async () => {
-        await act(() => {
+      it('should allow level to be increased with nesting', () => {
+        act(() => {
           const container = document.createElement('div');
           const root = ReactDOMClient.createRoot(container);
           root.render(

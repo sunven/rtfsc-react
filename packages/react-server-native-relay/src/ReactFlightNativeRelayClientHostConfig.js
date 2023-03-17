@@ -1,5 +1,5 @@
 /**
- * Copyright (c) Meta Platforms, Inc. and affiliates.
+ * Copyright (c) Facebook, Inc. and its affiliates.
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
@@ -11,9 +11,9 @@ import type {JSONValue, ResponseBase} from 'react-client/src/ReactFlightClient';
 
 import type {JSResourceReference} from 'JSResourceReference';
 
-import type {ClientReferenceMetadata} from 'ReactFlightNativeRelayClientIntegration';
+import type {ModuleMetaData} from 'ReactFlightNativeRelayClientIntegration';
 
-export type ClientReference<T> = JSResourceReference<T>;
+export type ModuleReference<T> = JSResourceReference<T>;
 
 import {
   parseModelString,
@@ -25,51 +25,36 @@ export {
   requireModule,
 } from 'ReactFlightNativeRelayClientIntegration';
 
-import {resolveClientReference as resolveClientReferenceImpl} from 'ReactFlightNativeRelayClientIntegration';
+import {resolveModuleReference as resolveModuleReferenceImpl} from 'ReactFlightNativeRelayClientIntegration';
 
 import isArray from 'shared/isArray';
 
-export type {ClientReferenceMetadata} from 'ReactFlightNativeRelayClientIntegration';
+export type {ModuleMetaData} from 'ReactFlightNativeRelayClientIntegration';
 
-export type SSRManifest = null;
-export type ServerManifest = null;
-export type ServerReferenceId = string;
+export type BundlerConfig = null;
 
 export type UninitializedModel = JSONValue;
 
 export type Response = ResponseBase;
 
-export function resolveClientReference<T>(
-  bundlerConfig: SSRManifest,
-  metadata: ClientReferenceMetadata,
-): ClientReference<T> {
-  return resolveClientReferenceImpl(metadata);
+export function resolveModuleReference<T>(
+  bundlerConfig: BundlerConfig,
+  moduleData: ModuleMetaData,
+): ModuleReference<T> {
+  return resolveModuleReferenceImpl(moduleData);
 }
 
-export function resolveServerReference<T>(
-  bundlerConfig: ServerManifest,
-  id: ServerReferenceId,
-): ClientReference<T> {
-  throw new Error('Not implemented.');
-}
-
-function parseModelRecursively(
-  response: Response,
-  parentObj: {+[key: string]: JSONValue} | $ReadOnlyArray<JSONValue>,
-  key: string,
-  value: JSONValue,
-): $FlowFixMe {
+function parseModelRecursively(response: Response, parentObj, value) {
   if (typeof value === 'string') {
-    return parseModelString(response, parentObj, key, value);
+    return parseModelString(response, parentObj, value);
   }
   if (typeof value === 'object' && value !== null) {
     if (isArray(value)) {
-      const parsedValue: Array<$FlowFixMe> = [];
+      const parsedValue = [];
       for (let i = 0; i < value.length; i++) {
         (parsedValue: any)[i] = parseModelRecursively(
           response,
           value,
-          '' + i,
           value[i],
         );
       }
@@ -80,7 +65,6 @@ function parseModelRecursively(
         (parsedValue: any)[innerKey] = parseModelRecursively(
           response,
           value,
-          innerKey,
           value[innerKey],
         );
       }
@@ -93,5 +77,5 @@ function parseModelRecursively(
 const dummy = {};
 
 export function parseModel<T>(response: Response, json: UninitializedModel): T {
-  return (parseModelRecursively(response, dummy, '', json): any);
+  return (parseModelRecursively(response, dummy, json): any);
 }

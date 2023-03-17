@@ -1,5 +1,5 @@
 /**
- * Copyright (c) Meta Platforms, Inc. and affiliates.
+ * Copyright (c) Facebook, Inc. and its affiliates.
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
@@ -13,7 +13,7 @@ let ReactDOM;
 let React;
 let ReactCache;
 let ReactTestRenderer;
-let waitForAll;
+let Scheduler;
 
 describe('ReactTestRenderer', () => {
   beforeEach(() => {
@@ -25,30 +25,15 @@ describe('ReactTestRenderer', () => {
     React = require('react');
     ReactCache = require('react-cache');
     ReactTestRenderer = require('react-test-renderer');
-    const InternalTestUtils = require('internal-test-utils');
-    waitForAll = InternalTestUtils.waitForAll;
+    Scheduler = require('scheduler');
   });
 
   it('should warn if used to render a ReactDOM portal', () => {
     const container = document.createElement('div');
     expect(() => {
-      let error;
-      try {
+      expect(() => {
         ReactTestRenderer.create(ReactDOM.createPortal('foo', container));
-      } catch (e) {
-        error = e;
-      }
-      // After the update throws, a subsequent render is scheduled to
-      // unmount the whole tree. This update also causes an error, so React
-      // throws an AggregateError.
-      const errors = error.errors;
-      expect(errors.length).toBe(2);
-      expect(errors[0].message.includes('indexOf is not a function')).toBe(
-        true,
-      );
-      expect(errors[1].message.includes('indexOf is not a function')).toBe(
-        true,
-      );
+      }).toThrow();
     }).toErrorDev('An invalid container has been provided.', {
       withoutStack: true,
     });
@@ -86,14 +71,16 @@ describe('ReactTestRenderer', () => {
 
       const root = ReactTestRenderer.create(<App text="initial" />);
       PendingResources.initial('initial');
-      await waitForAll([]);
+      await Promise.resolve();
+      Scheduler.unstable_flushAll();
       expect(root.toJSON()).toEqual('initial');
 
       root.update(<App text="dynamic" />);
       expect(root.toJSON()).toEqual('fallback');
 
       PendingResources.dynamic('dynamic');
-      await waitForAll([]);
+      await Promise.resolve();
+      Scheduler.unstable_flushAll();
       expect(root.toJSON()).toEqual('dynamic');
     });
 
@@ -110,14 +97,16 @@ describe('ReactTestRenderer', () => {
 
       const root = ReactTestRenderer.create(<App text="initial" />);
       PendingResources.initial('initial');
-      await waitForAll([]);
+      await Promise.resolve();
+      Scheduler.unstable_flushAll();
       expect(root.toJSON().children).toEqual(['initial']);
 
       root.update(<App text="dynamic" />);
       expect(root.toJSON().children).toEqual(['fallback']);
 
       PendingResources.dynamic('dynamic');
-      await waitForAll([]);
+      await Promise.resolve();
+      Scheduler.unstable_flushAll();
       expect(root.toJSON().children).toEqual(['dynamic']);
     });
   });

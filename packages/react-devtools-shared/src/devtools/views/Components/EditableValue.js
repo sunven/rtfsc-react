@@ -1,5 +1,5 @@
 /**
- * Copyright (c) Meta Platforms, Inc. and affiliates.
+ * Copyright (c) Facebook, Inc. and its affiliates.
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
@@ -14,19 +14,19 @@ import {useEditableValue} from '../hooks';
 
 type OverrideValueFn = (path: Array<string | number>, value: any) => void;
 
-type EditableValueProps = {
+type EditableValueProps = {|
   className?: string,
   overrideValue: OverrideValueFn,
   path: Array<string | number>,
   value: any,
-};
+|};
 
 export default function EditableValue({
   className = '',
   overrideValue,
   path,
   value,
-}: EditableValueProps): React.Node {
+}: EditableValueProps) {
   const [state, dispatch] = useEditableValue(value);
   const {editableValue, hasPendingChanges, isValid, parsedValue} = state;
 
@@ -36,7 +36,6 @@ export default function EditableValue({
       externalValue: value,
     });
 
-  // $FlowFixMe[missing-local-annot]
   const handleChange = ({target}) =>
     dispatch({
       type: 'UPDATE',
@@ -44,7 +43,6 @@ export default function EditableValue({
       externalValue: value,
     });
 
-  // $FlowFixMe[missing-local-annot]
   const handleCheckBoxToggle = ({target}) => {
     dispatch({
       type: 'UPDATE',
@@ -60,7 +58,6 @@ export default function EditableValue({
     overrideValue(path, target.checked);
   };
 
-  // $FlowFixMe[missing-local-annot]
   const handleKeyDown = event => {
     // Prevent keydown events from e.g. change selected element in the tree
     event.stopPropagation();

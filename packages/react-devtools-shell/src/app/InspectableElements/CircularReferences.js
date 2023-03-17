@@ -1,5 +1,5 @@
 /**
- * Copyright (c) Meta Platforms, Inc. and affiliates.
+ * Copyright (c) Facebook, Inc. and its affiliates.
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
@@ -9,23 +9,16 @@
 
 import * as React from 'react';
 
-const arrayOne: $FlowFixMe = [];
-const arrayTwo: $FlowFixMe = [];
+const arrayOne = [];
+const arrayTwo = [];
 arrayTwo.push(arrayOne);
 arrayOne.push(arrayTwo);
 
-type ObjectOne = {
-  objectTwo?: ObjectTwo,
-};
-type ObjectTwo = {
-  objectOne: ObjectOne,
-};
-
-const objectOne: ObjectOne = {};
-const objectTwo: ObjectTwo = {objectOne};
+const objectOne = {};
+const objectTwo = {objectOne};
 objectOne.objectTwo = objectTwo;
 
-export default function CircularReferences(): React.Node {
+export default function CircularReferences() {
   return <ChildComponent arrayOne={arrayOne} objectOne={objectOne} />;
 }
 

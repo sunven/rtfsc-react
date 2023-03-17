@@ -1,5 +1,5 @@
 /**
- * Copyright (c) Meta Platforms, Inc. and affiliates.
+ * Copyright (c) Facebook, Inc. and its affiliates.
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
@@ -25,7 +25,7 @@ let eventQueue: ?(Array<ReactSyntheticEvent> | ReactSyntheticEvent) = null;
  * @param {?object} event Synthetic event to be dispatched.
  * @private
  */
-function executeDispatchesAndRelease(event: ReactSyntheticEvent) {
+const executeDispatchesAndRelease = function(event: ReactSyntheticEvent) {
   if (event) {
     executeDispatchesInOrder(event);
 
@@ -33,11 +33,10 @@ function executeDispatchesAndRelease(event: ReactSyntheticEvent) {
       event.constructor.release(event);
     }
   }
-}
-// $FlowFixMe[missing-local-annot]
-function executeDispatchesAndReleaseTopLevel(e) {
+};
+const executeDispatchesAndReleaseTopLevel = function(e) {
   return executeDispatchesAndRelease(e);
-}
+};
 
 export function runEventsInBatch(
   events: Array<ReactSyntheticEvent> | ReactSyntheticEvent | null,

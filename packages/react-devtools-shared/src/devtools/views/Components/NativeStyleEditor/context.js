@@ -1,13 +1,11 @@
 /**
- * Copyright (c) Meta Platforms, Inc. and affiliates.
+ * Copyright (c) Facebook, Inc. and its affiliates.
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
  *
  * @flow
  */
-
-import type {ReactContext} from 'shared/ReactTypes';
 
 import * as React from 'react';
 import {
@@ -39,52 +37,49 @@ import type {
 
 export type GetStyleAndLayout = (id: number) => StyleAndLayoutFrontend | null;
 
-type Context = {
+type Context = {|
   getStyleAndLayout: GetStyleAndLayout,
-};
+|};
 
-const NativeStyleContext: ReactContext<Context> = createContext<Context>(
-  ((null: any): Context),
-);
+const NativeStyleContext = createContext<Context>(((null: any): Context));
 NativeStyleContext.displayName = 'NativeStyleContext';
 
 type ResolveFn = (styleAndLayout: StyleAndLayoutFrontend) => void;
-type InProgressRequest = {
+type InProgressRequest = {|
   promise: Thenable<StyleAndLayoutFrontend>,
   resolveFn: ResolveFn,
-};
+|};
 
 const inProgressRequests: WeakMap<Element, InProgressRequest> = new WeakMap();
-const resource: Resource<Element, Element, StyleAndLayoutFrontend> =
-  createResource(
-    (element: Element) => {
-      const request = inProgressRequests.get(element);
-      if (request != null) {
-        return request.promise;
-      }
+const resource: Resource<
+  Element,
+  Element,
+  StyleAndLayoutFrontend,
+> = createResource(
+  (element: Element) => {
+    const request = inProgressRequests.get(element);
+    if (request != null) {
+      return request.promise;
+    }
 
-      let resolveFn:
-        | ResolveFn
-        | ((
-            result: Promise<StyleAndLayoutFrontend> | StyleAndLayoutFrontend,
-          ) => void) = ((null: any): ResolveFn);
-      const promise = new Promise(resolve => {
-        resolveFn = resolve;
-      });
+    let resolveFn = ((null: any): ResolveFn);
+    const promise = new Promise(resolve => {
+      resolveFn = resolve;
+    });
 
-      inProgressRequests.set(element, ({promise, resolveFn}: $FlowFixMe));
+    inProgressRequests.set(element, {promise, resolveFn});
 
-      return (promise: $FlowFixMe);
-    },
-    (element: Element) => element,
-    {useWeakMap: true},
-  );
+    return promise;
+  },
+  (element: Element) => element,
+  {useWeakMap: true},
+);
 
-type Props = {
+type Props = {|
   children: React$Node,
-};
+|};
 
-function NativeStyleContextController({children}: Props): React.Node {
+function NativeStyleContextController({children}: Props) {
   const bridge = useContext<FrontendBridge>(BridgeContext);
   const store = useContext<Store>(StoreContext);
 
@@ -105,8 +100,10 @@ function NativeStyleContextController({children}: Props): React.Node {
   // would itself be blocked by the same render that suspends (waiting for the data).
   const {selectedElementID} = useContext<StateContext>(TreeStateContext);
 
-  const [currentStyleAndLayout, setCurrentStyleAndLayout] =
-    useState<StyleAndLayoutFrontend | null>(null);
+  const [
+    currentStyleAndLayout,
+    setCurrentStyleAndLayout,
+  ] = useState<StyleAndLayoutFrontend | null>(null);
 
   // This effect handler invalidates the suspense cache and schedules rendering updates with React.
   useEffect(() => {

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) Meta Platforms, Inc. and affiliates.
+ * Copyright (c) Facebook, Inc. and its affiliates.
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
@@ -13,7 +13,7 @@ import type {
   MeasureInWindowOnSuccessCallback,
   MeasureLayoutOnSuccessCallback,
   MeasureOnSuccessCallback,
-  INativeMethods,
+  NativeMethods,
   ViewConfig,
 } from './ReactNativeTypes';
 import type {Instance} from './ReactNativeHostConfig';
@@ -30,7 +30,7 @@ import {
   warnForStyleProps,
 } from './NativeMethodsMixinUtils';
 
-class ReactNativeFiberHostComponent implements INativeMethods {
+class ReactNativeFiberHostComponent {
   _children: Array<Instance | number>;
   _nativeTag: number;
   _internalFiberInstanceHandleDEV: Object;
@@ -82,8 +82,7 @@ class ReactNativeFiberHostComponent implements INativeMethods {
       // Already a node handle
       relativeNode = relativeToNativeNode;
     } else {
-      const nativeNode: ReactNativeFiberHostComponent =
-        (relativeToNativeNode: any);
+      const nativeNode: ReactNativeFiberHostComponent = (relativeToNativeNode: any);
       if (nativeNode._nativeTag) {
         relativeNode = nativeNode._nativeTag;
       }
@@ -126,5 +125,8 @@ class ReactNativeFiberHostComponent implements INativeMethods {
     }
   }
 }
+
+// eslint-disable-next-line no-unused-expressions
+(ReactNativeFiberHostComponent.prototype: $ReadOnly<{...NativeMethods, ...}>);
 
 export default ReactNativeFiberHostComponent;

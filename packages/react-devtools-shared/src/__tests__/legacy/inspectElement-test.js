@@ -1,5 +1,5 @@
 /**
- * Copyright (c) Meta Platforms, Inc. and affiliates.
+ * Copyright (c) Facebook, Inc. and its affiliates.
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
@@ -74,13 +74,13 @@ describe('InspectedElementContext', () => {
     const inspectedElement = await read(id);
 
     expect(inspectedElement).toMatchInlineSnapshot(`
-      {
-        "context": {},
+      Object {
+        "context": Object {},
         "events": undefined,
         "hooks": null,
         "id": 2,
         "owners": null,
-        "props": {
+        "props": Object {
           "a": 1,
           "b": "abc",
         },
@@ -117,13 +117,13 @@ describe('InspectedElementContext', () => {
     const inspectedElement = await read(id);
 
     expect(inspectedElement).toMatchInlineSnapshot(`
-      {
-        "context": {},
+      Object {
+        "context": Object {},
         "events": undefined,
         "hooks": null,
         "id": 2,
         "owners": null,
-        "props": {
+        "props": Object {
           "boolean_false": false,
           "boolean_true": true,
           "float": 1.23,
@@ -213,7 +213,7 @@ describe('InspectedElementContext', () => {
     const inspectedElement = await read(id);
 
     expect(inspectedElement.props).toMatchInlineSnapshot(`
-      {
+      Object {
         "anonymous_fn": Dehydrated {
           "preview_short": ƒ () {},
           "preview_long": ƒ () {},
@@ -222,7 +222,7 @@ describe('InspectedElementContext', () => {
           "preview_short": ArrayBuffer(3),
           "preview_long": ArrayBuffer(3),
         },
-        "array_of_arrays": [
+        "array_of_arrays": Array [
           Dehydrated {
             "preview_short": Array(2),
             "preview_long": [Array(3), Array(0)],
@@ -252,7 +252,7 @@ describe('InspectedElementContext', () => {
           "preview_short": <div />,
           "preview_long": <div />,
         },
-        "immutable": {
+        "immutable": Object {
           "0": Dehydrated {
             "preview_short": Array(2),
             "preview_long": ["a", List(3)],
@@ -266,7 +266,7 @@ describe('InspectedElementContext', () => {
             "preview_long": ["c", Map(2)],
           },
         },
-        "map": {
+        "map": Object {
           "0": Dehydrated {
             "preview_short": Array(2),
             "preview_long": ["name", "Brian"],
@@ -276,7 +276,7 @@ describe('InspectedElementContext', () => {
             "preview_long": ["food", "sushi"],
           },
         },
-        "map_of_maps": {
+        "map_of_maps": Object {
           "0": Dehydrated {
             "preview_short": Array(2),
             "preview_long": ["first", Map(2)],
@@ -286,7 +286,7 @@ describe('InspectedElementContext', () => {
             "preview_long": ["second", Map(2)],
           },
         },
-        "object_of_objects": {
+        "object_of_objects": Object {
           "inner": Dehydrated {
             "preview_short": {…},
             "preview_long": {boolean: true, number: 123, string: "abc"},
@@ -300,11 +300,11 @@ describe('InspectedElementContext', () => {
           "preview_short": /abc/giu,
           "preview_long": /abc/giu,
         },
-        "set": {
+        "set": Object {
           "0": "abc",
           "1": 123,
         },
-        "set_of_sets": {
+        "set_of_sets": Object {
           "0": Dehydrated {
             "preview_short": Set(3),
             "preview_long": Set(3) {"a", "b", "c"},
@@ -318,7 +318,7 @@ describe('InspectedElementContext', () => {
           "preview_short": Symbol(symbol),
           "preview_long": Symbol(symbol),
         },
-        "typed_array": {
+        "typed_array": Object {
           "0": 100,
           "1": -100,
           "2": 0,
@@ -347,8 +347,8 @@ describe('InspectedElementContext', () => {
     const inspectedElement = await read(id);
 
     expect(inspectedElement.props).toMatchInlineSnapshot(`
-      {
-        "object": {
+      Object {
+        "object": Object {
           "boolean": true,
           "number": 123,
           "string": "abc",
@@ -404,13 +404,13 @@ describe('InspectedElementContext', () => {
     const inspectedElement = await read(id);
 
     expect(inspectedElement).toMatchInlineSnapshot(`
-      {
-        "context": {},
+      Object {
+        "context": Object {},
         "events": undefined,
         "hooks": null,
         "id": 2,
         "owners": null,
-        "props": {
+        "props": Object {
           "iteratable": Dehydrated {
             "preview_short": Generator,
             "preview_long": Generator,
@@ -459,14 +459,14 @@ describe('InspectedElementContext', () => {
     const inspectedElement = await read(id);
 
     expect(inspectedElement).toMatchInlineSnapshot(`
-      {
-        "context": {},
+      Object {
+        "context": Object {},
         "events": undefined,
         "hooks": null,
         "id": 2,
         "owners": null,
-        "props": {
-          "data": {
+        "props": Object {
+          "data": Object {
             "_number": 42,
             "number": 42,
           },
@@ -478,7 +478,7 @@ describe('InspectedElementContext', () => {
   });
 
   // @reactVersion >= 16.0
-  it('should support objects with inherited keys', async () => {
+  it('should support objects with with inherited keys', async () => {
     const Example = () => null;
 
     const base = Object.create(Object.prototype, {
@@ -549,14 +549,14 @@ describe('InspectedElementContext', () => {
     const inspectedElement = await read(id);
 
     expect(inspectedElement).toMatchInlineSnapshot(`
-      {
-        "context": {},
+      Object {
+        "context": Object {},
         "events": undefined,
         "hooks": null,
         "id": 2,
         "owners": null,
-        "props": {
-          "data": {
+        "props": Object {
+          "data": Object {
             "123": 3,
             "Symbol(enumerableSymbol)": 3,
             "Symbol(enumerableSymbolBase)": 1,
@@ -619,8 +619,8 @@ describe('InspectedElementContext', () => {
     const inspectedElement = await read(id);
 
     expect(inspectedElement.props).toMatchInlineSnapshot(`
-      {
-        "data": {
+      Object {
+        "data": Object {
           "a": undefined,
           "b": Infinity,
           "c": NaN,
@@ -659,8 +659,8 @@ describe('InspectedElementContext', () => {
 
     let inspectedElement = await read(id);
     expect(inspectedElement.props).toMatchInlineSnapshot(`
-      {
-        "nestedObject": {
+      Object {
+        "nestedObject": Object {
           "a": Dehydrated {
             "preview_short": {…},
             "preview_long": {b: {…}},
@@ -671,10 +671,10 @@ describe('InspectedElementContext', () => {
 
     inspectedElement = await read(id, ['props', 'nestedObject', 'a']);
     expect(inspectedElement.props).toMatchInlineSnapshot(`
-      {
-        "nestedObject": {
-          "a": {
-            "b": {
+      Object {
+        "nestedObject": Object {
+          "a": Object {
+            "b": Object {
               "c": Dehydrated {
                 "preview_short": Array(1),
                 "preview_long": [{…}],
@@ -687,12 +687,12 @@ describe('InspectedElementContext', () => {
 
     inspectedElement = await read(id, ['props', 'nestedObject', 'a', 'b', 'c']);
     expect(inspectedElement.props).toMatchInlineSnapshot(`
-      {
-        "nestedObject": {
-          "a": {
-            "b": {
-              "c": [
-                {
+      Object {
+        "nestedObject": Object {
+          "a": Object {
+            "b": Object {
+              "c": Array [
+                Object {
                   "d": Dehydrated {
                     "preview_short": {…},
                     "preview_long": {e: {…}},
@@ -715,14 +715,14 @@ describe('InspectedElementContext', () => {
       'd',
     ]);
     expect(inspectedElement.props).toMatchInlineSnapshot(`
-      {
-        "nestedObject": {
-          "a": {
-            "b": {
-              "c": [
-                {
-                  "d": {
-                    "e": {},
+      Object {
+        "nestedObject": Object {
+          "a": Object {
+            "b": Object {
+              "c": Array [
+                Object {
+                  "d": Object {
+                    "e": Object {},
                   },
                 },
               ],
@@ -760,7 +760,7 @@ describe('InspectedElementContext', () => {
     const rendererID = ((store.getRendererIDForElement(id): any): number);
 
     const logSpy = jest.fn();
-    jest.spyOn(console, 'log').mockImplementation(logSpy);
+    spyOn(console, 'log').and.callFake(logSpy);
 
     // Should store the whole value (not just the hydrated parts)
     backendAPI.storeAsGlobal({

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) Meta Platforms, Inc. and affiliates.
+ * Copyright (c) Facebook, Inc. and its affiliates.
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
@@ -7,27 +7,26 @@
  * @flow
  */
 
-// $FlowFixMe[missing-this-annot]
-function invokeGuardedCallbackProd<Args: Array<mixed>, Context>(
+function invokeGuardedCallbackProd<A, B, C, D, E, F, Context>(
   name: string | null,
-  func: (...Args) => mixed,
+  func: (a: A, b: B, c: C, d: D, e: E, f: F) => mixed,
   context: Context,
-): void {
-  // $FlowFixMe[method-unbinding]
+  a: A,
+  b: B,
+  c: C,
+  d: D,
+  e: E,
+  f: F,
+) {
   const funcArgs = Array.prototype.slice.call(arguments, 3);
   try {
-    // $FlowFixMe[incompatible-call] Flow doesn't understand the arguments splicing.
     func.apply(context, funcArgs);
   } catch (error) {
     this.onError(error);
   }
 }
 
-let invokeGuardedCallbackImpl: <Args: Array<mixed>, Context>(
-  name: string | null,
-  func: (...Args) => mixed,
-  context: Context,
-) => void = invokeGuardedCallbackProd;
+let invokeGuardedCallbackImpl = invokeGuardedCallbackProd;
 
 if (__DEV__) {
   // In DEV mode, we swap out invokeGuardedCallback for a special version
@@ -55,16 +54,29 @@ if (__DEV__) {
     typeof window !== 'undefined' &&
     typeof window.dispatchEvent === 'function' &&
     typeof document !== 'undefined' &&
-    // $FlowFixMe[method-unbinding]
     typeof document.createEvent === 'function'
   ) {
     const fakeNode = document.createElement('react');
 
     invokeGuardedCallbackImpl = function invokeGuardedCallbackDev<
-      Args: Array<mixed>,
+      A,
+      B,
+      C,
+      D,
+      E,
+      F,
       Context,
-      // $FlowFixMe[missing-this-annot]
-    >(name: string | null, func: (...Args) => mixed, context: Context): void {
+    >(
+      name: string | null,
+      func: (a: A, b: B, c: C, d: D, e: E, f: F) => mixed,
+      context: Context,
+      a: A,
+      b: B,
+      c: C,
+      d: D,
+      e: E,
+      f: F,
+    ) {
       // If document doesn't exist we know for sure we will crash in this method
       // when we call document.createEvent(). However this can cause confusing
       // errors: https://github.com/facebook/create-react-app/issues/3482
@@ -126,12 +138,10 @@ if (__DEV__) {
       // Create an event handler for our fake event. We will synchronously
       // dispatch our fake event using `dispatchEvent`. Inside the handler, we
       // call the user-provided callback.
-      // $FlowFixMe[method-unbinding]
       const funcArgs = Array.prototype.slice.call(arguments, 3);
       function callCallback() {
         didCall = true;
         restoreAfterDispatch();
-        // $FlowFixMe[incompatible-call] Flow doesn't understand the arguments splicing.
         func.apply(context, funcArgs);
         didError = false;
       }
@@ -152,7 +162,6 @@ if (__DEV__) {
       let didSetError = false;
       let isCrossOriginError = false;
 
-      // $FlowFixMe[missing-local-annot]
       function handleWindowError(event) {
         error = event.error;
         didSetError = true;

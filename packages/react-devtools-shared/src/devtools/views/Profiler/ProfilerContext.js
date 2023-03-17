@@ -1,13 +1,11 @@
 /**
- * Copyright (c) Meta Platforms, Inc. and affiliates.
+ * Copyright (c) Facebook, Inc. and its affiliates.
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
  *
  * @flow
  */
-
-import type {ReactContext} from 'shared/ReactTypes';
 
 import * as React from 'react';
 import {createContext, useCallback, useContext, useMemo, useState} from 'react';
@@ -18,13 +16,12 @@ import {
   TreeStateContext,
 } from '../Components/TreeContext';
 import {StoreContext} from '../context';
-import {logEvent} from 'react-devtools-shared/src/Logger';
 
 import type {ProfilingDataFrontend} from './types';
 
 export type TabID = 'flame-chart' | 'ranked-chart' | 'timeline';
 
-export type Context = {
+export type Context = {|
   // Which tab is selected in the Profiler UI?
   selectedTabID: TabID,
   selectTab(id: TabID): void,
@@ -67,26 +64,24 @@ export type Context = {
   selectedFiberID: number | null,
   selectedFiberName: string | null,
   selectFiber: (id: number | null, name: string | null) => void,
-};
+|};
 
-const ProfilerContext: ReactContext<Context> = createContext<Context>(
-  ((null: any): Context),
-);
+const ProfilerContext = createContext<Context>(((null: any): Context));
 ProfilerContext.displayName = 'ProfilerContext';
 
-type StoreProfilingState = {
+type StoreProfilingState = {|
   didRecordCommits: boolean,
   isProcessingData: boolean,
   isProfiling: boolean,
   profilingData: ProfilingDataFrontend | null,
   supportsProfiling: boolean,
-};
+|};
 
-type Props = {
+type Props = {|
   children: React$Node,
-};
+|};
 
-function ProfilerContextController({children}: Props): React.Node {
+function ProfilerContextController({children}: Props) {
   const store = useContext(StoreContext);
   const {selectedElementID} = useContext(TreeStateContext);
   const dispatch = useContext(TreeDispatcherContext);
@@ -125,8 +120,10 @@ function ProfilerContextController({children}: Props): React.Node {
     supportsProfiling,
   } = useSubscription<StoreProfilingState>(subscription);
 
-  const [prevProfilingData, setPrevProfilingData] =
-    useState<ProfilingDataFrontend | null>(null);
+  const [
+    prevProfilingData,
+    setPrevProfilingData,
+  ] = useState<ProfilingDataFrontend | null>(null);
   const [rootID, setRootID] = useState<number | null>(null);
   const [selectedFiberID, selectFiberID] = useState<number | null>(null);
   const [selectedFiberName, selectFiberName] = useState<string | null>(null);
@@ -177,8 +174,9 @@ function ProfilerContextController({children}: Props): React.Node {
         if (rootID === null || !dataForRoots.has(rootID)) {
           let selectedElementRootID = null;
           if (selectedElementID !== null) {
-            selectedElementRootID =
-              store.getRootIDForElement(selectedElementID);
+            selectedElementRootID = store.getRootIDForElement(
+              selectedElementID,
+            );
           }
           if (
             selectedElementRootID !== null &&
@@ -193,8 +191,18 @@ function ProfilerContextController({children}: Props): React.Node {
     });
   }
 
-  const [isCommitFilterEnabled, setIsCommitFilterEnabled] =
-    useLocalStorage<boolean>('React::DevTools::isCommitFilterEnabled', false);
+  const startProfiling = useCallback(
+    () => store.profilerStore.startProfiling(),
+    [store],
+  );
+  const stopProfiling = useCallback(() => store.profilerStore.stopProfiling(), [
+    store,
+  ]);
+
+  const [
+    isCommitFilterEnabled,
+    setIsCommitFilterEnabled,
+  ] = useLocalStorage<boolean>('React::DevTools::isCommitFilterEnabled', false);
   const [minCommitDuration, setMinCommitDuration] = useLocalStorage<number>(
     'minCommitDuration',
     0,
@@ -206,26 +214,6 @@ function ProfilerContextController({children}: Props): React.Node {
   const [selectedTabID, selectTab] = useLocalStorage<TabID>(
     'React::DevTools::Profiler::defaultTab',
     'flame-chart',
-    value => {
-      logEvent({
-        event_name: 'profiler-tab-changed',
-        metadata: {
-          tabId: value,
-        },
-      });
-    },
-  );
-
-  const startProfiling = useCallback(() => {
-    logEvent({
-      event_name: 'profiling-start',
-      metadata: {current_tab: selectedTabID},
-    });
-    store.profilerStore.startProfiling();
-  }, [store, selectedTabID]);
-  const stopProfiling = useCallback(
-    () => store.profilerStore.stopProfiling(),
-    [store],
   );
 
   if (isProfiling) {

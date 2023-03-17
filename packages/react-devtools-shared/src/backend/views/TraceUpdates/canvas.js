@@ -1,5 +1,5 @@
 /**
- * Copyright (c) Meta Platforms, Inc. and affiliates.
+ * Copyright (c) Facebook, Inc. and its affiliates.
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
@@ -10,7 +10,6 @@
 import type {Data} from './index';
 import type {Rect} from '../utils';
 import type {NativeType} from '../../types';
-import type Agent from '../../agent';
 
 const OUTLINE_COLOR = '#f0f0f0';
 
@@ -30,17 +29,7 @@ const COLORS = [
 
 let canvas: HTMLCanvasElement | null = null;
 
-export function draw(nodeToData: Map<NativeType, Data>, agent: Agent): void {
-  if (window.document == null) {
-    const nodesToDraw = [];
-    iterateNodes(nodeToData, (_, color, node) => {
-      nodesToDraw.push({node, color});
-    });
-
-    agent.emit('drawTraceUpdates', nodesToDraw);
-    return;
-  }
-
+export function draw(nodeToData: Map<NativeType, Data>): void {
   if (canvas === null) {
     initialize();
   }
@@ -51,21 +40,14 @@ export function draw(nodeToData: Map<NativeType, Data>, agent: Agent): void {
 
   const context = canvasFlow.getContext('2d');
   context.clearRect(0, 0, canvasFlow.width, canvasFlow.height);
-  iterateNodes(nodeToData, (rect, color) => {
+
+  nodeToData.forEach(({count, rect}) => {
     if (rect !== null) {
+      const colorIndex = Math.min(COLORS.length - 1, count - 1);
+      const color = COLORS[colorIndex];
+
       drawBorder(context, rect, color);
     }
-  });
-}
-
-function iterateNodes(
-  nodeToData: Map<NativeType, Data>,
-  execute: (rect: Rect | null, color: string, node: NativeType) => void,
-) {
-  nodeToData.forEach(({count, rect}, node) => {
-    const colorIndex = Math.min(COLORS.length - 1, count - 1);
-    const color = COLORS[colorIndex];
-    execute(rect, color, node);
   });
 }
 
@@ -97,12 +79,7 @@ function drawBorder(
   context.setLineDash([0]);
 }
 
-export function destroy(agent: Agent): void {
-  if (window.document == null) {
-    agent.emit('disableTraceUpdates');
-    return;
-  }
-
+export function destroy(): void {
   if (canvas !== null) {
     if (canvas.parentNode != null) {
       canvas.parentNode.removeChild(canvas);

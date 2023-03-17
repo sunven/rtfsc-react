@@ -1,5 +1,5 @@
 /**
- * Copyright (c) Meta Platforms, Inc. and affiliates.
+ * Copyright (c) Facebook, Inc. and its affiliates.
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
@@ -7,26 +7,22 @@
  * @flow
  */
 
-import type {
-  AnyNativeEvent,
-  LegacyPluginModule,
-} from './legacy-events/PluginModuleType';
+import type {AnyNativeEvent} from './legacy-events/PluginModuleType';
 import type {Fiber} from 'react-reconciler/src/ReactInternalTypes';
+import type {LegacyPluginModule} from './legacy-events/PluginModuleType';
 import type {ReactSyntheticEvent} from './legacy-events/ReactSyntheticEventType';
 import type {TopLevelType} from './legacy-events/TopLevelEventTypes';
 
-import {
-  registrationNameModules,
-  plugins,
-} from './legacy-events/EventPluginRegistry';
+import {registrationNameModules} from './legacy-events/EventPluginRegistry';
 import {batchedUpdates} from './legacy-events/ReactGenericBatching';
 import {runEventsInBatch} from './legacy-events/EventBatching';
-import getListener from './ReactNativeGetListener';
+import {plugins} from './legacy-events/EventPluginRegistry';
+import getListeners from './ReactNativeGetListeners';
 import accumulateInto from './legacy-events/accumulateInto';
 
 import {getInstanceFromNode} from './ReactNativeComponentTree';
 
-export {getListener, registrationNameModules as registrationNames};
+export {getListeners, registrationNameModules as registrationNames};
 
 /**
  * Version of `ReactBrowserEventEmitter` that works on the receiving side of a
@@ -43,14 +39,13 @@ const EMPTY_NATIVE_EVENT = (({}: any): AnyNativeEvent);
  * @param {Array<number>} indices Indices by which to pull subsequence.
  * @return {Array<Touch>} Subsequence of touch objects.
  */
-// $FlowFixMe[missing-local-annot]
-function touchSubsequence(touches, indices) {
+const touchSubsequence = function(touches, indices) {
   const ret = [];
   for (let i = 0; i < indices.length; i++) {
     ret.push(touches[indices[i]]);
   }
   return ret;
-}
+};
 
 /**
  * TODO: Pool all of this.
@@ -63,7 +58,7 @@ function touchSubsequence(touches, indices) {
  * @param {Array<number>} indices Indices to remove from `touches`.
  * @return {Array<Touch>} Subsequence of removed touch objects.
  */
-function removeTouchesAtIndices(
+const removeTouchesAtIndices = function(
   touches: Array<Object>,
   indices: Array<number>,
 ): Array<Object> {
@@ -85,7 +80,7 @@ function removeTouchesAtIndices(
   }
   temp.length = fillAt;
   return rippedOut;
-}
+};
 
 /**
  * Internal version of `receiveEvent` in terms of normalized (non-tag)
@@ -110,7 +105,7 @@ function _receiveRootNodeIDEvent(
     target = inst.stateNode;
   }
 
-  batchedUpdates(function () {
+  batchedUpdates(function() {
     runExtractedPluginEventsInBatch(topLevelType, inst, nativeEvent, target);
   });
   // React Native doesn't use ReactControlledComponent but if it did, here's
@@ -130,7 +125,7 @@ function extractPluginEvents(
   nativeEvent: AnyNativeEvent,
   nativeEventTarget: null | EventTarget,
 ): Array<ReactSyntheticEvent> | ReactSyntheticEvent | null {
-  let events: Array<ReactSyntheticEvent> | ReactSyntheticEvent | null = null;
+  let events = null;
   const legacyPlugins = ((plugins: any): Array<LegacyPluginModule<Event>>);
   for (let i = 0; i < legacyPlugins.length; i++) {
     // Not every plugin in the ordering may be loaded at runtime.

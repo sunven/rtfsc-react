@@ -1,5 +1,5 @@
 /**
- * Copyright (c) Meta Platforms, Inc. and affiliates.
+ * Copyright (c) Facebook, Inc. and its affiliates.
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
@@ -33,6 +33,8 @@ const ReactTestRenderer = require('react-test-renderer');
 
 // Isolate the noop renderer
 jest.resetModules();
+const ReactNoop = require('react-noop-renderer');
+const Scheduler = require('scheduler');
 
 let Group;
 let Shape;
@@ -57,7 +59,7 @@ function testDOMNodeStructure(domNode, expectedStructure) {
     }
   }
   if (expectedStructure.children) {
-    expectedStructure.children.forEach(function (subTree, index) {
+    expectedStructure.children.forEach(function(subTree, index) {
       testDOMNodeStructure(domNode.childNodes[index], subTree);
     });
   }
@@ -356,6 +358,58 @@ describe('ReactART', () => {
     instance = render(onClick2);
     doClick(instance);
     expect(onClick2).toBeCalled();
+  });
+
+  // @gate !enableSyncDefaultUpdates
+  it('can concurrently render with a "primary" renderer while sharing context', () => {
+    const CurrentRendererContext = React.createContext(null);
+
+    function Yield(props) {
+      Scheduler.unstable_yieldValue(props.value);
+      return null;
+    }
+
+    let ops = [];
+    function LogCurrentRenderer() {
+      return (
+        <CurrentRendererContext.Consumer>
+          {currentRenderer => {
+            ops.push(currentRenderer);
+            return null;
+          }}
+        </CurrentRendererContext.Consumer>
+      );
+    }
+
+    // Using test renderer instead of the DOM renderer here because async
+    // testing APIs for the DOM renderer don't exist.
+    ReactNoop.render(
+      <CurrentRendererContext.Provider value="Test">
+        <Yield value="A" />
+        <Yield value="B" />
+        <LogCurrentRenderer />
+        <Yield value="C" />
+      </CurrentRendererContext.Provider>,
+    );
+
+    expect(Scheduler).toFlushAndYieldThrough(['A']);
+
+    ReactDOM.render(
+      <Surface>
+        <LogCurrentRenderer />
+        <CurrentRendererContext.Provider value="ART">
+          <LogCurrentRenderer />
+        </CurrentRendererContext.Provider>
+      </Surface>,
+      container,
+    );
+
+    expect(ops).toEqual([null, 'ART']);
+
+    ops = [];
+    expect(Scheduler).toFlushAndYield(['B', 'C']);
+
+    expect(ops).toEqual(['Test']);
   });
 });
 

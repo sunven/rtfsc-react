@@ -1,5 +1,5 @@
 /**
- * Copyright (c) Meta Platforms, Inc. and affiliates.
+ * Copyright (c) Facebook, Inc. and its affiliates.
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
@@ -10,12 +10,12 @@
 import JSResourceReferenceImpl from 'JSResourceReferenceImpl';
 
 const ReactFlightDOMRelayClientIntegration = {
-  resolveClientReference(metadata) {
-    return new JSResourceReferenceImpl(metadata);
+  resolveModuleReference(moduleData) {
+    return new JSResourceReferenceImpl(moduleData);
   },
-  preloadModule(clientReference) {},
-  requireModule(clientReference) {
-    return clientReference._moduleId;
+  preloadModule(moduleReference) {},
+  requireModule(moduleReference) {
+    return moduleReference._moduleId;
   },
 };
 

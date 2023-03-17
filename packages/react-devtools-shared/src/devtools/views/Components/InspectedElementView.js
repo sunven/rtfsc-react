@@ -1,5 +1,5 @@
 /**
- * Copyright (c) Meta Platforms, Inc. and affiliates.
+ * Copyright (c) Facebook, Inc. and its affiliates.
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
@@ -33,7 +33,6 @@ import {
   storeAsGlobal as storeAsGlobalAPI,
 } from 'react-devtools-shared/src/backendAPI';
 import {enableStyleXFeatures} from 'react-devtools-feature-flags';
-import {logEvent} from 'react-devtools-shared/src/Logger';
 
 import styles from './InspectedElementView.css';
 
@@ -45,13 +44,13 @@ import type {ToggleParseHookNames} from './InspectedElementContext';
 export type CopyPath = (path: Array<string | number>) => void;
 export type InspectPath = (path: Array<string | number>) => void;
 
-type Props = {
+type Props = {|
   element: Element,
   hookNames: HookNames | null,
   inspectedElement: InspectedElement,
   parseHookNames: boolean,
   toggleParseHookNames: ToggleParseHookNames,
-};
+|};
 
 export default function InspectedElementView({
   element,
@@ -59,10 +58,15 @@ export default function InspectedElementView({
   inspectedElement,
   parseHookNames,
   toggleParseHookNames,
-}: Props): React.Node {
+}: Props) {
   const {id} = element;
-  const {owners, rendererPackageName, rendererVersion, rootType, source} =
-    inspectedElement;
+  const {
+    owners,
+    rendererPackageName,
+    rendererVersion,
+    rootType,
+    source,
+  } = inspectedElement;
 
   const bridge = useContext(BridgeContext);
   const store = useContext(StoreContext);
@@ -254,10 +258,10 @@ function formatSourceForDisplay(fileName: string, lineNumber: string) {
   return `${nameOnly}:${lineNumber}`;
 }
 
-type SourceProps = {
+type SourceProps = {|
   fileName: string,
   lineNumber: string,
-};
+|};
 
 function Source({fileName, lineNumber}: SourceProps) {
   const handleCopy = () => copy(`${fileName}:${lineNumber}`);
@@ -276,13 +280,13 @@ function Source({fileName, lineNumber}: SourceProps) {
   );
 }
 
-type OwnerViewProps = {
+type OwnerViewProps = {|
   displayName: string,
   hocDisplayNames: Array<string> | null,
   id: number,
   isInStore: boolean,
   type: ElementType,
-};
+|};
 
 function OwnerView({
   displayName,
@@ -292,19 +296,19 @@ function OwnerView({
   type,
 }: OwnerViewProps) {
   const dispatch = useContext(TreeDispatcherContext);
-  const {highlightNativeElement, clearHighlightNativeElement} =
-    useHighlightNativeElement();
+  const {
+    highlightNativeElement,
+    clearHighlightNativeElement,
+  } = useHighlightNativeElement();
 
-  const handleClick = useCallback(() => {
-    logEvent({
-      event_name: 'select-element',
-      metadata: {source: 'owner-view'},
-    });
-    dispatch({
-      type: 'SELECT_ELEMENT_BY_ID',
-      payload: id,
-    });
-  }, [dispatch, id]);
+  const handleClick = useCallback(
+    () =>
+      dispatch({
+        type: 'SELECT_ELEMENT_BY_ID',
+        payload: id,
+      }),
+    [dispatch, id],
+  );
 
   const onMouseEnter = () => highlightNativeElement(id);
 

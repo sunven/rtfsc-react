@@ -1,5 +1,5 @@
 /**
- * Copyright (c) Meta Platforms, Inc. and affiliates.
+ * Copyright (c) Facebook, Inc. and its affiliates.
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
@@ -14,10 +14,10 @@ import checkPropTypes from 'shared/checkPropTypes';
 let warnedAboutMissingGetChildContext;
 
 if (__DEV__) {
-  warnedAboutMissingGetChildContext = ({}: {[string]: boolean});
+  warnedAboutMissingGetChildContext = {};
 }
 
-export const emptyContextObject: {} = {};
+export const emptyContextObject = {};
 if (__DEV__) {
   Object.freeze(emptyContextObject);
 }
@@ -31,7 +31,7 @@ export function getMaskedContext(type: any, unmaskedContext: Object): Object {
       return emptyContextObject;
     }
 
-    const context: {[string]: $FlowFixMe} = {};
+    const context = {};
     for (const key in contextTypes) {
       context[key] = unmaskedContext[key];
     }
@@ -78,9 +78,8 @@ export function processChildContext(
     for (const contextKey in childContext) {
       if (!(contextKey in childContextTypes)) {
         throw new Error(
-          `${
-            getComponentNameFromType(type) || 'Unknown'
-          }.getChildContext(): key "${contextKey}" is not defined in childContextTypes.`,
+          `${getComponentNameFromType(type) ||
+            'Unknown'}.getChildContext(): key "${contextKey}" is not defined in childContextTypes.`,
         );
       }
     }

@@ -8,8 +8,8 @@ module.exports = {
   jsxBracketSameLine: true,
   trailingComma: 'es5',
   printWidth: 80,
-  parser: 'flow',
-  arrowParens: 'avoid',
+  parser: 'babel',
+
   overrides: [
     {
       files: esNextPaths,

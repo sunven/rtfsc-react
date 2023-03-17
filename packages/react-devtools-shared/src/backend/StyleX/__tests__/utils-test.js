@@ -1,5 +1,5 @@
 /**
- * Copyright (c) Meta Platforms, Inc. and affiliates.
+ * Copyright (c) Facebook, Inc. and its affiliates.
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
@@ -35,30 +35,30 @@ describe('Stylex plugin utils', () => {
 
   it('should gracefully handle empty values', () => {
     expect(getStyleXData(null)).toMatchInlineSnapshot(`
-      {
-        "resolvedStyles": {},
-        "sources": [],
+      Object {
+        "resolvedStyles": Object {},
+        "sources": Array [],
       }
     `);
 
     expect(getStyleXData(undefined)).toMatchInlineSnapshot(`
-      {
-        "resolvedStyles": {},
-        "sources": [],
+      Object {
+        "resolvedStyles": Object {},
+        "sources": Array [],
       }
     `);
 
     expect(getStyleXData('')).toMatchInlineSnapshot(`
-      {
-        "resolvedStyles": {},
-        "sources": [],
+      Object {
+        "resolvedStyles": Object {},
+        "sources": Array [],
       }
     `);
 
     expect(getStyleXData([undefined])).toMatchInlineSnapshot(`
-      {
-        "resolvedStyles": {},
-        "sources": [],
+      Object {
+        "resolvedStyles": Object {},
+        "sources": Array [],
       }
     `);
   });
@@ -87,13 +87,13 @@ describe('Stylex plugin utils', () => {
         alignItems: 'bar',
       }),
     ).toMatchInlineSnapshot(`
-      {
-        "resolvedStyles": {
+      Object {
+        "resolvedStyles": Object {
           "alignItems": "center",
           "display": "flex",
           "flexDirection": "center",
         },
-        "sources": [
+        "sources": Array [
           "Example__style",
         ],
       }
@@ -123,13 +123,13 @@ describe('Stylex plugin utils', () => {
         },
       ]),
     ).toMatchInlineSnapshot(`
-      {
-        "resolvedStyles": {
+      Object {
+        "resolvedStyles": Object {
           "alignItems": "center",
           "display": "flex",
           "flexDirection": "center",
         },
-        "sources": [
+        "sources": Array [
           "Example1__style",
           "Example2__style",
         ],
@@ -164,13 +164,13 @@ describe('Stylex plugin utils', () => {
         false,
       ]),
     ).toMatchInlineSnapshot(`
-      {
-        "resolvedStyles": {
+      Object {
+        "resolvedStyles": Object {
           "alignItems": "center",
           "display": "flex",
           "flexDirection": "center",
         },
-        "sources": [
+        "sources": Array [
           "Example1__style",
           "Example2__style",
         ],
@@ -204,15 +204,15 @@ describe('Stylex plugin utils', () => {
         },
       }),
     ).toMatchInlineSnapshot(`
-      {
-        "resolvedStyles": {
-          ":hover": {
+      Object {
+        "resolvedStyles": Object {
+          ":hover": Object {
             "color": "blue",
             "textDecoration": "none",
           },
           "color": "black",
         },
-        "sources": [
+        "sources": Array [
           "Example__style",
         ],
       }
@@ -244,13 +244,13 @@ describe('Stylex plugin utils', () => {
         false,
       ]),
     ).toMatchInlineSnapshot(`
-      {
-        "resolvedStyles": {
+      Object {
+        "resolvedStyles": Object {
           "alignItems": "center",
           "display": "flex",
           "flexDirection": "center",
         },
-        "sources": [
+        "sources": Array [
           "Example1__style",
           "Example2__style",
           "Example3__style",

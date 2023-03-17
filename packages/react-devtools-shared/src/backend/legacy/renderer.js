@@ -1,5 +1,5 @@
 /**
- * Copyright (c) Meta Platforms, Inc. and affiliates.
+ * Copyright (c) Facebook, Inc. and its affiliates.
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
@@ -137,13 +137,16 @@ export function attach(
   global: Object,
 ): RendererInterface {
   const idToInternalInstanceMap: Map<number, InternalInstance> = new Map();
-  const internalInstanceToIDMap: WeakMap<InternalInstance, number> =
-    new WeakMap();
-  const internalInstanceToRootIDMap: WeakMap<InternalInstance, number> =
-    new WeakMap();
+  const internalInstanceToIDMap: WeakMap<
+    InternalInstance,
+    number,
+  > = new WeakMap();
+  const internalInstanceToRootIDMap: WeakMap<
+    InternalInstance,
+    number,
+  > = new WeakMap();
 
-  let getInternalIDForNative: GetFiberIDForNative =
-    ((null: any): GetFiberIDForNative);
+  let getInternalIDForNative: GetFiberIDForNative = ((null: any): GetFiberIDForNative);
   let findNativeNodeForInternalID: (id: number) => ?NativeType;
   let getFiberForNative = (node: NativeType) => {
     // Not implemented.
@@ -152,8 +155,9 @@ export function attach(
 
   if (renderer.ComponentTree) {
     getInternalIDForNative = (node, findNearestUnfilteredAncestor) => {
-      const internalInstance =
-        renderer.ComponentTree.getClosestInstanceFromNode(node);
+      const internalInstance = renderer.ComponentTree.getClosestInstanceFromNode(
+        node,
+      );
       return internalInstanceToIDMap.get(internalInstance) || null;
     };
     findNativeNodeForInternalID = (id: number) => {
@@ -191,7 +195,7 @@ export function attach(
     return ((internalInstanceToIDMap.get(internalInstance): any): number);
   }
 
-  function areEqualArrays(a: Array<any>, b: Array<any>) {
+  function areEqualArrays(a, b) {
     if (a.length !== b.length) {
       return false;
     }
@@ -214,12 +218,10 @@ export function attach(
         const internalInstance = args[0];
         const hostContainerInfo = args[3];
         if (getElementType(internalInstance) === ElementTypeOtherOrUnknown) {
-          // $FlowFixMe[object-this-reference] found when upgrading Flow
           return fn.apply(this, args);
         }
         if (hostContainerInfo._topLevelWrapper === undefined) {
           // SSR
-          // $FlowFixMe[object-this-reference] found when upgrading Flow
           return fn.apply(this, args);
         }
 
@@ -239,12 +241,10 @@ export function attach(
         );
 
         try {
-          // $FlowFixMe[object-this-reference] found when upgrading Flow
           const result = fn.apply(this, args);
           parentIDStack.pop();
           return result;
         } catch (err) {
-          // $FlowFixMe[incompatible-type] found when upgrading Flow
           parentIDStack = [];
           throw err;
         } finally {
@@ -260,7 +260,6 @@ export function attach(
       performUpdateIfNecessary(fn, args) {
         const internalInstance = args[0];
         if (getElementType(internalInstance) === ElementTypeOtherOrUnknown) {
-          // $FlowFixMe[object-this-reference] found when upgrading Flow
           return fn.apply(this, args);
         }
 
@@ -269,7 +268,6 @@ export function attach(
 
         const prevChildren = getChildren(internalInstance);
         try {
-          // $FlowFixMe[object-this-reference] found when upgrading Flow
           const result = fn.apply(this, args);
 
           const nextChildren = getChildren(internalInstance);
@@ -281,7 +279,6 @@ export function attach(
           parentIDStack.pop();
           return result;
         } catch (err) {
-          // $FlowFixMe[incompatible-type] found when upgrading Flow
           parentIDStack = [];
           throw err;
         } finally {
@@ -297,7 +294,6 @@ export function attach(
       receiveComponent(fn, args) {
         const internalInstance = args[0];
         if (getElementType(internalInstance) === ElementTypeOtherOrUnknown) {
-          // $FlowFixMe[object-this-reference] found when upgrading Flow
           return fn.apply(this, args);
         }
 
@@ -306,7 +302,6 @@ export function attach(
 
         const prevChildren = getChildren(internalInstance);
         try {
-          // $FlowFixMe[object-this-reference] found when upgrading Flow
           const result = fn.apply(this, args);
 
           const nextChildren = getChildren(internalInstance);
@@ -318,7 +313,6 @@ export function attach(
           parentIDStack.pop();
           return result;
         } catch (err) {
-          // $FlowFixMe[incompatible-type] found when upgrading Flow
           parentIDStack = [];
           throw err;
         } finally {
@@ -334,14 +328,12 @@ export function attach(
       unmountComponent(fn, args) {
         const internalInstance = args[0];
         if (getElementType(internalInstance) === ElementTypeOtherOrUnknown) {
-          // $FlowFixMe[object-this-reference] found when upgrading Flow
           return fn.apply(this, args);
         }
 
         const id = getID(internalInstance);
         parentIDStack.push(id);
         try {
-          // $FlowFixMe[object-this-reference] found when upgrading Flow
           const result = fn.apply(this, args);
           parentIDStack.pop();
 
@@ -350,7 +342,6 @@ export function attach(
 
           return result;
         } catch (err) {
-          // $FlowFixMe[incompatible-type] found when upgrading Flow
           parentIDStack = [];
           throw err;
         } finally {
@@ -503,11 +494,11 @@ export function attach(
     const numUnmountIDs =
       pendingUnmountedIDs.length + (pendingUnmountedRootID === null ? 0 : 1);
 
-    const operations = new Array<number>(
+    const operations = new Array(
       // Identify which renderer this update is coming from.
       2 + // [rendererID, rootFiberID]
-        // How big is the string table?
-        1 + // [stringTableLength]
+      // How big is the string table?
+      1 + // [stringTableLength]
         // Then goes the actual string table.
         pendingStringTableLength +
         // All unmounts are batched in a single message.
@@ -781,7 +772,7 @@ export function attach(
 
       let owner = element._owner;
       if (owner) {
-        owners = ([]: Array<SerializedElement>);
+        owners = [];
         while (owner != null) {
           owners.push({
             displayName: getData(owner).displayName || 'Unknown',
@@ -803,8 +794,8 @@ export function attach(
     }
 
     // Not implemented
-    const errors: Array<[string, number]> = [];
-    const warnings: Array<[string, number]> = [];
+    const errors = [];
+    const warnings = [];
 
     return {
       id,

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) Meta Platforms, Inc. and affiliates.
+ * Copyright (c) Facebook, Inc. and its affiliates.
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
@@ -16,20 +16,20 @@ const Pending = 0;
 const Resolved = 1;
 const Rejected = 2;
 
-type PendingRecord = {
+type PendingRecord = {|
   status: 0,
   value: Wakeable,
-};
+|};
 
-type ResolvedRecord<T> = {
+type ResolvedRecord<T> = {|
   status: 1,
   value: T,
-};
+|};
 
-type RejectedRecord = {
+type RejectedRecord = {|
   status: 2,
   value: Error,
-};
+|};
 
 type Record<T> = PendingRecord | ResolvedRecord<T> | RejectedRecord;
 
@@ -55,9 +55,9 @@ export function importFile(file: File): TimelineData | Error {
   let record = fileNameToProfilerDataMap.get(fileName);
 
   if (!record) {
-    const callbacks = new Set<() => mixed>();
+    const callbacks = new Set();
     const wakeable: Wakeable = {
-      then(callback: () => mixed) {
+      then(callback) {
         callbacks.add(callback);
       },
 
@@ -79,8 +79,7 @@ export function importFile(file: File): TimelineData | Error {
     importFileWorker(file).then(data => {
       switch (data.status) {
         case 'SUCCESS':
-          const resolvedRecord =
-            ((newRecord: any): ResolvedRecord<TimelineData>);
+          const resolvedRecord = ((newRecord: any): ResolvedRecord<TimelineData>);
           resolvedRecord.status = Resolved;
           resolvedRecord.value = data.processedData;
           break;

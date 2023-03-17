@@ -1,5 +1,5 @@
 /**
- * Copyright (c) Meta Platforms, Inc. and affiliates.
+ * Copyright (c) Facebook, Inc. and its affiliates.
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
@@ -57,7 +57,7 @@ function hookNamesModuleLoaderFunction() {
   );
 }
 
-function setContentDOMNode(value: HTMLElement): typeof DevtoolsUI {
+function setContentDOMNode(value: HTMLElement) {
   node = value;
 
   // Save so we can restore the exact waiting message between sessions.
@@ -70,14 +70,12 @@ function setProjectRoots(value: Array<string>) {
   projectRoots = value;
 }
 
-function setStatusListener(value: StatusListener): typeof DevtoolsUI {
+function setStatusListener(value: StatusListener) {
   statusListener = value;
   return DevtoolsUI;
 }
 
-function setDisconnectedCallback(
-  value: OnDisconnectedCallback,
-): typeof DevtoolsUI {
+function setDisconnectedCallback(value: OnDisconnectedCallback) {
   disconnectedCallback = value;
   return DevtoolsUI;
 }
@@ -86,12 +84,11 @@ let bridge: FrontendBridge | null = null;
 let store: Store | null = null;
 let root = null;
 
-const log = (...args: Array<mixed>) => console.log('[React DevTools]', ...args);
-log.warn = (...args: Array<mixed>) => console.warn('[React DevTools]', ...args);
-log.error = (...args: Array<mixed>) =>
-  console.error('[React DevTools]', ...args);
+const log = (...args) => console.log('[React DevTools]', ...args);
+log.warn = (...args) => console.warn('[React DevTools]', ...args);
+log.error = (...args) => console.error('[React DevTools]', ...args);
 
-function debug(methodName: string, ...args: Array<mixed>) {
+function debug(methodName: string, ...args) {
   if (__DEBUG__) {
     console.log(
       `%c[core/standalone] %c${methodName}`,
@@ -167,8 +164,7 @@ function onDisconnected() {
   disconnectedCallback();
 }
 
-// $FlowFixMe[missing-local-annot]
-function onError({code, message}: $FlowFixMe) {
+function onError({code, message}) {
   safeUnmount();
 
   if (code === 'EADDRINUSE') {
@@ -258,11 +254,9 @@ function initialize(socket: WebSocket) {
     socket.close();
   });
 
-  // $FlowFixMe[incompatible-call] found when upgrading Flow
   store = new Store(bridge, {
     checkBridgeProtocolCompatibility: true,
-    supportsNativeInspection: true,
-    supportsTraceUpdates: true,
+    supportsNativeInspection: false,
   });
 
   log('Connected');
@@ -272,7 +266,7 @@ function initialize(socket: WebSocket) {
 
 let startServerTimeoutID: TimeoutID | null = null;
 
-function connectToSocket(socket: WebSocket): {close(): void} {
+function connectToSocket(socket: WebSocket) {
   socket.onerror = err => {
     onDisconnected();
     log.error('Error with websocket connection', err);
@@ -284,27 +278,27 @@ function connectToSocket(socket: WebSocket): {close(): void} {
   initialize(socket);
 
   return {
-    close: function () {
+    close: function() {
       onDisconnected();
     },
   };
 }
 
-type ServerOptions = {
+type ServerOptions = {|
   key?: string,
   cert?: string,
-};
+|};
 
-type LoggerOptions = {
+type LoggerOptions = {|
   surface?: ?string,
-};
+|};
 
 function startServer(
   port?: number = 8097,
   host?: string = 'localhost',
   httpsOptions?: ServerOptions,
   loggerOptions?: LoggerOptions,
-): {close(): void} {
+) {
   registerDevToolsEventLogger(loggerOptions?.surface ?? 'standalone');
 
   const useHttps = !!httpsOptions;
@@ -335,13 +329,13 @@ function startServer(
     initialize(socket);
   });
 
-  server.on('error', (event: $FlowFixMe) => {
+  server.on('error', event => {
     onError(event);
     log.error('Failed to start the DevTools server', event);
     startServerTimeoutID = setTimeout(() => startServer(port), 1000);
   });
 
-  httpServer.on('request', (request: $FlowFixMe, response: $FlowFixMe) => {
+  httpServer.on('request', (request, response) => {
     // Serve a file that immediately sets up the connection.
     const backendFile = readFileSync(join(__dirname, 'backend.js'));
 
@@ -377,7 +371,7 @@ function startServer(
     );
   });
 
-  httpServer.on('error', (event: $FlowFixMe) => {
+  httpServer.on('error', event => {
     onError(event);
     statusListener('Failed to start the server.', 'error');
     startServerTimeoutID = setTimeout(() => startServer(port), 1000);
@@ -391,7 +385,7 @@ function startServer(
   });
 
   return {
-    close: function () {
+    close: function() {
       connected = null;
       onDisconnected();
       if (startServerTimeoutID !== null) {

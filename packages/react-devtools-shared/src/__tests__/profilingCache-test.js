@@ -1,5 +1,5 @@
 /**
- * Copyright (c) Meta Platforms, Inc. and affiliates.
+ * Copyright (c) Facebook, Inc. and its affiliates.
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
@@ -182,14 +182,14 @@ describe('ProfilingCache', () => {
 
     const rootID = store.roots[0];
 
-    const prevCommitData =
-      store.profilerStore.getDataForRoot(rootID).commitData;
+    const prevCommitData = store.profilerStore.getDataForRoot(rootID)
+      .commitData;
     expect(prevCommitData).toHaveLength(4);
 
     utils.exportImportHelper(bridge, store);
 
-    const nextCommitData =
-      store.profilerStore.getDataForRoot(rootID).commitData;
+    const nextCommitData = store.profilerStore.getDataForRoot(rootID)
+      .commitData;
     expect(nextCommitData).toHaveLength(4);
     nextCommitData.forEach((commitData, index) => {
       expect(commitData).toEqual(prevCommitData[index]);
@@ -202,7 +202,10 @@ describe('ProfilingCache', () => {
 
     const ModernContext = React.createContext(0);
 
-    class LegacyContextProvider extends React.Component<any, {count: number}> {
+    class LegacyContextProvider extends React.Component<
+      any,
+      {|count: number|},
+    > {
       static childContextTypes = {
         count: PropTypes.number,
       };
@@ -267,35 +270,35 @@ describe('ProfilingCache', () => {
     expect(changeDescriptions).toHaveLength(5);
     expect(changeDescriptions[0]).toMatchInlineSnapshot(`
       Map {
-        2 => {
+        2 => Object {
           "context": null,
           "didHooksChange": false,
           "isFirstMount": true,
           "props": null,
           "state": null,
         },
-        4 => {
+        4 => Object {
           "context": null,
           "didHooksChange": false,
           "isFirstMount": true,
           "props": null,
           "state": null,
         },
-        5 => {
+        5 => Object {
           "context": null,
           "didHooksChange": false,
           "isFirstMount": true,
           "props": null,
           "state": null,
         },
-        6 => {
+        6 => Object {
           "context": null,
           "didHooksChange": false,
           "isFirstMount": true,
           "props": null,
           "state": null,
         },
-        7 => {
+        7 => Object {
           "context": null,
           "didHooksChange": false,
           "isFirstMount": true,
@@ -306,51 +309,51 @@ describe('ProfilingCache', () => {
     `);
     expect(changeDescriptions[1]).toMatchInlineSnapshot(`
       Map {
-        5 => {
+        5 => Object {
           "context": null,
           "didHooksChange": false,
-          "hooks": [],
+          "hooks": Array [],
           "isFirstMount": false,
-          "props": [
+          "props": Array [
             "count",
           ],
           "state": null,
         },
-        4 => {
+        4 => Object {
           "context": true,
           "didHooksChange": false,
           "hooks": null,
           "isFirstMount": false,
-          "props": [],
+          "props": Array [],
           "state": null,
         },
-        7 => {
+        7 => Object {
           "context": null,
           "didHooksChange": false,
-          "hooks": [],
+          "hooks": Array [],
           "isFirstMount": false,
-          "props": [
+          "props": Array [
             "count",
           ],
           "state": null,
         },
-        6 => {
-          "context": [
+        6 => Object {
+          "context": Array [
             "count",
           ],
           "didHooksChange": false,
           "hooks": null,
           "isFirstMount": false,
-          "props": [],
+          "props": Array [],
           "state": null,
         },
-        2 => {
+        2 => Object {
           "context": null,
           "didHooksChange": false,
-          "hooks": [],
+          "hooks": Array [],
           "isFirstMount": false,
-          "props": [],
-          "state": [
+          "props": Array [],
+          "state": Array [
             "count",
           ],
         },
@@ -358,140 +361,140 @@ describe('ProfilingCache', () => {
     `);
     expect(changeDescriptions[2]).toMatchInlineSnapshot(`
       Map {
-        5 => {
+        5 => Object {
           "context": null,
           "didHooksChange": false,
-          "hooks": [],
+          "hooks": Array [],
           "isFirstMount": false,
-          "props": [],
+          "props": Array [],
           "state": null,
         },
-        4 => {
+        4 => Object {
           "context": false,
           "didHooksChange": false,
           "hooks": null,
           "isFirstMount": false,
-          "props": [],
+          "props": Array [],
           "state": null,
         },
-        7 => {
+        7 => Object {
           "context": null,
           "didHooksChange": false,
-          "hooks": [],
+          "hooks": Array [],
           "isFirstMount": false,
-          "props": [],
+          "props": Array [],
           "state": null,
         },
-        6 => {
-          "context": [],
+        6 => Object {
+          "context": Array [],
           "didHooksChange": false,
           "hooks": null,
           "isFirstMount": false,
-          "props": [],
+          "props": Array [],
           "state": null,
         },
-        2 => {
+        2 => Object {
           "context": null,
           "didHooksChange": false,
-          "hooks": [],
+          "hooks": Array [],
           "isFirstMount": false,
-          "props": [
+          "props": Array [
             "foo",
           ],
-          "state": [],
+          "state": Array [],
         },
       }
     `);
     expect(changeDescriptions[3]).toMatchInlineSnapshot(`
       Map {
-        5 => {
+        5 => Object {
           "context": null,
           "didHooksChange": false,
-          "hooks": [],
+          "hooks": Array [],
           "isFirstMount": false,
-          "props": [],
+          "props": Array [],
           "state": null,
         },
-        4 => {
+        4 => Object {
           "context": false,
           "didHooksChange": false,
           "hooks": null,
           "isFirstMount": false,
-          "props": [],
+          "props": Array [],
           "state": null,
         },
-        7 => {
+        7 => Object {
           "context": null,
           "didHooksChange": false,
-          "hooks": [],
+          "hooks": Array [],
           "isFirstMount": false,
-          "props": [],
+          "props": Array [],
           "state": null,
         },
-        6 => {
-          "context": [],
+        6 => Object {
+          "context": Array [],
           "didHooksChange": false,
           "hooks": null,
           "isFirstMount": false,
-          "props": [],
+          "props": Array [],
           "state": null,
         },
-        2 => {
+        2 => Object {
           "context": null,
           "didHooksChange": false,
-          "hooks": [],
+          "hooks": Array [],
           "isFirstMount": false,
-          "props": [
+          "props": Array [
             "foo",
             "bar",
           ],
-          "state": [],
+          "state": Array [],
         },
       }
     `);
     expect(changeDescriptions[4]).toMatchInlineSnapshot(`
       Map {
-        5 => {
+        5 => Object {
           "context": null,
           "didHooksChange": false,
-          "hooks": [],
+          "hooks": Array [],
           "isFirstMount": false,
-          "props": [],
+          "props": Array [],
           "state": null,
         },
-        4 => {
+        4 => Object {
           "context": false,
           "didHooksChange": false,
           "hooks": null,
           "isFirstMount": false,
-          "props": [],
+          "props": Array [],
           "state": null,
         },
-        7 => {
+        7 => Object {
           "context": null,
           "didHooksChange": false,
-          "hooks": [],
+          "hooks": Array [],
           "isFirstMount": false,
-          "props": [],
+          "props": Array [],
           "state": null,
         },
-        6 => {
-          "context": [],
+        6 => Object {
+          "context": Array [],
           "didHooksChange": false,
           "hooks": null,
           "isFirstMount": false,
-          "props": [],
+          "props": Array [],
           "state": null,
         },
-        2 => {
+        2 => Object {
           "context": null,
           "didHooksChange": false,
-          "hooks": [],
+          "hooks": Array [],
           "isFirstMount": false,
-          "props": [
+          "props": Array [
             "bar",
           ],
-          "state": [],
+          "state": Array [],
         },
       }
     `);
@@ -630,7 +633,7 @@ describe('ProfilingCache', () => {
     // 1st render: No change
     expect(changeDescriptions[0]).toMatchInlineSnapshot(`
       Map {
-        3 => {
+        3 => Object {
           "context": null,
           "didHooksChange": false,
           "isFirstMount": true,
@@ -643,12 +646,12 @@ describe('ProfilingCache', () => {
     // 2nd render: Changed props
     expect(changeDescriptions[1]).toMatchInlineSnapshot(`
       Map {
-        3 => {
+        3 => Object {
           "context": false,
           "didHooksChange": false,
-          "hooks": [],
+          "hooks": Array [],
           "isFirstMount": false,
-          "props": [
+          "props": Array [
             "count",
           ],
           "state": null,
@@ -659,14 +662,14 @@ describe('ProfilingCache', () => {
     // 3rd render: Changed useReducer
     expect(changeDescriptions[2]).toMatchInlineSnapshot(`
       Map {
-        3 => {
+        3 => Object {
           "context": false,
           "didHooksChange": true,
-          "hooks": [
+          "hooks": Array [
             1,
           ],
           "isFirstMount": false,
-          "props": [],
+          "props": Array [],
           "state": null,
         },
       }
@@ -675,14 +678,14 @@ describe('ProfilingCache', () => {
     // 4th render: Changed useState
     expect(changeDescriptions[3]).toMatchInlineSnapshot(`
       Map {
-        3 => {
+        3 => Object {
           "context": false,
           "didHooksChange": true,
-          "hooks": [
+          "hooks": Array [
             0,
           ],
           "isFirstMount": false,
-          "props": [],
+          "props": Array [],
           "state": null,
         },
       }
@@ -691,12 +694,12 @@ describe('ProfilingCache', () => {
     // 5th render: Changed context
     expect(changeDescriptions[4]).toMatchInlineSnapshot(`
       Map {
-        3 => {
+        3 => Object {
           "context": true,
           "didHooksChange": false,
-          "hooks": [],
+          "hooks": Array [],
           "isFirstMount": false,
-          "props": [],
+          "props": Array [],
           "state": null,
         },
       }
@@ -705,14 +708,14 @@ describe('ProfilingCache', () => {
     // 6th render: Sync external store
     expect(changeDescriptions[5]).toMatchInlineSnapshot(`
       Map {
-        3 => {
+        3 => Object {
           "context": false,
           "didHooksChange": true,
-          "hooks": [
+          "hooks": Array [
             2,
           ],
           "isFirstMount": false,
-          "props": [],
+          "props": Array [],
           "state": null,
         },
       }
@@ -901,25 +904,25 @@ describe('ProfilingCache', () => {
     }
 
     expect(allFiberCommits).toMatchInlineSnapshot(`
-      [
-        [
+      Array [
+        Array [
           0,
           1,
           2,
         ],
-        [
+        Array [
           0,
           1,
           2,
         ],
-        [
+        Array [
           1,
           2,
         ],
-        [
+        Array [
           2,
         ],
-        [
+        Array [
           0,
         ],
       ]
@@ -949,8 +952,8 @@ describe('ProfilingCache', () => {
     const rootID = store.roots[0];
     const commitData = store.profilerStore.getDataForRoot(rootID).commitData;
     expect(commitData).toMatchInlineSnapshot(`
-      [
-        {
+      Array [
+        Object {
           "changeDescriptions": Map {},
           "duration": 0,
           "effectDuration": null,
@@ -965,8 +968,8 @@ describe('ProfilingCache', () => {
           "passiveEffectDuration": null,
           "priorityLevel": "Immediate",
           "timestamp": 0,
-          "updaters": [
-            {
+          "updaters": Array [
+            Object {
               "displayName": "render()",
               "hocDisplayNames": null,
               "id": 1,
@@ -1094,10 +1097,8 @@ describe('ProfilingCache', () => {
     utils.act(() => setChildUnmounted(true));
     utils.act(() => store.profilerStore.stopProfiling());
 
-    const updaters = store.profilerStore.getCommitData(
-      store.roots[0],
-      0,
-    ).updaters;
+    const updaters = store.profilerStore.getCommitData(store.roots[0], 0)
+      .updaters;
     expect(updaters.length).toEqual(1);
     expect(updaters[0].displayName).toEqual('App');
   });
@@ -1131,10 +1132,8 @@ describe('ProfilingCache', () => {
     utils.act(() => setChildUnmounted(true));
     utils.act(() => store.profilerStore.stopProfiling());
 
-    const updaters = store.profilerStore.getCommitData(
-      store.roots[0],
-      0,
-    ).updaters;
+    const updaters = store.profilerStore.getCommitData(store.roots[0], 0)
+      .updaters;
     expect(updaters.length).toEqual(1);
     expect(updaters[0].displayName).toEqual('App');
   });
@@ -1163,10 +1162,8 @@ describe('ProfilingCache', () => {
     utils.act(() => setChildUnmounted(true));
     utils.act(() => store.profilerStore.stopProfiling());
 
-    const updaters = store.profilerStore.getCommitData(
-      store.roots[0],
-      0,
-    ).updaters;
+    const updaters = store.profilerStore.getCommitData(store.roots[0], 0)
+      .updaters;
     expect(updaters.length).toEqual(1);
     expect(updaters[0].displayName).toEqual('App');
   });

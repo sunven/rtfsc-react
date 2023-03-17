@@ -1,6 +1,6 @@
 /**
 /**
- * Copyright (c) Meta Platforms, Inc. and affiliates.
+ * Copyright (c) Facebook, Inc. and its affiliates.
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
@@ -9,7 +9,6 @@
  */
 
 import {copy} from 'clipboard-js';
-import {compareVersions} from 'compare-versions';
 import {dehydrate} from '../hydration';
 import isArray from 'shared/isArray';
 
@@ -21,8 +20,8 @@ export function cleanForBridge(
   path?: Array<string | number> = [],
 ): DehydratedData | null {
   if (data !== null) {
-    const cleanedPaths: Array<Array<string | number>> = [];
-    const unserializablePaths: Array<Array<string | number>> = [];
+    const cleanedPaths = [];
+    const unserializablePaths = [];
     const cleanedData = dehydrate(
       data,
       cleanedPaths,
@@ -120,10 +119,7 @@ export function copyWithSet(
   return updated;
 }
 
-export function getEffectDurations(root: Object): {
-  effectDuration: any | null,
-  passiveEffectDuration: any | null,
-} {
+export function getEffectDurations(root: Object) {
   // Profiling durations are only available for certain builds.
   // If available, they'll be stored on the HostRoot.
   let effectDuration = null;
@@ -144,7 +140,7 @@ export function getEffectDurations(root: Object): {
 }
 
 export function serializeToString(data: any): string {
-  const cache = new Set<mixed>();
+  const cache = new Set();
   // Use a custom replacer function to protect against circular references.
   return JSON.stringify(data, (key, value) => {
     if (typeof value === 'object' && value !== null) {
@@ -153,6 +149,7 @@ export function serializeToString(data: any): string {
       }
       cache.add(value);
     }
+    // $FlowFixMe
     if (typeof value === 'bigint') {
       return value.toString() + 'n';
     }
@@ -275,12 +272,4 @@ export function isSynchronousXHRSupported(): boolean {
     window.document.featurePolicy &&
     window.document.featurePolicy.allowsFeature('sync-xhr')
   );
-}
-
-export function gt(a: string = '', b: string = ''): boolean {
-  return compareVersions(a, b) === 1;
-}
-
-export function gte(a: string = '', b: string = ''): boolean {
-  return compareVersions(a, b) > -1;
 }

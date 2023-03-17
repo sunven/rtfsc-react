@@ -1,5 +1,5 @@
 /**
- * Copyright (c) Meta Platforms, Inc. and affiliates.
+ * Copyright (c) Facebook, Inc. and its affiliates.
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
@@ -10,7 +10,7 @@
 // Renderers that don't support hydration
 // can re-export everything from this module.
 
-function shim(...args: any): empty {
+function shim(...args: any) {
   throw new Error(
     'The current renderer does not support hydration. ' +
       'This error is likely caused by a bug in React. ' +
@@ -21,8 +21,9 @@ function shim(...args: any): empty {
 // Hydration (when unsupported)
 export type SuspenseInstance = mixed;
 export const supportsHydration = false;
-export const isHydratableType = shim;
-export const isHydratableText = shim;
+export const canHydrateInstance = shim;
+export const canHydrateTextInstance = shim;
+export const canHydrateSuspenseInstance = shim;
 export const isSuspenseInstancePending = shim;
 export const isSuspenseInstanceFallback = shim;
 export const getSuspenseInstanceFallbackErrorDetails = shim;
@@ -31,12 +32,6 @@ export const getNextHydratableSibling = shim;
 export const getFirstHydratableChild = shim;
 export const getFirstHydratableChildWithinContainer = shim;
 export const getFirstHydratableChildWithinSuspenseInstance = shim;
-export const shouldSkipHydratableForInstance = shim;
-export const shouldSkipHydratableForTextInstance = shim;
-export const shouldSkipHydratableForSuspenseInstance = shim;
-export const canHydrateInstance = shim;
-export const canHydrateTextInstance = shim;
-export const canHydrateSuspenseInstance = shim;
 export const hydrateInstance = shim;
 export const hydrateTextInstance = shim;
 export const hydrateSuspenseInstance = shim;

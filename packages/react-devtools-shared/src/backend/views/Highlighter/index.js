@@ -1,5 +1,5 @@
 /**
- * Copyright (c) Meta Platforms, Inc. and affiliates.
+ * Copyright (c) Facebook, Inc. and its affiliates.
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
@@ -38,7 +38,7 @@ export default function setupHighlighter(
     registerListenersOnWindow(window);
   }
 
-  function registerListenersOnWindow(window: any) {
+  function registerListenersOnWindow(window) {
     // This plug-in may run in non-DOM environments (e.g. React Native).
     if (window && typeof window.addEventListener === 'function') {
       window.addEventListener('click', onClick, true);
@@ -48,15 +48,13 @@ export default function setupHighlighter(
       window.addEventListener('pointerdown', onPointerDown, true);
       window.addEventListener('pointerover', onPointerOver, true);
       window.addEventListener('pointerup', onPointerUp, true);
-    } else {
-      agent.emit('startInspectingNative');
     }
   }
 
   function stopInspectingNative() {
-    hideOverlay(agent);
+    hideOverlay();
     removeListenersOnWindow(window);
-    iframesListeningTo.forEach(function (frame) {
+    iframesListeningTo.forEach(function(frame) {
       try {
         removeListenersOnWindow(frame.contentWindow);
       } catch (error) {
@@ -66,7 +64,7 @@ export default function setupHighlighter(
     iframesListeningTo = new Set();
   }
 
-  function removeListenersOnWindow(window: any) {
+  function removeListenersOnWindow(window) {
     // This plug-in may run in non-DOM environments (e.g. React Native).
     if (window && typeof window.removeEventListener === 'function') {
       window.removeEventListener('click', onClick, true);
@@ -76,13 +74,11 @@ export default function setupHighlighter(
       window.removeEventListener('pointerdown', onPointerDown, true);
       window.removeEventListener('pointerover', onPointerOver, true);
       window.removeEventListener('pointerup', onPointerUp, true);
-    } else {
-      agent.emit('stopInspectingNative');
     }
   }
 
   function clearNativeElementHighlight() {
-    hideOverlay(agent);
+    hideOverlay();
   }
 
   function highlightNativeElement({
@@ -115,10 +111,10 @@ export default function setupHighlighter(
 
     if (nodes != null && nodes[0] != null) {
       const node = nodes[0];
-      // $FlowFixMe[method-unbinding]
       if (scrollIntoView && typeof node.scrollIntoView === 'function') {
         // If the node isn't visible show it before highlighting it.
         // We may want to reconsider this; it might be a little disruptive.
+        // $FlowFixMe Flow only knows about 'start' | 'end'
         node.scrollIntoView({block: 'nearest', inline: 'nearest'});
       }
 
@@ -129,7 +125,7 @@ export default function setupHighlighter(
         bridge.send('syncSelectionToNativeElementsPanel');
       }
     } else {
-      hideOverlay(agent);
+      hideOverlay();
     }
   }
 

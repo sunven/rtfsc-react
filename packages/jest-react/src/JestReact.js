@@ -1,5 +1,5 @@
 /**
- * Copyright (c) Meta Platforms, Inc. and affiliates.
+ * Copyright (c) Facebook, Inc. and its affiliates.
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
@@ -8,6 +8,8 @@
 import {REACT_ELEMENT_TYPE, REACT_FRAGMENT_TYPE} from 'shared/ReactSymbols';
 
 import isArray from 'shared/isArray';
+
+export {act} from './internalAct';
 
 function captureAssertion(fn) {
   // Trick to use a Jest matcher inside another Jest matcher. `fn` contains an
@@ -27,14 +29,12 @@ function captureAssertion(fn) {
 
 function assertYieldsWereCleared(root) {
   const Scheduler = root._Scheduler;
-  const actualYields = Scheduler.unstable_clearLog();
+  const actualYields = Scheduler.unstable_clearYields();
   if (actualYields.length !== 0) {
-    const error = Error(
+    throw new Error(
       'Log of yielded values is not empty. ' +
         'Call expect(ReactTestRenderer).unstable_toHaveYielded(...) first.',
     );
-    Error.captureStackTrace(error, assertYieldsWereCleared);
-    throw error;
   }
 }
 

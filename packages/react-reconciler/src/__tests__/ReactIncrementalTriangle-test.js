@@ -1,5 +1,5 @@
 /**
- * Copyright (c) Meta Platforms, Inc. and affiliates.
+ * Copyright (c) Facebook, Inc. and its affiliates.
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
@@ -216,7 +216,7 @@ describe('ReactIncrementalTriangle', () => {
       }
       render() {
         if (yieldAfterEachRender) {
-          Scheduler.log(this);
+          Scheduler.unstable_yieldValue(this);
         }
         const {counter, remainingDepth} = this.props;
         return (
@@ -316,8 +316,7 @@ describe('ReactIncrementalTriangle', () => {
     reset();
 
     function assertConsistentTree(activeTriangleIndices = new Set(), counter) {
-      const childrenJSX = ReactNoop.getPendingChildrenAsJSX(rootID);
-      const children = childrenJSX === null ? [] : childrenJSX.props.children;
+      const children = ReactNoop.getChildren(rootID);
 
       if (children.length !== TOTAL_CHILDREN) {
         throw new Error('Wrong number of children.');
@@ -328,7 +327,7 @@ describe('ReactIncrementalTriangle', () => {
       for (let i = 0; i < children.length; i++) {
         const child = children[i];
 
-        const output = JSON.parse(child.props.prop);
+        const output = JSON.parse(child.prop);
         const prop = output.prop;
         const isActive = output.isActive;
         const counterContext = output.counterContext;

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) Meta Platforms, Inc. and affiliates.
+ * Copyright (c) Facebook, Inc. and its affiliates.
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
@@ -64,10 +64,7 @@ ByteSize
 
 // TODO: Implement HTMLData, BlobData and URLData.
 
-import type {
-  Request,
-  ReactClientValue,
-} from 'react-server/src/ReactFlightServer';
+import type {Request, ReactModel} from 'react-server/src/ReactFlightServer';
 
 import {stringToChunk} from './ReactServerStreamConfig';
 
@@ -75,51 +72,19 @@ import type {Chunk} from './ReactServerStreamConfig';
 
 export type {Destination, Chunk} from './ReactServerStreamConfig';
 
-export {
-  supportsRequestStorage,
-  requestStorage,
-} from './ReactServerStreamConfig';
-
 const stringify = JSON.stringify;
 
 function serializeRowHeader(tag: string, id: number) {
-  return id.toString(16) + ':' + tag;
+  return tag + id.toString(16) + ':';
 }
 
-export function processErrorChunkProd(
+export function processErrorChunk(
   request: Request,
   id: number,
-  digest: string,
-): Chunk {
-  if (__DEV__) {
-    // These errors should never make it into a build so we don't need to encode them in codes.json
-    // eslint-disable-next-line react-internal/prod-error-codes
-    throw new Error(
-      'processErrorChunkProd should never be called while in development mode. Use processErrorChunkDev instead. This is a bug in React.',
-    );
-  }
-
-  const errorInfo: any = {digest};
-  const row = serializeRowHeader('E', id) + stringify(errorInfo) + '\n';
-  return stringToChunk(row);
-}
-
-export function processErrorChunkDev(
-  request: Request,
-  id: number,
-  digest: string,
   message: string,
   stack: string,
 ): Chunk {
-  if (!__DEV__) {
-    // These errors should never make it into a build so we don't need to encode them in codes.json
-    // eslint-disable-next-line react-internal/prod-error-codes
-    throw new Error(
-      'processErrorChunkDev should never be called while in production mode. Use processErrorChunkProd instead. This is a bug in React.',
-    );
-  }
-
-  const errorInfo: any = {digest, message, stack};
+  const errorInfo = {message, stack};
   const row = serializeRowHeader('E', id) + stringify(errorInfo) + '\n';
   return stringToChunk(row);
 }
@@ -127,32 +92,39 @@ export function processErrorChunkDev(
 export function processModelChunk(
   request: Request,
   id: number,
-  model: ReactClientValue,
+  model: ReactModel,
 ): Chunk {
-  // $FlowFixMe[incompatible-type] stringify can return null
-  const json: string = stringify(model, request.toJSON);
-  const row = id.toString(16) + ':' + json + '\n';
+  const json = stringify(model, request.toJSON);
+  const row = serializeRowHeader('J', id) + json + '\n';
   return stringToChunk(row);
 }
 
-export function processReferenceChunk(
+export function processModuleChunk(
   request: Request,
   id: number,
-  reference: string,
+  moduleMetaData: ReactModel,
 ): Chunk {
-  const json = stringify(reference);
-  const row = id.toString(16) + ':' + json + '\n';
+  const json = stringify(moduleMetaData);
+  const row = serializeRowHeader('M', id) + json + '\n';
   return stringToChunk(row);
 }
 
-export function processImportChunk(
+export function processProviderChunk(
   request: Request,
   id: number,
-  clientReferenceMetadata: ReactClientValue,
+  contextName: string,
 ): Chunk {
-  // $FlowFixMe[incompatible-type] stringify can return null
-  const json: string = stringify(clientReferenceMetadata);
-  const row = serializeRowHeader('I', id) + json + '\n';
+  const row = serializeRowHeader('P', id) + contextName + '\n';
+  return stringToChunk(row);
+}
+
+export function processSymbolChunk(
+  request: Request,
+  id: number,
+  name: string,
+): Chunk {
+  const json = stringify(name);
+  const row = serializeRowHeader('S', id) + json + '\n';
   return stringToChunk(row);
 }
 

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) Meta Platforms, Inc. and affiliates.
+ * Copyright (c) Facebook, Inc. and its affiliates.
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
@@ -250,54 +250,53 @@ export function prepareProfilingDataFrontendFromExport(
 export function prepareProfilingDataExport(
   profilingDataFrontend: ProfilingDataFrontend,
 ): ProfilingDataExport {
-  const timelineData: Array<TimelineDataExport> =
-    profilingDataFrontend.timelineData.map(
-      ({
-        batchUIDToMeasuresMap,
-        componentMeasures,
-        duration,
-        flamechart,
-        internalModuleSourceToRanges,
-        laneToLabelMap,
-        laneToReactMeasureMap,
-        nativeEvents,
-        networkMeasures,
-        otherUserTimingMarks,
-        reactVersion,
-        schedulingEvents,
-        snapshots,
-        snapshotHeight,
-        startTime,
-        suspenseEvents,
-        thrownErrors,
-      }) => ({
-        // Most of the data is safe to serialize as-is,
-        // but we need to convert the Maps to nested Arrays.
-        batchUIDToMeasuresKeyValueArray: Array.from(
-          batchUIDToMeasuresMap.entries(),
-        ),
-        componentMeasures: componentMeasures,
-        duration,
-        flamechart,
-        internalModuleSourceToRanges: Array.from(
-          internalModuleSourceToRanges.entries(),
-        ),
-        laneToLabelKeyValueArray: Array.from(laneToLabelMap.entries()),
-        laneToReactMeasureKeyValueArray: Array.from(
-          laneToReactMeasureMap.entries(),
-        ),
-        nativeEvents,
-        networkMeasures,
-        otherUserTimingMarks,
-        reactVersion,
-        schedulingEvents,
-        snapshots,
-        snapshotHeight,
-        startTime,
-        suspenseEvents,
-        thrownErrors,
-      }),
-    );
+  const timelineData: Array<TimelineDataExport> = profilingDataFrontend.timelineData.map(
+    ({
+      batchUIDToMeasuresMap,
+      componentMeasures,
+      duration,
+      flamechart,
+      internalModuleSourceToRanges,
+      laneToLabelMap,
+      laneToReactMeasureMap,
+      nativeEvents,
+      networkMeasures,
+      otherUserTimingMarks,
+      reactVersion,
+      schedulingEvents,
+      snapshots,
+      snapshotHeight,
+      startTime,
+      suspenseEvents,
+      thrownErrors,
+    }) => ({
+      // Most of the data is safe to serialize as-is,
+      // but we need to convert the Maps to nested Arrays.
+      batchUIDToMeasuresKeyValueArray: Array.from(
+        batchUIDToMeasuresMap.entries(),
+      ),
+      componentMeasures: componentMeasures,
+      duration,
+      flamechart,
+      internalModuleSourceToRanges: Array.from(
+        internalModuleSourceToRanges.entries(),
+      ),
+      laneToLabelKeyValueArray: Array.from(laneToLabelMap.entries()),
+      laneToReactMeasureKeyValueArray: Array.from(
+        laneToReactMeasureMap.entries(),
+      ),
+      nativeEvents,
+      networkMeasures,
+      otherUserTimingMarks,
+      reactVersion,
+      schedulingEvents,
+      snapshots,
+      snapshotHeight,
+      startTime,
+      suspenseEvents,
+      thrownErrors,
+    }),
+  );
 
   const dataForRoots: Array<ProfilingDataForRootExport> = [];
   profilingDataFrontend.dataForRoots.forEach(
@@ -354,7 +353,7 @@ export function prepareProfilingDataExport(
   };
 }
 
-export const getGradientColor = (value: number): string => {
+export const getGradientColor = (value: number) => {
   const maxIndex = commitGradient.length - 1;
   let index;
   if (Number.isNaN(value)) {
@@ -367,21 +366,19 @@ export const getGradientColor = (value: number): string => {
   return commitGradient[Math.round(index)];
 };
 
-export const formatDuration = (duration: number): number | string =>
+export const formatDuration = (duration: number) =>
   Math.round(duration * 10) / 10 || '<0.1';
-export const formatPercentage = (percentage: number): number =>
+export const formatPercentage = (percentage: number) =>
   Math.round(percentage * 100);
-export const formatTime = (timestamp: number): number =>
+export const formatTime = (timestamp: number) =>
   Math.round(Math.round(timestamp) / 100) / 10;
 
-export const scale =
-  (
-    minValue: number,
-    maxValue: number,
-    minRange: number,
-    maxRange: number,
-  ): ((value: number, fallbackValue: number) => number) =>
-  (value: number, fallbackValue: number) =>
-    maxValue - minValue === 0
-      ? fallbackValue
-      : ((value - minValue) / (maxValue - minValue)) * (maxRange - minRange);
+export const scale = (
+  minValue: number,
+  maxValue: number,
+  minRange: number,
+  maxRange: number,
+) => (value: number, fallbackValue: number) =>
+  maxValue - minValue === 0
+    ? fallbackValue
+    : ((value - minValue) / (maxValue - minValue)) * (maxRange - minRange);

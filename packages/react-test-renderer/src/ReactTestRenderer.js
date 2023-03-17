@@ -1,5 +1,5 @@
 /**
- * Copyright (c) Meta Platforms, Inc. and affiliates.
+ * Copyright (c) Facebook, Inc. and its affiliates.
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
@@ -7,12 +7,9 @@
  * @flow
  */
 
-import type {Fiber, FiberRoot} from 'react-reconciler/src/ReactInternalTypes';
-import type {
-  PublicInstance,
-  Instance,
-  TextInstance,
-} from './ReactTestHostConfig';
+import type {Fiber} from 'react-reconciler/src/ReactInternalTypes';
+import type {FiberRoot} from 'react-reconciler/src/ReactInternalTypes';
+import type {Instance, TextInstance} from './ReactTestHostConfig';
 
 import * as React from 'react';
 import * as Scheduler from 'scheduler/unstable_mock';
@@ -30,8 +27,6 @@ import {
   FunctionComponent,
   ClassComponent,
   HostComponent,
-  HostHoistable,
-  HostSingleton,
   HostPortal,
   HostText,
   HostRoot,
@@ -66,12 +61,12 @@ type TestRendererOptions = {
   ...
 };
 
-type ReactTestRendererJSON = {
+type ReactTestRendererJSON = {|
   type: string,
   props: {[propName: string]: any, ...},
   children: null | Array<ReactTestRendererNode>,
-  $$typeof?: symbol, // Optional because we add it with defineProperty().
-};
+  $$typeof?: Symbol, // Optional because we add it with defineProperty().
+|};
 type ReactTestRendererNode = ReactTestRendererJSON | string;
 
 type FindOptions = $Shape<{
@@ -84,7 +79,7 @@ type FindOptions = $Shape<{
 export type Predicate = (node: ReactTestInstance) => ?boolean;
 
 const defaultTestOptions = {
-  createNodeMock: function () {
+  createNodeMock: function() {
     return null;
   },
 };
@@ -133,7 +128,7 @@ function toJSON(inst: Instance | TextInstance): ReactTestRendererNode | null {
   }
 }
 
-function childrenToTree(node: null | Fiber) {
+function childrenToTree(node) {
   if (!node) {
     return null;
   }
@@ -146,7 +141,6 @@ function childrenToTree(node: null | Fiber) {
   return flatten(children.map(toTree));
 }
 
-// $FlowFixMe[missing-local-annot]
 function nodeAndSiblingsArray(nodeWithSibling) {
   const array = [];
   let node = nodeWithSibling;
@@ -157,7 +151,6 @@ function nodeAndSiblingsArray(nodeWithSibling) {
   return array;
 }
 
-// $FlowFixMe[missing-local-annot]
 function flatten(arr) {
   const result = [];
   const stack = [{i: 0, array: arr}];
@@ -177,7 +170,7 @@ function flatten(arr) {
   return result;
 }
 
-function toTree(node: null | Fiber): $FlowFixMe {
+function toTree(node: ?Fiber) {
   if (node == null) {
     return null;
   }
@@ -203,8 +196,6 @@ function toTree(node: null | Fiber): $FlowFixMe {
         instance: null,
         rendered: childrenToTree(node.child),
       };
-    case HostHoistable:
-    case HostSingleton:
     case HostComponent: {
       return {
         nodeType: 'host',
@@ -310,20 +301,15 @@ class ReactTestInstance {
     this._fiber = fiber;
   }
 
-  get instance(): $FlowFixMe {
-    const tag = this._fiber.tag;
-    if (
-      tag === HostComponent ||
-      tag === HostHoistable ||
-      tag === HostSingleton
-    ) {
+  get instance() {
+    if (this._fiber.tag === HostComponent) {
       return getPublicInstance(this._fiber.stateNode);
     } else {
       return this._fiber.stateNode;
     }
   }
 
-  get type(): any {
+  get type() {
     return this._fiber.type;
   }
 
@@ -451,33 +437,19 @@ function propsMatch(props: Object, filter: Object): boolean {
   return true;
 }
 
-// $FlowFixMe[missing-local-annot]
 function onRecoverableError(error) {
   // TODO: Expose onRecoverableError option to userspace
   // eslint-disable-next-line react-internal/no-production-logging, react-internal/warning-args
   console.error(error);
 }
 
-function create(
-  element: React$Element<any>,
-  options: TestRendererOptions,
-): {
-  _Scheduler: typeof Scheduler,
-  root: void,
-  toJSON(): Array<ReactTestRendererNode> | ReactTestRendererNode | null,
-  toTree(): mixed,
-  update(newElement: React$Element<any>): any,
-  unmount(): void,
-  getInstance(): React$Component<any, any> | PublicInstance | null,
-  unstable_flushSync: typeof flushSync,
-} {
+function create(element: React$Element<any>, options: TestRendererOptions) {
   let createNodeMock = defaultTestOptions.createNodeMock;
   let isConcurrent = false;
   let isStrictMode = false;
   let concurrentUpdatesByDefault = null;
   if (typeof options === 'object' && options !== null) {
     if (typeof options.createNodeMock === 'function') {
-      // $FlowFixMe[incompatible-type] found when upgrading Flow
       createNodeMock = options.createNodeMock;
     }
     if (options.unstable_isConcurrent === true) {
@@ -494,7 +466,7 @@ function create(
     }
   }
   let container = {
-    children: ([]: Array<Instance | TextInstance>),
+    children: [],
     createNodeMock,
     tag: 'CONTAINER',
   };
@@ -560,7 +532,7 @@ function create(
       }
       return toTree(root.current);
     },
-    update(newElement: React$Element<any>): number | void {
+    update(newElement: React$Element<any>) {
       if (root == null || root.current == null) {
         return;
       }
@@ -571,7 +543,6 @@ function create(
         return;
       }
       updateContainer(null, root, null, null);
-      // $FlowFixMe[incompatible-type] found when upgrading Flow
       container = null;
       root = null;
     },
@@ -591,7 +562,7 @@ function create(
     ({
       configurable: true,
       enumerable: true,
-      get: function () {
+      get: function() {
         if (root === null) {
           throw new Error("Can't access .root on unmounted test renderer");
         }
@@ -604,7 +575,6 @@ function create(
         } else {
           // However, we give you the root if there's more than one root child.
           // We could make this the behavior for all cases but it would be a breaking change.
-          // $FlowFixMe[incompatible-use] found when upgrading Flow
           return wrapFiber(root.current);
         }
       },
@@ -614,7 +584,7 @@ function create(
   return entry;
 }
 
-const fiberToWrapper = new WeakMap<Fiber, ReactTestInstance>();
+const fiberToWrapper = new WeakMap();
 function wrapFiber(fiber: Fiber): ReactTestInstance {
   let wrapper = fiberToWrapper.get(fiber);
   if (wrapper === undefined && fiber.alternate !== null) {

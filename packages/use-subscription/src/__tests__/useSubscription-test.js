@@ -1,5 +1,5 @@
 /**
- * Copyright (c) Meta Platforms, Inc. and affiliates.
+ * Copyright (c) Facebook, Inc. and its affiliates.
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
@@ -16,9 +16,6 @@ let React;
 let ReactTestRenderer;
 let Scheduler;
 let ReplaySubject;
-let assertLog;
-let waitForAll;
-let waitFor;
 
 describe('useSubscription', () => {
   beforeEach(() => {
@@ -30,15 +27,10 @@ describe('useSubscription', () => {
     ReactTestRenderer = require('react-test-renderer');
     Scheduler = require('scheduler');
 
-    act = require('internal-test-utils').act;
+    act = require('jest-react').act;
 
     BehaviorSubject = require('rxjs').BehaviorSubject;
     ReplaySubject = require('rxjs').ReplaySubject;
-
-    const InternalTestUtils = require('internal-test-utils');
-    waitForAll = InternalTestUtils.waitForAll;
-    assertLog = InternalTestUtils.assertLog;
-    waitFor = InternalTestUtils.waitFor;
   });
 
   function createBehaviorSubject(initialValue) {
@@ -57,9 +49,9 @@ describe('useSubscription', () => {
     return replaySubject;
   }
 
-  it('supports basic subscription pattern', async () => {
+  it('supports basic subscription pattern', () => {
     function Child({value = 'default'}) {
-      Scheduler.log(value);
+      Scheduler.unstable_yieldValue(value);
       return null;
     }
 
@@ -81,29 +73,29 @@ describe('useSubscription', () => {
 
     const observable = createBehaviorSubject();
     let renderer;
-    await act(() => {
+    act(() => {
       renderer = ReactTestRenderer.create(
         <Subscription source={observable} />,
         {unstable_isConcurrent: true},
       );
     });
-    assertLog(['default']);
+    expect(Scheduler).toHaveYielded(['default']);
 
     // Updates while subscribed should re-render the child component
-    await act(() => observable.next(123));
-    assertLog([123]);
-    await act(() => observable.next('abc'));
-    assertLog(['abc']);
+    act(() => observable.next(123));
+    expect(Scheduler).toHaveYielded([123]);
+    act(() => observable.next('abc'));
+    expect(Scheduler).toHaveYielded(['abc']);
 
     // Unmounting the subscriber should remove listeners
-    await act(() => renderer.update(<div />));
-    await act(() => observable.next(456));
-    await waitForAll([]);
+    act(() => renderer.update(<div />));
+    act(() => observable.next(456));
+    expect(Scheduler).toFlushAndYield([]);
   });
 
-  it('should support observable types like RxJS ReplaySubject', async () => {
+  it('should support observable types like RxJS ReplaySubject', () => {
     function Child({value = 'default'}) {
-      Scheduler.log(value);
+      Scheduler.unstable_yieldValue(value);
       return null;
     }
 
@@ -133,27 +125,27 @@ describe('useSubscription', () => {
 
     let observable = createReplaySubject('initial');
     let renderer;
-    await act(() => {
+    act(() => {
       renderer = ReactTestRenderer.create(
         <Subscription source={observable} />,
         {unstable_isConcurrent: true},
       );
     });
-    assertLog(['initial']);
-    await act(() => observable.next('updated'));
-    assertLog(['updated']);
+    expect(Scheduler).toHaveYielded(['initial']);
+    act(() => observable.next('updated'));
+    expect(Scheduler).toHaveYielded(['updated']);
 
-    await waitForAll([]);
+    Scheduler.unstable_flushAll();
 
     // Unsetting the subscriber prop should reset subscribed values
     observable = createReplaySubject(undefined);
-    await act(() => renderer.update(<Subscription source={observable} />));
-    assertLog(['default']);
+    act(() => renderer.update(<Subscription source={observable} />));
+    expect(Scheduler).toHaveYielded(['default']);
   });
 
-  it('should unsubscribe from old sources and subscribe to new sources when memoized props change', async () => {
+  it('should unsubscribe from old sources and subscribe to new sources when memoized props change', () => {
     function Child({value = 'default'}) {
-      Scheduler.log(value);
+      Scheduler.unstable_yieldValue(value);
       return null;
     }
 
@@ -182,7 +174,7 @@ describe('useSubscription', () => {
     expect(subscriptions).toHaveLength(0);
 
     let renderer;
-    await act(() => {
+    act(() => {
       renderer = ReactTestRenderer.create(
         <Subscription source={observableA} />,
         {unstable_isConcurrent: true},
@@ -190,31 +182,31 @@ describe('useSubscription', () => {
     });
 
     // Updates while subscribed should re-render the child component
-    assertLog(['a-0']);
+    expect(Scheduler).toHaveYielded(['a-0']);
     expect(subscriptions).toHaveLength(1);
     expect(subscriptions[0]).toBe(observableA);
 
     // Unsetting the subscriber prop should reset subscribed values
-    await act(() => renderer.update(<Subscription source={observableB} />));
+    act(() => renderer.update(<Subscription source={observableB} />));
 
-    assertLog(['b-0']);
+    expect(Scheduler).toHaveYielded(['b-0']);
     expect(subscriptions).toHaveLength(2);
     expect(subscriptions[1]).toBe(observableB);
 
     // Updates to the old subscribable should not re-render the child component
-    await act(() => observableA.next('a-1'));
-    await waitForAll([]);
+    act(() => observableA.next('a-1'));
+    expect(Scheduler).toFlushAndYield([]);
 
     // Updates to the bew subscribable should re-render the child component
-    await act(() => observableB.next('b-1'));
-    assertLog(['b-1']);
+    act(() => observableB.next('b-1'));
+    expect(Scheduler).toHaveYielded(['b-1']);
 
     expect(subscriptions).toHaveLength(2);
   });
 
-  it('should unsubscribe from old sources and subscribe to new sources when useCallback functions change', async () => {
+  it('should unsubscribe from old sources and subscribe to new sources when useCallback functions change', () => {
     function Child({value = 'default'}) {
-      Scheduler.log(value);
+      Scheduler.unstable_yieldValue(value);
       return null;
     }
 
@@ -241,7 +233,7 @@ describe('useSubscription', () => {
     expect(subscriptions).toHaveLength(0);
 
     let renderer;
-    await act(() => {
+    act(() => {
       renderer = ReactTestRenderer.create(
         <Subscription source={observableA} />,
         {unstable_isConcurrent: true},
@@ -249,37 +241,37 @@ describe('useSubscription', () => {
     });
 
     // Updates while subscribed should re-render the child component
-    assertLog(['a-0']);
+    expect(Scheduler).toHaveYielded(['a-0']);
     expect(subscriptions).toHaveLength(1);
     expect(subscriptions[0]).toBe(observableA);
 
     // Unsetting the subscriber prop should reset subscribed values
-    await act(() => renderer.update(<Subscription source={observableB} />));
-    assertLog(['b-0']);
+    act(() => renderer.update(<Subscription source={observableB} />));
+    expect(Scheduler).toHaveYielded(['b-0']);
     expect(subscriptions).toHaveLength(2);
     expect(subscriptions[1]).toBe(observableB);
 
     // Updates to the old subscribable should not re-render the child component
-    await act(() => observableA.next('a-1'));
-    await waitForAll([]);
+    act(() => observableA.next('a-1'));
+    expect(Scheduler).toFlushAndYield([]);
 
     // Updates to the bew subscribable should re-render the child component
-    await act(() => observableB.next('b-1'));
-    assertLog(['b-1']);
+    act(() => observableB.next('b-1'));
+    expect(Scheduler).toHaveYielded(['b-1']);
 
     expect(subscriptions).toHaveLength(2);
   });
 
-  it('should ignore values emitted by a new subscribable until the commit phase', async () => {
+  it('should ignore values emitted by a new subscribable until the commit phase', () => {
     const log = [];
 
     function Grandchild({value}) {
-      Scheduler.log('Grandchild: ' + value);
+      Scheduler.unstable_yieldValue('Grandchild: ' + value);
       return null;
     }
 
     function Child({value = 'default'}) {
-      Scheduler.log('Child: ' + value);
+      Scheduler.unstable_yieldValue('Child: ' + value);
       return <Grandchild value={value} />;
     }
 
@@ -329,21 +321,25 @@ describe('useSubscription', () => {
     const observableB = createBehaviorSubject('b-0');
 
     let renderer;
-    await act(() => {
+    act(() => {
       renderer = ReactTestRenderer.create(<Parent observed={observableA} />, {
         unstable_isConcurrent: true,
       });
     });
-    assertLog(['Child: a-0', 'Grandchild: a-0']);
+    expect(Scheduler).toHaveYielded(['Child: a-0', 'Grandchild: a-0']);
     expect(log).toEqual(['Parent.componentDidMount']);
 
     // Start React update, but don't finish
-    await act(async () => {
-      React.startTransition(() => {
+    act(() => {
+      if (gate(flags => flags.enableSyncDefaultUpdates)) {
+        React.startTransition(() => {
+          renderer.update(<Parent observed={observableB} />);
+        });
+      } else {
         renderer.update(<Parent observed={observableB} />);
-      });
+      }
 
-      await waitFor(['Child: b-0']);
+      expect(Scheduler).toFlushAndYieldThrough(['Child: b-0']);
       expect(log).toEqual(['Parent.componentDidMount']);
 
       // Emit some updates from the uncommitted subscribable
@@ -353,13 +349,13 @@ describe('useSubscription', () => {
     });
 
     // Update again
-    await act(() => renderer.update(<Parent observed={observableA} />));
+    act(() => renderer.update(<Parent observed={observableA} />));
 
     // Flush everything and ensure that the correct subscribable is used
     // We expect the last emitted update to be rendered (because of the commit phase value check)
     // But the intermediate ones should be ignored,
     // And the final rendered output should be the higher-priority observable.
-    assertLog([
+    expect(Scheduler).toHaveYielded([
       'Grandchild: b-0',
       'Child: b-3',
       'Grandchild: b-3',
@@ -373,16 +369,16 @@ describe('useSubscription', () => {
     ]);
   });
 
-  it('should not drop values emitted between updates', async () => {
+  it('should not drop values emitted between updates', () => {
     const log = [];
 
     function Grandchild({value}) {
-      Scheduler.log('Grandchild: ' + value);
+      Scheduler.unstable_yieldValue('Grandchild: ' + value);
       return null;
     }
 
     function Child({value = 'default'}) {
-      Scheduler.log('Child: ' + value);
+      Scheduler.unstable_yieldValue('Child: ' + value);
       return <Grandchild value={value} />;
     }
 
@@ -432,21 +428,25 @@ describe('useSubscription', () => {
     const observableB = createBehaviorSubject('b-0');
 
     let renderer;
-    await act(() => {
+    act(() => {
       renderer = ReactTestRenderer.create(<Parent observed={observableA} />, {
         unstable_isConcurrent: true,
       });
     });
-    assertLog(['Child: a-0', 'Grandchild: a-0']);
+    expect(Scheduler).toHaveYielded(['Child: a-0', 'Grandchild: a-0']);
     expect(log).toEqual(['Parent.componentDidMount:a-0']);
     log.splice(0);
 
     // Start React update, but don't finish
-    await act(async () => {
-      React.startTransition(() => {
+    act(() => {
+      if (gate(flags => flags.enableSyncDefaultUpdates)) {
+        React.startTransition(() => {
+          renderer.update(<Parent observed={observableB} />);
+        });
+      } else {
         renderer.update(<Parent observed={observableB} />);
-      });
-      await waitFor(['Child: b-0']);
+      }
+      expect(Scheduler).toFlushAndYieldThrough(['Child: b-0']);
       expect(log).toEqual([]);
 
       // Emit some updates from the old subscribable
@@ -454,16 +454,10 @@ describe('useSubscription', () => {
       observableA.next('a-2');
 
       // Update again
-      if (gate(flags => flags.enableUnifiedSyncLane)) {
-        React.startTransition(() => {
-          renderer.update(<Parent observed={observableA} />);
-        });
-      } else {
-        renderer.update(<Parent observed={observableA} />);
-      }
+      renderer.update(<Parent observed={observableA} />);
 
       // Flush everything and ensure that the correct subscribable is used
-      await waitForAll([
+      expect(Scheduler).toFlushAndYield([
         'Child: a-2',
         'Grandchild: a-2',
         'Child: a-2',
@@ -474,14 +468,14 @@ describe('useSubscription', () => {
 
     // Updates from the new subscribable should be ignored.
     log.splice(0);
-    await act(() => observableB.next('b-1'));
-    await waitForAll([]);
+    act(() => observableB.next('b-1'));
+    expect(Scheduler).toFlushAndYield([]);
     expect(log).toEqual([]);
   });
 
-  it('should guard against updates that happen after unmounting', async () => {
+  it('should guard against updates that happen after unmounting', () => {
     function Child({value = 'default'}) {
-      Scheduler.log(value);
+      Scheduler.unstable_yieldValue(value);
       return null;
     }
 
@@ -522,26 +516,27 @@ describe('useSubscription', () => {
       },
     };
 
-    eventHandler.subscribe(async value => {
+    eventHandler.subscribe(value => {
       if (value === false) {
         renderer.unmount();
+        expect(Scheduler).toFlushAndYield([]);
       }
     });
 
     let renderer;
-    await act(() => {
+    act(() => {
       renderer = ReactTestRenderer.create(
         <Subscription source={eventHandler} />,
         {unstable_isConcurrent: true},
       );
     });
-    assertLog([true]);
+    expect(Scheduler).toHaveYielded([true]);
 
     // This event should unmount
     eventHandler.change(false);
   });
 
-  it('does not return a value from the previous subscription if the source is updated', async () => {
+  it('does not return a value from the previous subscription if the source is updated', () => {
     const subscription1 = {
       getCurrentValue: () => 'one',
       subscribe: () => () => {},
@@ -563,21 +558,19 @@ describe('useSubscription', () => {
     }
 
     let renderer;
-    await act(() => {
+    act(() => {
       renderer = ReactTestRenderer.create(
         <Subscription subscription={subscription1} />,
         {unstable_isConcurrent: true},
       );
     });
-    await waitForAll([]);
+    Scheduler.unstable_flushAll();
 
-    await act(() =>
-      renderer.update(<Subscription subscription={subscription2} />),
-    );
-    await waitForAll([]);
+    act(() => renderer.update(<Subscription subscription={subscription2} />));
+    Scheduler.unstable_flushAll();
   });
 
-  it('should not tear if a mutation occurs during a concurrent update', async () => {
+  it('should not tear if a mutation occurs during a concurrent update', () => {
     const input = document.createElement('input');
 
     const mutate = value => {
@@ -595,11 +588,11 @@ describe('useSubscription', () => {
 
     const Subscriber = ({id}) => {
       const value = useSubscription(subscription);
-      Scheduler.log(`render:${id}:${value}`);
+      Scheduler.unstable_yieldValue(`render:${id}:${value}`);
       return value;
     };
 
-    await act(async () => {
+    act(() => {
       // Initial render of "A"
       mutate('A');
       ReactTestRenderer.create(
@@ -609,13 +602,13 @@ describe('useSubscription', () => {
         </React.Fragment>,
         {unstable_isConcurrent: true},
       );
-      await waitForAll(['render:first:A', 'render:second:A']);
+      expect(Scheduler).toFlushAndYield(['render:first:A', 'render:second:A']);
 
       // Update state "A" -> "B"
       // This update will be eagerly evaluated,
       // so the tearing case this test is guarding against would not happen.
       mutate('B');
-      await waitForAll(['render:first:B', 'render:second:B']);
+      expect(Scheduler).toFlushAndYield(['render:first:B', 'render:second:B']);
 
       // No more pending updates
       jest.runAllTimers();
@@ -624,14 +617,25 @@ describe('useSubscription', () => {
       // Interrupt with a second mutation "C" -> "D".
       // This update will not be eagerly evaluated,
       // but useSubscription() should eagerly close over the updated value to avoid tearing.
-      React.startTransition(() => {
+      if (gate(flags => flags.enableSyncDefaultUpdates)) {
+        React.startTransition(() => {
+          mutate('C');
+        });
+      } else {
         mutate('C');
-      });
-      await waitFor(['render:first:C', 'render:second:C']);
-      React.startTransition(() => {
+      }
+      expect(Scheduler).toFlushAndYieldThrough([
+        'render:first:C',
+        'render:second:C',
+      ]);
+      if (gate(flags => flags.enableSyncDefaultUpdates)) {
+        React.startTransition(() => {
+          mutate('D');
+        });
+      } else {
         mutate('D');
-      });
-      await waitForAll(['render:first:D', 'render:second:D']);
+      }
+      expect(Scheduler).toFlushAndYield(['render:first:D', 'render:second:D']);
 
       // No more pending updates
       jest.runAllTimers();

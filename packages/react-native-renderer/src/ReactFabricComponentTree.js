@@ -1,52 +1,30 @@
 /**
- * Copyright (c) Meta Platforms, Inc. and affiliates.
+ * Copyright (c) Facebook, Inc. and its affiliates.
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
- *
- * @flow strict-local
  */
 
-import type {
-  PublicInstance,
-  Instance,
-  Props,
-  TextInstance,
-} from './ReactFabricHostConfig';
-import type {Fiber} from 'react-reconciler/src/ReactInternalTypes';
-import {getPublicInstance} from './ReactFabricHostConfig';
-
-// `node` is typed incorrectly here. The proper type should be `PublicInstance`.
-// This is ok in DOM because they types are interchangeable, but in React Native
-// they aren't.
-function getInstanceFromNode(node: Instance | TextInstance): Fiber | null {
-  const instance: Instance = (node: $FlowFixMe); // In React Native, node is never a text instance
-
-  if (instance.internalInstanceHandle != null) {
-    return instance.internalInstanceHandle;
-  }
-
-  // $FlowFixMe[incompatible-return] DevTools incorrectly passes a fiber in React Native.
-  return node;
+function getInstanceFromInstance(instanceHandle) {
+  return instanceHandle;
 }
 
-function getNodeFromInstance(fiber: Fiber): PublicInstance {
-  const publicInstance = getPublicInstance(fiber.stateNode);
+function getTagFromInstance(inst) {
+  const nativeInstance = inst.stateNode.canonical;
 
-  if (publicInstance == null) {
-    throw new Error('Could not find host instance from fiber');
+  if (!nativeInstance._nativeTag) {
+    throw new Error('All native instances should have a tag.');
   }
 
-  return publicInstance;
-}
-
-function getFiberCurrentPropsFromNode(instance: Instance): Props {
-  return instance.currentProps;
+  return nativeInstance;
 }
 
 export {
-  getInstanceFromNode,
-  getInstanceFromNode as getClosestInstanceFromNode,
-  getNodeFromInstance,
-  getFiberCurrentPropsFromNode,
+  getInstanceFromInstance as getClosestInstanceFromNode,
+  getInstanceFromInstance as getInstanceFromNode,
+  getTagFromInstance as getNodeFromInstance,
 };
+
+export function getFiberCurrentPropsFromNode(inst) {
+  return inst.canonical.currentProps;
+}

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) Meta Platforms, Inc. and affiliates.
+ * Copyright (c) Facebook, Inc. and its affiliates.
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
@@ -13,9 +13,6 @@ import {formatDataForPreview} from '../../utils';
 import isArray from 'react-devtools-shared/src/isArray';
 
 import type {HooksTree} from 'react-debug-tools/src/ReactDebugHooks';
-
-// $FlowFixMe[method-unbinding]
-const hasOwnProperty = Object.prototype.hasOwnProperty;
 
 export function alphaSortEntries(
   entryA: [string, mixed],
@@ -134,7 +131,7 @@ export function serializeDataForCopy(props: Object): string {
 
 export function serializeHooksForCopy(hooks: HooksTree | null): string {
   // $FlowFixMe "HooksTree is not an object"
-  const cloned = Object.assign(([]: Array<any>), hooks);
+  const cloned = Object.assign([], hooks);
 
   const queue = [...cloned];
 

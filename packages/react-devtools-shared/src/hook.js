@@ -8,22 +8,13 @@
  * @flow
  */
 
-import type {BrowserTheme} from './devtools/views/DevTools';
-import type {
-  DevToolsHook,
-  Handler,
-  ReactRenderer,
-  RendererID,
-  RendererInterface,
-} from './backend/types';
+import type {BrowserTheme} from 'react-devtools-shared/src/devtools/views/DevTools';
+import type {DevToolsHook} from 'react-devtools-shared/src/backend/types';
 
 import {
-  patchConsoleUsingWindowValues,
+  patch as patchConsole,
   registerRenderer as registerRendererWithConsole,
 } from './backend/console';
-import {attach} from './backend/renderer';
-import {SESSION_STORAGE_RELOAD_AND_PROFILE_KEY} from './constants';
-import {sessionStorageGetItem} from './storage';
 
 declare var window: any;
 
@@ -33,7 +24,7 @@ export function installHook(target: any): DevToolsHook | null {
   }
 
   let targetConsole: Object = console;
-  let targetConsoleMethods: {[string]: $FlowFixMe} = {};
+  let targetConsoleMethods = {};
   for (const method in console) {
     targetConsoleMethods[method] = console[method];
   }
@@ -43,13 +34,13 @@ export function installHook(target: any): DevToolsHook | null {
   ): void {
     targetConsole = targetConsoleForTesting;
 
-    targetConsoleMethods = ({}: {[string]: $FlowFixMe});
+    targetConsoleMethods = {};
     for (const method in targetConsole) {
       targetConsoleMethods[method] = console[method];
     }
   }
 
-  function detectReactBuildType(renderer: ReactRenderer) {
+  function detectReactBuildType(renderer) {
     try {
       if (typeof renderer.version === 'string') {
         // React DOM Fiber (16+)
@@ -70,7 +61,6 @@ export function installHook(target: any): DevToolsHook | null {
         // it happens *outside* of the renderer injection. See `checkDCE` below.
       }
 
-      // $FlowFixMe[method-unbinding]
       const toString = Function.prototype.toString;
       if (renderer.Mount && renderer.Mount._renderNewRootComponent) {
         // React DOM Stack
@@ -157,7 +147,6 @@ export function installHook(target: any): DevToolsHook | null {
     // This runs for production versions of React.
     // Needs to be super safe.
     try {
-      // $FlowFixMe[method-unbinding]
       const toString = Function.prototype.toString;
       const code = toString.call(fn);
 
@@ -170,7 +159,7 @@ export function installHook(target: any): DevToolsHook | null {
 
         // Bonus: throw an exception hoping that it gets picked up by a reporting system.
         // Not synchronously so that it doesn't break the calling code.
-        setTimeout(function () {
+        setTimeout(function() {
           throw new Error(
             'React is running in production mode, but dead code ' +
               'elimination has not been applied. Read how to correctly ' +
@@ -239,26 +228,19 @@ export function installHook(target: any): DevToolsHook | null {
     hideConsoleLogsInStrictMode: boolean,
     browserTheme: BrowserTheme,
   }) {
-    const overrideConsoleMethods = [
-      'error',
-      'group',
-      'groupCollapsed',
-      'info',
-      'log',
-      'trace',
-      'warn',
-    ];
+    const overrideConsoleMethods = ['error', 'trace', 'warn', 'log'];
 
     if (unpatchFn !== null) {
       // Don't patch twice.
       return;
     }
 
-    const originalConsoleMethods: {[string]: $FlowFixMe} = {};
+    const originalConsoleMethods = {};
 
     unpatchFn = () => {
       for (const method in originalConsoleMethods) {
         try {
+          // $FlowFixMe property error|warn is not writable.
           targetConsole[method] = originalConsoleMethods[method];
         } catch (error) {}
       }
@@ -272,7 +254,7 @@ export function installHook(target: any): DevToolsHook | null {
           ? targetConsole[method].__REACT_DEVTOOLS_STRICT_MODE_ORIGINAL_METHOD__
           : targetConsole[method]);
 
-        const overrideMethod = (...args: $ReadOnlyArray<any>) => {
+        const overrideMethod = (...args) => {
           if (!hideConsoleLogsInStrictMode) {
             // Dim the text color of the double logs if we're not
             // hiding them.
@@ -307,11 +289,10 @@ export function installHook(target: any): DevToolsHook | null {
           }
         };
 
-        overrideMethod.__REACT_DEVTOOLS_STRICT_MODE_ORIGINAL_METHOD__ =
-          originalMethod;
-        originalMethod.__REACT_DEVTOOLS_STRICT_MODE_OVERRIDE_METHOD__ =
-          overrideMethod;
+        overrideMethod.__REACT_DEVTOOLS_STRICT_MODE_ORIGINAL_METHOD__ = originalMethod;
+        originalMethod.__REACT_DEVTOOLS_STRICT_MODE_OVERRIDE_METHOD__ = overrideMethod;
 
+        // $FlowFixMe property error|warn is not writable.
         targetConsole[method] = overrideMethod;
       } catch (error) {}
     });
@@ -327,7 +308,7 @@ export function installHook(target: any): DevToolsHook | null {
 
   let uidCounter = 0;
 
-  function inject(renderer: ReactRenderer) {
+  function inject(renderer) {
     const id = ++uidCounter;
     renderers.set(id, renderer);
 
@@ -354,6 +335,16 @@ export function installHook(target: any): DevToolsHook | null {
     // (See comments in the try/catch below for more context on inlining.)
     if (!__TEST__ && !__EXTENSION__) {
       try {
+        const appendComponentStack =
+          window.__REACT_DEVTOOLS_APPEND_COMPONENT_STACK__ !== false;
+        const breakOnConsoleErrors =
+          window.__REACT_DEVTOOLS_BREAK_ON_CONSOLE_ERRORS__ === true;
+        const showInlineWarningsAndErrors =
+          window.__REACT_DEVTOOLS_SHOW_INLINE_WARNINGS_AND_ERRORS__ !== false;
+        const hideConsoleLogsInStrictMode =
+          window.__REACT_DEVTOOLS_HIDE_CONSOLE_LOGS_IN_STRICT_MODE__ === true;
+        const browserTheme = window.__REACT_DEVTOOLS_BROWSER_THEME__;
+
         // The installHook() function is injected by being stringified in the browser,
         // so imports outside of this function do not get included.
         //
@@ -362,15 +353,20 @@ export function installHook(target: any): DevToolsHook | null {
         // and the object itself will be undefined as well for the reasons mentioned above,
         // so we use try/catch instead.
         registerRendererWithConsole(renderer);
-        patchConsoleUsingWindowValues();
+        patchConsole({
+          appendComponentStack,
+          breakOnConsoleErrors,
+          showInlineWarningsAndErrors,
+          hideConsoleLogsInStrictMode,
+          browserTheme,
+        });
       } catch (error) {}
     }
 
     // If we have just reloaded to profile, we need to inject the renderer interface before the app loads.
     // Otherwise the renderer won't yet exist and we can skip this step.
-    if (
-      sessionStorageGetItem(SESSION_STORAGE_RELOAD_AND_PROFILE_KEY) === 'true'
-    ) {
+    const attach = target.__REACT_DEVTOOLS_ATTACH__;
+    if (typeof attach === 'function') {
       const rendererInterface = attach(hook, id, renderer, target);
       hook.rendererInterfaces.set(id, rendererInterface);
     }
@@ -386,19 +382,19 @@ export function installHook(target: any): DevToolsHook | null {
 
   let hasDetectedBadDCE = false;
 
-  function sub(event: string, fn: Handler) {
+  function sub(event, fn) {
     hook.on(event, fn);
     return () => hook.off(event, fn);
   }
 
-  function on(event: string, fn: Handler) {
+  function on(event, fn) {
     if (!listeners[event]) {
       listeners[event] = [];
     }
     listeners[event].push(fn);
   }
 
-  function off(event: string, fn: Handler) {
+  function off(event, fn) {
     if (!listeners[event]) {
       return;
     }
@@ -411,13 +407,13 @@ export function installHook(target: any): DevToolsHook | null {
     }
   }
 
-  function emit(event: string, data: any) {
+  function emit(event, data) {
     if (listeners[event]) {
       listeners[event].map(fn => fn(data));
     }
   }
 
-  function getFiberRoots(rendererID: RendererID) {
+  function getFiberRoots(rendererID) {
     const roots = fiberRoots;
     if (!roots[rendererID]) {
       roots[rendererID] = new Set();
@@ -425,18 +421,14 @@ export function installHook(target: any): DevToolsHook | null {
     return roots[rendererID];
   }
 
-  function onCommitFiberUnmount(rendererID: RendererID, fiber: any) {
+  function onCommitFiberUnmount(rendererID, fiber) {
     const rendererInterface = rendererInterfaces.get(rendererID);
     if (rendererInterface != null) {
       rendererInterface.handleCommitFiberUnmount(fiber);
     }
   }
 
-  function onCommitFiberRoot(
-    rendererID: RendererID,
-    root: any,
-    priorityLevel: void | number,
-  ) {
+  function onCommitFiberRoot(rendererID, root, priorityLevel) {
     const mountedRoots = hook.getFiberRoots(rendererID);
     const current = root.current;
     const isKnownRoot = mountedRoots.has(root);
@@ -455,14 +447,14 @@ export function installHook(target: any): DevToolsHook | null {
     }
   }
 
-  function onPostCommitFiberRoot(rendererID: RendererID, root: any) {
+  function onPostCommitFiberRoot(rendererID, root) {
     const rendererInterface = rendererInterfaces.get(rendererID);
     if (rendererInterface != null) {
       rendererInterface.handlePostCommitFiberRoot(root);
     }
   }
 
-  function setStrictMode(rendererID: RendererID, isStrictMode: any) {
+  function setStrictMode(rendererID, isStrictMode) {
     const rendererInterface = rendererInterfaces.get(rendererID);
     if (rendererInterface != null) {
       if (isStrictMode) {
@@ -523,10 +515,10 @@ export function installHook(target: any): DevToolsHook | null {
   }
 
   // TODO: More meaningful names for "rendererInterfaces" and "renderers".
-  const fiberRoots: {[RendererID]: Set<mixed>} = {};
-  const rendererInterfaces = new Map<RendererID, RendererInterface>();
-  const listeners: {[string]: Array<Handler>} = {};
-  const renderers = new Map<RendererID, ReactRenderer>();
+  const fiberRoots = {};
+  const rendererInterfaces = new Map();
+  const listeners = {};
+  const renderers = new Map();
 
   const hook: DevToolsHook = {
     rendererInterfaces,
@@ -562,8 +554,7 @@ export function installHook(target: any): DevToolsHook | null {
   };
 
   if (__TEST__) {
-    hook.dangerous_setTargetConsoleForTesting =
-      dangerous_setTargetConsoleForTesting;
+    hook.dangerous_setTargetConsoleForTesting = dangerous_setTargetConsoleForTesting;
   }
 
   Object.defineProperty(

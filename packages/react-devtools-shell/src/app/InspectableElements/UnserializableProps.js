@@ -1,5 +1,5 @@
 /**
- * Copyright (c) Meta Platforms, Inc. and affiliates.
+ * Copyright (c) Facebook, Inc. and its affiliates.
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
@@ -31,9 +31,10 @@ const immutable = Immutable.fromJS({
     xyz: 1,
   },
 });
+// $FlowFixMe
 const bigInt = BigInt(123); // eslint-disable-line no-undef
 
-export default function UnserializableProps(): React.Node {
+export default function UnserializableProps() {
   return (
     <ChildComponent
       arrayBuffer={arrayBuffer}

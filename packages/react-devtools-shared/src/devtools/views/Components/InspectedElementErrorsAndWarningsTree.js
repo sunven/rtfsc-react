@@ -1,5 +1,5 @@
 /**
- * Copyright (c) Meta Platforms, Inc. and affiliates.
+ * Copyright (c) Facebook, Inc. and its affiliates.
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
@@ -27,21 +27,23 @@ import {
 import type {InspectedElement} from './types';
 import type {FrontendBridge} from 'react-devtools-shared/src/bridge';
 
-type Props = {
+type Props = {|
   bridge: FrontendBridge,
   inspectedElement: InspectedElement,
   store: Store,
-};
+|};
 
 export default function InspectedElementErrorsAndWarningsTree({
   bridge,
   inspectedElement,
   store,
-}: Props): React.Node {
+}: Props) {
   const refresh = useCacheRefresh();
 
-  const [isErrorsTransitionPending, startClearErrorsTransition] =
-    useTransition();
+  const [
+    isErrorsTransitionPending,
+    startClearErrorsTransition,
+  ] = useTransition();
   const clearErrorsForInspectedElement = () => {
     const {id} = inspectedElement;
     const rendererID = store.getRendererIDForElement(id);
@@ -57,8 +59,10 @@ export default function InspectedElementErrorsAndWarningsTree({
     }
   };
 
-  const [isWarningsTransitionPending, startClearWarningsTransition] =
-    useTransition();
+  const [
+    isWarningsTransitionPending,
+    startClearWarningsTransition,
+  ] = useTransition();
   const clearWarningsForInspectedElement = () => {
     const {id} = inspectedElement;
     const rendererID = store.getRendererIDForElement(id);
@@ -111,16 +115,16 @@ export default function InspectedElementErrorsAndWarningsTree({
   );
 }
 
-type TreeProps = {
+type TreeProps = {|
   badgeClassName: string,
   actions: React$Node,
   className: string,
-  clearMessages: () => void,
+  clearMessages: () => {},
   entries: Array<[string, number]>,
   isTransitionPending: boolean,
   label: string,
   messageClassName: string,
-};
+|};
 
 function Tree({
   badgeClassName,
@@ -159,12 +163,12 @@ function Tree({
   );
 }
 
-type ErrorOrWarningViewProps = {
+type ErrorOrWarningViewProps = {|
   badgeClassName: string,
   className: string,
   count: number,
   message: string,
-};
+|};
 
 function ErrorOrWarningView({
   className,

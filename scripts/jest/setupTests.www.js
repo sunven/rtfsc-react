@@ -6,7 +6,21 @@ jest.mock('shared/ReactFeatureFlags', () => {
     () => jest.requireActual('shared/forks/ReactFeatureFlags.www-dynamic'),
     {virtual: true}
   );
-  return jest.requireActual('shared/forks/ReactFeatureFlags.www');
+
+  const wwwFlags = jest.requireActual('shared/forks/ReactFeatureFlags.www');
+  const defaultFlags = jest.requireActual('shared/ReactFeatureFlags');
+
+  // TODO: Many tests were written before we started running them against the
+  // www configuration. Update those tests so that they work against the www
+  // configuration, too. Then remove these overrides.
+  wwwFlags.disableLegacyContext = defaultFlags.disableLegacyContext;
+  wwwFlags.disableJavaScriptURLs = defaultFlags.disableJavaScriptURLs;
+
+  return wwwFlags;
+});
+
+jest.mock('shared/ReactSymbols', () => {
+  return jest.requireActual('shared/ReactSymbols.www');
 });
 
 jest.mock('scheduler/src/SchedulerFeatureFlags', () => {

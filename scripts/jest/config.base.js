@@ -20,15 +20,10 @@ module.exports = {
   rootDir: process.cwd(),
   roots: ['<rootDir>/packages', '<rootDir>/scripts'],
   collectCoverageFrom: ['packages/**/*.js'],
-  fakeTimers: {
-    enableGlobally: true,
-    legacyFakeTimers: true,
-  },
+  timers: 'fake',
   snapshotSerializers: [require.resolve('jest-snapshot-serializer-raw')],
 
   testSequencer: require.resolve('./jestSequencer'),
 
   testEnvironment: 'jsdom',
-
-  testRunner: 'jest-circus/runner',
 };

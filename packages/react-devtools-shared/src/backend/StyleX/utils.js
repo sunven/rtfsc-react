@@ -1,5 +1,5 @@
 /**
- * Copyright (c) Meta Platforms, Inc. and affiliates.
+ * Copyright (c) Facebook, Inc. and its affiliates.
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
@@ -13,7 +13,7 @@ import isArray from 'react-devtools-shared/src/isArray';
 const cachedStyleNameToValueMap: Map<string, string> = new Map();
 
 export function getStyleXData(data: any): StyleXPlugin {
-  const sources = new Set<string>();
+  const sources = new Set();
   const resolvedStyles = {};
 
   crawlData(data, sources, resolvedStyles);
@@ -67,10 +67,7 @@ function crawlObjectProperties(
         // Special case; this key is the name of the style's source/file/module.
         sources.add(key);
       } else {
-        const propertyValue = getPropertyValueForStyleName(value);
-        if (propertyValue != null) {
-          resolvedStyles[key] = propertyValue;
-        }
+        resolvedStyles[key] = getPropertyValueForStyleName(value);
       }
     } else {
       const nestedStyle = {};
@@ -93,19 +90,11 @@ function getPropertyValueForStyleName(styleName: string): string | null {
     const styleSheet = ((document.styleSheets[
       styleSheetIndex
     ]: any): CSSStyleSheet);
-    let rules: CSSRuleList | null = null;
-    // this might throw if CORS rules are enforced https://www.w3.org/TR/cssom-1/#the-cssstylesheet-interface
-    try {
-      rules = styleSheet.cssRules;
-    } catch (_e) {
-      continue;
-    }
-
+    // $FlowFixMe Flow doesn't konw about these properties
+    const rules = styleSheet.rules || styleSheet.cssRules;
     for (let ruleIndex = 0; ruleIndex < rules.length; ruleIndex++) {
-      if (!(rules[ruleIndex] instanceof CSSStyleRule)) {
-        continue;
-      }
-      const rule = ((rules[ruleIndex]: any): CSSStyleRule);
+      const rule = rules[ruleIndex];
+      // $FlowFixMe Flow doesn't konw about these properties
       const {cssText, selectorText, style} = rule;
 
       if (selectorText != null) {
