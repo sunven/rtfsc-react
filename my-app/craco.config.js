@@ -1,15 +1,13 @@
-const path = require('path')
-module.exports ={
-  "devServer": {
-    "port": 3301,
-      static: {
-        directory: path.join(__dirname, '../build'),
-      },
+// const path = require('path');
+module.exports = {
+  devServer: {
+    port: 3301,
+    static: ['./public', '../build/node_modules'],
   },
-  webpack:{
-    externals:{
+  webpack: {
+    externals: {
       react: 'React',
       'react-dom': 'ReactDOM',
-    }
-  }
-}
+    },
+  },
+};
