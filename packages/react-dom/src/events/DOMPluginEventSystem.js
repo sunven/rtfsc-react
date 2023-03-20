@@ -390,6 +390,7 @@ export function listenToAllSupportedEvents(rootContainerElement: EventTarget) {
     allNativeEvents.forEach(domEventName => {
       // We handle selectionchange separately because it
       // doesn't bubble and needs to be on the document.
+      // 我们单独处理selectionchange事件，因为它不会冒泡并且需要在文档上。
       if (domEventName !== 'selectionchange') {
         if (!nonDelegatedEvents.has(domEventName)) {
           listenToNativeEvent(domEventName, false, rootContainerElement);
@@ -404,6 +405,7 @@ export function listenToAllSupportedEvents(rootContainerElement: EventTarget) {
     if (ownerDocument !== null) {
       // The selectionchange event also needs deduplication
       // but it is attached to the document.
+      // selectionchange事件也需要去重，但它附加在文档上。
       if (!(ownerDocument: any)[listeningMarker]) {
         (ownerDocument: any)[listeningMarker] = true;
         listenToNativeEvent('selectionchange', false, ownerDocument);

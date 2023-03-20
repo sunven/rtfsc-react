@@ -496,6 +496,9 @@ export function requestUpdateLane(fiber: Fiber): Lane {
   // The opaque type returned by the host config is internally a lane, so we can
   // use that directly.
   // TODO: Move this type conversion to the event priority module.
+
+  // 在某些React方法内部产生的更新，例如flushSync，通过使用上下文变量来跟踪其优先级。
+  // 主机配置返回的不透明类型在内部是一个lane，因此我们可以直接使用它。
   const updateLane: Lane = (getCurrentUpdatePriority(): any);
   if (updateLane !== NoLane) {
     return updateLane;
@@ -507,6 +510,8 @@ export function requestUpdateLane(fiber: Fiber): Lane {
   // The opaque type returned by the host config is internally a lane, so we can
   // use that directly.
   // TODO: Move this type conversion to the event priority module.
+  // 此更新源自 React 之外。根据事件类型，向主机环境请求适当的优先级。
+  // 主机配置返回的不透明类型在内部是一个 lane，因此我们可以直接使用它。
   const eventLane: Lane = (getCurrentEventPriority(): any);
   return eventLane;
 }
