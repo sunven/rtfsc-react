@@ -530,6 +530,7 @@ function requestRetryLane(fiber: Fiber) {
   return claimNextRetryLane();
 }
 
+// fiber 更新计划
 export function scheduleUpdateOnFiber(
   root: FiberRoot,
   fiber: Fiber,
@@ -637,6 +638,7 @@ export function scheduleUpdateOnFiber(
       }
     }
 
+    // 确保 Root 已安排计划
     ensureRootIsScheduled(root, eventTime);
     if (
       lane === SyncLane &&
