@@ -10,6 +10,14 @@ yarn build "react/index,react-dom/index" --type=UMD
 
 packages/react-dom/src/client/ReactDOMLegacy.js render中打上断点
 
+launch.json
+type msedge/chrome
+
+- 调用
+
 ## reference
 
-<https://juejin.cn/post/7169046885859082277>
+<https://juejin.cn/post/7169046885859082277> npm link 方式
+<https://juejin.cn/post/7126501202866470949> 修改sourcemap生成路径，还得放到挡墙workspace
+
+FiberRootNode > FiberNode

@@ -176,6 +176,7 @@ function extractEvents(
 }
 
 // List of events that need to be individually attached to media elements.
+// 需要单独附加到媒体元素的事件列表。
 export const mediaEventTypes: Array<DOMEventName> = [
   'abort',
   'canplay',

@@ -8,9 +8,8 @@
       "type": "msedge",
       "request": "launch",
       "name": "Launch Chrome against localhost",
-      // "url": "http://localhost:3301",
-      "file": "${workspaceFolder}/fixtures/packaging/babel-standalone/dev.html",
-      // "webRoot": "${workspaceFolder}"
+      "url": "http://localhost:3301",
+      "webRoot": "${workspaceFolder}"
     }
   ]
 }

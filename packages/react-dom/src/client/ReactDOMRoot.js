@@ -231,6 +231,7 @@ export function createRoot(
     onRecoverableError,
     transitionCallbacks,
   );
+  // document.getElementById('container')["__reactContainer$9vaadzygxou"]
   markContainerAsRoot(root.current, container);
 
   const rootContainerElement: Document | Element | DocumentFragment =

@@ -6,9 +6,10 @@
     <script src="./babel.js"></script>
     <div id="container"></div>
     <script type="text/babel">
-      ReactDOM.render(
-        <h1>Hello World!</h1>,
-        document.getElementById('container')
+      const createRoot = ReactDOM.createRoot;
+      const root = createRoot(document.getElementById('container'));
+      root.render(
+        <div>app</div>
       );
     </script>
   </body>
