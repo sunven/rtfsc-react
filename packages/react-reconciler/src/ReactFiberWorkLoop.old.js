@@ -552,6 +552,7 @@ export function scheduleUpdateOnFiber(
   }
 
   // Mark that the root has a pending update.
+  // 标记根目录有待更新。
   markRootUpdated(root, lane, eventTime);
 
   if (
@@ -695,11 +696,15 @@ export function isUnsafeClassRenderPhaseUpdate(fiber: Fiber) {
 // of the existing task is the same as the priority of the next level that the
 // root has work on. This function is called on every update, and right before
 // exiting a task.
+// 使用此函数为根节点安排任务。每个根节点只有一个任务；
+// 如果已经安排了任务，我们将检查现有任务的优先级是否与该根节点下一级需要处理的工作的优先级相同。
+// 此函数在每次更新时调用，并且在退出任务之前立即调用。
 function ensureRootIsScheduled(root: FiberRoot, currentTime: number) {
   const existingCallbackNode = root.callbackNode;
 
   // Check if any lanes are being starved by other work. If so, mark them as
   // expired so we know to work on those next.
+  // 检查是否有任何通道被其他工作占用。如果是这样，请将它们标记为过期，以便我们知道下一步要处理它们。
   markStarvedLanesAsExpired(root, currentTime);
 
   // Determine the next lanes to work on, and their priority.
@@ -1284,6 +1289,7 @@ function performSyncWorkOnRoot(root) {
 
   // Before exiting, make sure there's a callback scheduled for the next
   // pending level.
+  // 在退出之前，请确保为下一个待处理的级别安排了回调。
   ensureRootIsScheduled(root, now());
 
   return null;

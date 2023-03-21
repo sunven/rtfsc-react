@@ -461,7 +461,7 @@ export function createHostRootFiber(
     // Without some nodes in the tree having empty base times.
     mode |= ProfileMode;
   }
-
+  // tag 决定了 model
   return createFiber(HostRoot, null, null, mode);
 }
 

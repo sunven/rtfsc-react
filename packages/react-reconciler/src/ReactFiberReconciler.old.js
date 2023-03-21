@@ -328,6 +328,7 @@ export function updateContainer(
     onScheduleRoot(container, element);
   }
   const current = container.current;
+  // 1. 获取当前时间戳, 计算本次更新的优先级
   const eventTime = requestEventTime();
   const lane = requestUpdateLane(current);
 
@@ -359,6 +360,7 @@ export function updateContainer(
     }
   }
 
+  // 2. 设置fiber.updateQueue
   const update = createUpdate(eventTime, lane);
   // Caution: React DevTools currently depends on this property
   // being called "element".
@@ -380,6 +382,7 @@ export function updateContainer(
 
   const root = enqueueUpdate(current, update, lane);
   if (root !== null) {
+    // 3. 进入reconciler运作流程中的`输入`环节
     scheduleUpdateOnFiber(root, current, lane, eventTime);
     entangleTransitions(root, current, lane);
   }
