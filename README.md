@@ -15,6 +15,12 @@ type msedge/chrome
 
 - 调用
 
+搜索排除文件
+
+```
+__tests__/**,*.new.js,*.html,*.min.js,*.development.js
+```
+
 ## reference
 
 <https://juejin.cn/post/7169046885859082277> npm link 方式

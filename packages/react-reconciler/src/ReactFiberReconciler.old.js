@@ -330,6 +330,7 @@ export function updateContainer(
   const current = container.current;
   // 1. 获取当前时间戳, 计算本次更新的优先级
   const eventTime = requestEventTime();
+  // 创建update优先级
   const lane = requestUpdateLane(current);
 
   if (enableSchedulingProfiler) {

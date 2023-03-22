@@ -275,12 +275,16 @@ const RootCompleted = 5;
 const RootDidNotComplete = 6;
 
 // Describes where we are in the React execution stack
+// 描述了我们在 React 执行栈中的位置
 let executionContext: ExecutionContext = NoContext;
 // The root we're working on
+// 我们正在处理的根源
 let workInProgressRoot: FiberRoot | null = null;
 // The fiber we're working on
+// 正在工作的fiber
 let workInProgress: Fiber | null = null;
 // The lanes we're rendering
+// 正在渲染的车道(复数)
 let workInProgressRootRenderLanes: Lanes = NoLanes;
 
 // Stack that allows components to change the render lanes for its subtree
@@ -291,24 +295,33 @@ let workInProgressRootRenderLanes: Lanes = NoLanes;
 //
 // Most things in the work loop should deal with workInProgressRootRenderLanes.
 // Most things in begin/complete phases should deal with subtreeRenderLanes.
+// 包含所有子节点的优先级, 是workInProgressRootRenderLanes的超集
+// 大多数情况下: 在工作循环整体层面会使用workInProgressRootRenderLanes, 在begin/complete阶段层面会使用 subtreeRenderLane
 export let subtreeRenderLanes: Lanes = NoLanes;
+// 一个栈结构: 专门存储当前节点的 subtreeRenderLanes
 const subtreeRenderLanesCursor: StackCursor<Lanes> = createCursor(NoLanes);
 
 // Whether to root completed, errored, suspended, etc.
+// fiber构造完后, root节点的状态: completed, errored, suspended等
 let workInProgressRootExitStatus: RootExitStatus = RootInProgress;
 // A fatal error, if one is thrown
+// 重大错误
 let workInProgressRootFatalError: mixed = null;
 // "Included" lanes refer to lanes that were worked on during this render. It's
 // slightly different than `renderLanes` because `renderLanes` can change as you
 // enter and exit an Offscreen tree. This value is the combination of all render
 // lanes for the entire render phase.
+// 整个render期间所使用到的所有lanes
 let workInProgressRootIncludedLanes: Lanes = NoLanes;
 // The work left over by components that were visited during this render. Only
 // includes unprocessed updates, not work in bailed out children.
+// 在render期间被跳过(由于优先级不够)的lanes: 只包括未处理的updates, 不包括被复用的fiber节点
 let workInProgressRootSkippedLanes: Lanes = NoLanes;
 // Lanes that were updated (in an interleaved event) during this render.
+// 在此渲染期间更新的车道（在交错事件中）。
 let workInProgressRootInterleavedUpdatedLanes: Lanes = NoLanes;
 // Lanes that were updated during the render phase (*not* an interleaved event).
+// 在渲染阶段更新的车道（*不是*交错事件）。
 let workInProgressRootRenderPhaseUpdatedLanes: Lanes = NoLanes;
 // Lanes that were pinged (in an interleaved event) during this render.
 let workInProgressRootPingedLanes: Lanes = NoLanes;
@@ -403,6 +416,7 @@ let pendingPassiveEffectsRemainingLanes: Lanes = NoLanes;
 let pendingPassiveTransitions: Array<Transition> | null = null;
 
 // Use these to prevent an infinite loop of nested updates
+// 防止无限循环和嵌套更新
 const NESTED_UPDATE_LIMIT = 50;
 let nestedUpdateCount: number = 0;
 let rootWithNestedUpdates: FiberRoot | null = null;
@@ -416,6 +430,7 @@ let rootWithPassiveNestedUpdates: FiberRoot | null = null;
 // If two updates are scheduled within the same event, we should treat their
 // event times as simultaneous, even if the actual clock time has advanced
 // between the first and second call.
+// 发起更新的时间
 let currentEventTime: number = NoTimestamp;
 let currentEventTransitionLane: Lanes = NoLanes;
 
@@ -466,6 +481,7 @@ export function requestUpdateLane(fiber: Fiber): Lane {
     return pickArbitraryLane(workInProgressRootRenderLanes);
   }
 
+  // suspense 过程
   const isTransition = requestCurrentTransition() !== NoTransition;
   if (isTransition) {
     if (__DEV__ && ReactCurrentBatchConfig.transition !== null) {
@@ -499,6 +515,7 @@ export function requestUpdateLane(fiber: Fiber): Lane {
 
   // 在某些React方法内部产生的更新，例如flushSync，通过使用上下文变量来跟踪其优先级。
   // 主机配置返回的不透明类型在内部是一个lane，因此我们可以直接使用它。
+  // 正常情况, 获取调度优先级
   const updateLane: Lane = (getCurrentUpdatePriority(): any);
   if (updateLane !== NoLane) {
     return updateLane;
@@ -653,6 +670,8 @@ export function scheduleUpdateOnFiber(
       // scheduleCallbackForFiber to preserve the ability to schedule a callback
       // without immediately flushing it. We only do this for user-initiated
       // updates, to preserve historical behavior of legacy mode.
+      // 并发模型不会进来
+      // 如果执行上下文为空, 会取消调度任务, 手动执行回调  进行fiber树构造
       resetRenderTimer();
       flushSyncCallbacksOnlyInLegacyMode();
     }
@@ -821,6 +840,7 @@ function ensureRootIsScheduled(root: FiberRoot, currentTime: number) {
         schedulerPriorityLevel = NormalSchedulerPriority;
         break;
     }
+    // 注册调度
     newCallbackNode = scheduleCallback(
       schedulerPriorityLevel,
       performConcurrentWorkOnRoot.bind(null, root),
