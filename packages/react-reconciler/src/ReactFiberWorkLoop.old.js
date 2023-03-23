@@ -853,6 +853,7 @@ function ensureRootIsScheduled(root: FiberRoot, currentTime: number) {
 
 // This is the entry point for every concurrent task, i.e. anything that
 // goes through Scheduler.
+// 这是每个并发任务的入口点，即通过调度程序进行的任何操作。
 function performConcurrentWorkOnRoot(root, didTimeout) {
   if (enableProfilerTimer && enableProfilerNestedUpdatePhase) {
     resetNestedUpdateFlag();
@@ -886,6 +887,7 @@ function performConcurrentWorkOnRoot(root, didTimeout) {
 
   // Determine the next lanes to work on, using the fields stored
   // on the root.
+  // 获取本次`render`的优先级
   let lanes = getNextLanes(
     root,
     root === workInProgressRoot ? workInProgressRootRenderLanes : NoLanes,
@@ -901,6 +903,9 @@ function performConcurrentWorkOnRoot(root, didTimeout) {
   // TODO: We only check `didTimeout` defensively, to account for a Scheduler
   // bug we're still investigating. Once the bug in Scheduler is fixed,
   // we can remove this, since we track expiration ourselves.
+  // 在某些情况下，我们会禁用时间片切换：如果工作已经过长时间绑定于 CPU（“过期”工作，以防止饥饿），或者我们处于默认同步更新模式。
+  // 待办事项：我们只是为了防御性地检查 `didTimeout`，以解决我们仍在调查的 Scheduler bug。
+  // 一旦 Scheduler 中的 bug 被修复，我们就可以删除它了，因为我们自己跟踪到期情况。"
   const shouldTimeSlice =
     !includesBlockingLane(root, lanes) &&
     !includesExpiredLane(root, lanes) &&
@@ -1695,6 +1700,7 @@ function renderRootSync(root: FiberRoot, lanes: Lanes) {
 
   // If the root or lanes have changed, throw out the existing stack
   // and prepare a fresh one. Otherwise we'll continue where we left off.
+  // 如果fiberRoot变动, 或者update.lane变动, 都会刷新栈帧, 丢弃上一次渲染进度
   if (workInProgressRoot !== root || workInProgressRootRenderLanes !== lanes) {
     if (enableUpdaterTracking) {
       if (isDevToolsPresent) {
@@ -1713,6 +1719,7 @@ function renderRootSync(root: FiberRoot, lanes: Lanes) {
     }
 
     workInProgressTransitions = getTransitionsForLanes(root, lanes);
+    // 刷新栈帧, legacy模式下都会进入
     prepareFreshStack(root, lanes);
   }
 
@@ -1758,6 +1765,7 @@ function renderRootSync(root: FiberRoot, lanes: Lanes) {
   }
 
   // Set this to null to indicate there's no in-progress render.
+  // 重置全局变量, 表明render结束
   workInProgressRoot = null;
   workInProgressRootRenderLanes = NoLanes;
 
@@ -1865,6 +1873,8 @@ function performUnitOfWork(unitOfWork: Fiber): void {
   // The current, flushed, state of this fiber is the alternate. Ideally
   // nothing should rely on this, but relying on it here means that we don't
   // need an additional field on the work in progress.
+  // current old
+  // unitOfWork new
   const current = unitOfWork.alternate;
   setCurrentDebugFiberInDEV(unitOfWork);
 
@@ -1881,6 +1891,7 @@ function performUnitOfWork(unitOfWork: Fiber): void {
   unitOfWork.memoizedProps = unitOfWork.pendingProps;
   if (next === null) {
     // If this doesn't spawn new work, complete the current work.
+    // 如果这不能产生新的工作，请完成当前的工作。
     completeUnitOfWork(unitOfWork);
   } else {
     workInProgress = next;
@@ -1892,7 +1903,10 @@ function performUnitOfWork(unitOfWork: Fiber): void {
 function completeUnitOfWork(unitOfWork: Fiber): void {
   // Attempt to complete the current unit of work, then move to the next
   // sibling. If there are no more siblings, return to the parent fiber.
+  // 尝试完成当前工作单元，然后移动到下一个兄弟节点。如果没有更多的兄弟节点，则返回父级 fiber
+  // unitOfWork为 fiber树构造的最后一个fiber
   let completedWork = unitOfWork;
+  // 外层循环控制并移动指针(`workInProgress`,`completedWork`等)
   do {
     // The current, flushed, state of this fiber is the alternate. Ideally
     // nothing should rely on this, but relying on it here means that we don't
@@ -1908,6 +1922,7 @@ function completeUnitOfWork(unitOfWork: Fiber): void {
         !enableProfilerTimer ||
         (completedWork.mode & ProfileMode) === NoMode
       ) {
+        // 1. 处理Fiber节点, 会调用渲染器(调用react-dom包, 关联Fiber节点和dom对象, 绑定事件等)
         next = completeWork(current, completedWork, subtreeRenderLanes);
       } else {
         startProfilerTimer(completedWork);
@@ -1919,10 +1934,12 @@ function completeUnitOfWork(unitOfWork: Fiber): void {
 
       if (next !== null) {
         // Completing this fiber spawned new work. Work on that next.
+        // 如果派生出其他的子节点, 则回到`beginWork`阶段进行处理
         workInProgress = next;
         return;
       }
     } else {
+      // 异常情况
       // This fiber did not complete because something threw. Pop values off
       // the stack without entering the complete phase. If this is a boundary,
       // capture values if possible.
@@ -1973,16 +1990,19 @@ function completeUnitOfWork(unitOfWork: Fiber): void {
     const siblingFiber = completedWork.sibling;
     if (siblingFiber !== null) {
       // If there is more work to do in this returnFiber, do that next.
+      // 如果有兄弟节点, 返回之后再次进入`beginWork`阶段
       workInProgress = siblingFiber;
       return;
     }
     // Otherwise, return to the parent
+    // 移动指针, 指向下一个节点
     completedWork = returnFiber;
     // Update the next thing we're working on in case something throws.
     workInProgress = completedWork;
   } while (completedWork !== null);
 
   // We've reached the root.
+  // 已回溯到根节点, 设置workInProgressRootExitStatus = RootCompleted
   if (workInProgressRootExitStatus === RootInProgress) {
     workInProgressRootExitStatus = RootCompleted;
   }

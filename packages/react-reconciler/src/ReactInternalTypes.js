@@ -76,19 +76,27 @@ export type Fiber = {|
   // minimize the number of objects created during the initial render.
 
   // Tag identifying the type of fiber.
+  // 根据ReactElement组件的 type 进行生成
   tag: WorkTag,
 
   // Unique identifier of this child.
+  // 和ReactElement组件的 key 一致
   key: null | string,
 
   // The value of element.type which is used to preserve the identity during
   // reconciliation of this child.
+  // 一般来讲和ReactElement组件的 type 一致
   elementType: any,
 
   // The resolved function/class/ associated with this fiber.
+  // 一般来讲和fiber.elementType一致. 一些特殊情形下,
+  // 比如在开发环境下为了兼容热更新(HotReloading), 会对function, class, ForwardRef类型的ReactElement做一定的处理,
+  // 这种情况会区别于fiber.elementType
   type: any,
 
   // The local state associated with this fiber.
+  // 与fiber关联的局部状态节点(比如: HostComponent类型指向与fiber节点对应的 dom 节点;
+  // 根节点fiber.stateNode指向的是FiberRoot; class 类型节点其stateNode指向的是 class 实例)
   stateNode: any,
 
   // Conceptual aliases
@@ -106,26 +114,34 @@ export type Fiber = {|
   // Singly Linked List Tree Structure.
   child: Fiber | null,
   sibling: Fiber | null,
+  //  fiber 在兄弟节点中的索引, 如果是单节点默认为 0.
   index: number,
 
   // The ref last used to attach this node.
   // I'll avoid adding an owner field for prod and model that as functions.
+  // 指向在ReactElement组件上设置的 ref(string类型的ref除外,
+  // 这种类型的ref已经不推荐使用, reconciler阶段会将string类型的ref转换成一个function类型)
   ref:
     | null
     | (((handle: mixed) => void) & {_stringRef: ?string, ...})
     | RefObject,
 
   // Input is the data coming into process this fiber. Arguments. Props.
+  // 从`ReactElement`对象传入的 props. 用于和`fiber.memoizedProps`比较可以得出属性是否变动
   pendingProps: any, // This type will be more specific once we overload the tag.
+  // 上一次生成子节点时用到的属性, 生成子节点之后保持在内存中
   memoizedProps: any, // The props used to create the output.
 
   // A queue of state updates and callbacks.
+  // 存储state更新的队列, 当前节点的state改动之后, 都会创建一个update对象添加到这个队列中.
   updateQueue: mixed,
 
   // The state used to create the output
+  // 用于输出的state, 最终渲染所使用的state
   memoizedState: any,
 
   // Dependencies (contexts, events) for this fiber, if it has any
+  // 该fiber节点所依赖的(contexts, events)等
   dependencies: Dependencies | null,
 
   // Bitfield that describes properties about the fiber and its subtree. E.g.
@@ -134,28 +150,38 @@ export type Fiber = {|
   // parent. Additional flags can be set at creation time, but after that the
   // value should remain unchanged throughout the fiber's lifetime, particularly
   // before its child fibers are created.
+  // 二进制位 Bitfield,继承至父节点,影响本 fiber 节点及其子树中所有节点.
+  // 与 react 应用的运行模式有关(有 ConcurrentMode, BlockingMode, NoMode 等选项)
   mode: TypeOfMode,
 
   // Effect
   flags: Flags,
+  //替代16.x版本中的 firstEffect, nextEffect. 当设置了 enableNewReconciler=true才会启用
   subtreeFlags: Flags,
+  // 存储将要被删除的子节点. 当设置了 enableNewReconciler=true才会启用
   deletions: Array<Fiber> | null,
 
   // Singly linked list fast path to the next fiber with side-effects.
+  // 单向链表, 指向下一个有副作用的fiber节点
   nextEffect: Fiber | null,
 
   // The first and last fiber with side-effect within this subtree. This allows
   // us to reuse a slice of the linked list when we reuse the work done within
   // this fiber.
+  // 指向副作用链表中的第一个fiber节点
   firstEffect: Fiber | null,
+  // 指向副作用链表中的最后一个fiber节点
   lastEffect: Fiber | null,
 
+  // 本fiber节点的优先级
   lanes: Lanes,
+  // 子节点的优先级
   childLanes: Lanes,
 
   // This is a pooled version of a Fiber. Every fiber that gets updated will
   // eventually have a pair. There are cases when we can clean up pairs to save
   // memory if we need to.
+  // 指向内存中的另一个fiber, 每个被更新过fiber节点在内存中都是成对出现(current和workInProgress)
   alternate: Fiber | null,
 
   // Time spent rendering this Fiber and its descendants for the current update.

@@ -145,10 +145,15 @@ if (__DEV__) {
 }
 
 export type Hook = {|
+  // 内存状态, 用于输出成最终的fiber树
   memoizedState: any,
+  // 基础状态, 当Hook.queue更新过后, baseState也会更新.
   baseState: any,
+  // 基础状态队列, 在reconciler阶段会辅助状态合并.
   baseQueue: Update<any, any> | null,
+  // 指向一个Update队列
   queue: any,
+  // 指向该function组件的下一个Hook对象, 使得多个Hook之间也构成了一个链表.
   next: Hook | null,
 |};
 
