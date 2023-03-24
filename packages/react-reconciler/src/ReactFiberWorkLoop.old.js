@@ -719,6 +719,7 @@ export function isUnsafeClassRenderPhaseUpdate(fiber: Fiber) {
 // 如果已经安排了任务，我们将检查现有任务的优先级是否与该根节点下一级需要处理的工作的优先级相同。
 // 此函数在每次更新时调用，并且在退出任务之前立即调用。
 function ensureRootIsScheduled(root: FiberRoot, currentTime: number) {
+  // 调用scheduleCallback返回的任务
   const existingCallbackNode = root.callbackNode;
 
   // Check if any lanes are being starved by other work. If so, mark them as
@@ -746,12 +747,14 @@ function ensureRootIsScheduled(root: FiberRoot, currentTime: number) {
   const newCallbackPriority = getHighestPriorityLane(nextLanes);
 
   // Check if there's an existing task. We may be able to reuse it.
+  // 检查是否存在现有任务。我们可能可以重复使用它。
   const existingCallbackPriority = root.callbackPriority;
   if (
     existingCallbackPriority === newCallbackPriority &&
     // Special case related to `act`. If the currently scheduled task is a
     // Scheduler task, rather than an `act` task, cancel it and re-scheduled
     // on the `act` queue.
+    // 与 `act` 相关的特殊情况。如果当前计划的任务是调度程序任务，而不是 `act` 任务，则取消该任务并重新安排到 `act` 队列中。
     !(
       __DEV__ &&
       ReactCurrentActQueue.current !== null &&
@@ -777,6 +780,7 @@ function ensureRootIsScheduled(root: FiberRoot, currentTime: number) {
 
   if (existingCallbackNode != null) {
     // Cancel the existing callback. We'll schedule a new one below.
+    // 取消现有的回调。我们将在下面安排一个新的。
     cancelCallback(existingCallbackNode);
   }
 
@@ -854,6 +858,8 @@ function ensureRootIsScheduled(root: FiberRoot, currentTime: number) {
 // This is the entry point for every concurrent task, i.e. anything that
 // goes through Scheduler.
 // 这是每个并发任务的入口点，即通过调度程序进行的任何操作。
+// didTimeout:currentTask.expirationTime <= currentTime
+// 支持可中断渲染
 function performConcurrentWorkOnRoot(root, didTimeout) {
   if (enableProfilerTimer && enableProfilerNestedUpdatePhase) {
     resetNestedUpdateFlag();
@@ -861,6 +867,7 @@ function performConcurrentWorkOnRoot(root, didTimeout) {
 
   // Since we know we're in a React event, we can clear the current
   // event time. The next update will compute a new event time.
+  // 由于我们知道当前处于 React 事件中，因此可以清除当前事件时间。下一次更新将计算新的事件时间。
   currentEventTime = NoTimestamp;
   currentEventTransitionLane = NoLanes;
 
@@ -870,7 +877,9 @@ function performConcurrentWorkOnRoot(root, didTimeout) {
 
   // Flush any pending passive effects before deciding which lanes to work on,
   // in case they schedule additional work.
+  // 在决定要处理哪些车道时，请先清除任何待处理的被动效果，以防它们安排了额外的工作。
   const originalCallbackNode = root.callbackNode;
+  // 1. 刷新pending状态的effects, 有可能某些effect会取消本次任务
   const didFlushPassiveEffects = flushPassiveEffects();
   if (didFlushPassiveEffects) {
     // Something in the passive effect phase may have canceled the current task.
@@ -887,7 +896,7 @@ function performConcurrentWorkOnRoot(root, didTimeout) {
 
   // Determine the next lanes to work on, using the fields stored
   // on the root.
-  // 获取本次`render`的优先级
+  // 2. 获取本次`render`的优先级
   let lanes = getNextLanes(
     root,
     root === workInProgressRoot ? workInProgressRootRenderLanes : NoLanes,
@@ -906,6 +915,7 @@ function performConcurrentWorkOnRoot(root, didTimeout) {
   // 在某些情况下，我们会禁用时间片切换：如果工作已经过长时间绑定于 CPU（“过期”工作，以防止饥饿），或者我们处于默认同步更新模式。
   // 待办事项：我们只是为了防御性地检查 `didTimeout`，以解决我们仍在调查的 Scheduler bug。
   // 一旦 Scheduler 中的 bug 被修复，我们就可以删除它了，因为我们自己跟踪到期情况。"
+  // 3.构造fiber树
   const shouldTimeSlice =
     !includesBlockingLane(root, lanes) &&
     !includesExpiredLane(root, lanes) &&
@@ -919,6 +929,8 @@ function performConcurrentWorkOnRoot(root, didTimeout) {
       // render synchronously to block concurrent data mutations, and we'll
       // includes all pending updates are included. If it still fails after
       // the second attempt, we'll give up and commit the resulting tree.
+      // 如果出现错误，请尝试再次渲染。我们将同步进行渲染以阻止并发数据突变，并包含所有待处理的更新。
+      // 如果第二次尝试仍然失败，我们将放弃并提交生成的树形结构。
       const errorRetryLanes = getLanesToRetrySynchronouslyOnError(root);
       if (errorRetryLanes !== NoLanes) {
         lanes = errorRetryLanes;
@@ -927,6 +939,8 @@ function performConcurrentWorkOnRoot(root, didTimeout) {
     }
     if (exitStatus === RootFatalErrored) {
       const fatalError = workInProgressRootFatalError;
+      // 如果在render过程中产生了新的update, 且新update的优先级与最初render的优先级有交集
+      // 那么最初render无效, 丢弃最初render的结果, 等待下一次调度
       prepareFreshStack(root, NoLanes);
       markRootSuspended(root, lanes);
       ensureRootIsScheduled(root, now());
@@ -961,6 +975,7 @@ function performConcurrentWorkOnRoot(root, didTimeout) {
         exitStatus = renderRootSync(root, lanes);
 
         // We need to check again if something threw
+        // 4. 异常处理: 有可能fiber构造过程中出现异常
         if (exitStatus === RootErrored) {
           const errorRetryLanes = getLanesToRetrySynchronouslyOnError(root);
           if (errorRetryLanes !== NoLanes) {
@@ -983,14 +998,17 @@ function performConcurrentWorkOnRoot(root, didTimeout) {
       // or, if something suspended, wait to commit it after a timeout.
       root.finishedWork = finishedWork;
       root.finishedLanes = lanes;
+      // 5. 输出: 渲染fiber树
       finishConcurrentRender(root, exitStatus, lanes);
     }
   }
 
+  // 退出前再次检测, 是否还有其他更新, 是否需要发起新调度
   ensureRootIsScheduled(root, now());
   if (root.callbackNode === originalCallbackNode) {
     // The task node scheduled for this root is the same one that's
     // currently executed. Need to return a continuation.
+    // 渲染被阻断, 返回一个新的performConcurrentWorkOnRoot函数, 等待下一次调用
     return performConcurrentWorkOnRoot.bind(null, root);
   }
   return null;
@@ -2056,6 +2074,7 @@ function commitRootImpl(
     throw new Error('Should not already be working.');
   }
 
+  // 设置局部变量
   const finishedWork = root.finishedWork;
   const lanes = root.finishedLanes;
 
@@ -2091,6 +2110,7 @@ function commitRootImpl(
       }
     }
   }
+  // 清空FiberRoot对象上的属性
   root.finishedWork = null;
   root.finishedLanes = NoLanes;
 
@@ -2165,6 +2185,7 @@ function commitRootImpl(
       (BeforeMutationMask | MutationMask | LayoutMask | PassiveMask)) !==
     NoFlags;
 
+  // 提交阶段
   if (subtreeHasEffects || rootHasEffect) {
     const prevTransition = ReactCurrentBatchConfig.transition;
     ReactCurrentBatchConfig.transition = null;
@@ -2184,6 +2205,8 @@ function commitRootImpl(
     // The first phase a "before mutation" phase. We use this phase to read the
     // state of the host tree right before we mutate it. This is where
     // getSnapshotBeforeUpdate is called.
+    // 阶段1: dom突变之前
+    // dom 变更之前, 主要处理副作用队列中带有Snapshot,Passive标记的fiber节点.
     const shouldFireAfterActiveInstanceBlur = commitBeforeMutationEffects(
       root,
       finishedWork,
@@ -2202,6 +2225,8 @@ function commitRootImpl(
     }
 
     // The next phase is the mutation phase, where we mutate the host tree.
+    // 阶段2: dom突变, 界面发生改变
+    // dom 变更, 界面得到更新. 主要处理副作用队列中带有Placement, Update, Deletion, Hydrating标记的fiber节点.
     commitMutationEffects(root, finishedWork, lanes);
 
     if (enableCreateEventHandleAPI) {
@@ -2228,6 +2253,8 @@ function commitRootImpl(
     if (enableSchedulingProfiler) {
       markLayoutEffectsStarted(lanes);
     }
+    // 阶段3: layout阶段, 调用生命周期componentDidUpdate和回调函数等
+    // dom 变更后, 主要处理副作用队列中带有Update | Callback标记的fiber节点.
     commitLayoutEffects(finishedWork, root, lanes);
     if (__DEV__) {
       if (enableDebugTracing) {

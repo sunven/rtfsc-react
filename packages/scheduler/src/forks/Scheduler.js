@@ -207,8 +207,7 @@ function workLoop(hasTimeRemaining, initialTime) {
     currentTask !== null &&
     !(enableSchedulerDebugging && isSchedulerPaused)
   ) {
-    // ImmediatePriority 类型任务 会加 -1，这会导致expirationTime 比 currentTime小？
-    // 不是，MessageChannel 有4ms延迟 expirationTime 一定大于currentTime
+    // ImmediatePriority 类型任务 会加 -1，这会导致expirationTime 比 currentTime小
     if (
       currentTask.expirationTime > currentTime &&
       (!hasTimeRemaining || shouldYieldToHost())
@@ -220,6 +219,7 @@ function workLoop(hasTimeRemaining, initialTime) {
       break;
     }
     const callback = currentTask.callback;
+    // 取消的任务，currentTask.callback为null
     if (typeof callback === 'function') {
       currentTask.callback = null;
       currentPriorityLevel = currentTask.priorityLevel;
