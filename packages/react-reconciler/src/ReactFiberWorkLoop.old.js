@@ -1753,6 +1753,7 @@ function renderRootSync(root: FiberRoot, lanes: Lanes) {
 
   do {
     try {
+      // 直至执行成功？
       workLoopSync();
       break;
     } catch (thrownValue) {

@@ -327,6 +327,8 @@ export function updateContainer(
   if (__DEV__) {
     onScheduleRoot(container, element);
   }
+  // container 是 fiberRoot
+  // container.current是HostRootFiber
   const current = container.current;
   // 1. 获取当前时间戳, 计算本次更新的优先级
   const eventTime = requestEventTime();
