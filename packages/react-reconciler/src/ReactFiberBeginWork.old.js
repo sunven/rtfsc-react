@@ -1465,7 +1465,7 @@ function updateHostComponent(
 
   // 特殊操作需要设置fiber.flags
   markRef(current, workInProgress);
-  // 3. 根据`ReactElement`对象, 调用`reconcileChildren`生成`Fiber`子节点(只生成`次级子节点`)
+  // 3. 根据`ReactElement`对象, 调用`reconcileChildren`生成`Fiber`子节点(只生成`次级子节点`) 多个children生成sibling
   reconcileChildren(current, workInProgress, nextChildren, renderLanes);
   return workInProgress.child;
 }

@@ -6,11 +6,28 @@
     <script src="./babel.js"></script>
     <div id="container"></div>
     <script type="text/babel">
+      const Component = React.Component;
       const createRoot = ReactDOM.createRoot;
       const root = createRoot(document.getElementById('container'));
-      root.render(
-        <div><p>p</p></div>
-      );
+      const FC = ()=>{
+        return (
+          <div>
+            <p>p</p>
+            <span>span</span>
+          </div>
+        )
+      }
+      class App extends Component{
+        render() {
+          return (
+            <main>
+              <a>a</a>
+              <FC />
+            </main>
+          )
+        }
+      }
+      root.render(<App />);
     </script>
   </body>
 </html>
