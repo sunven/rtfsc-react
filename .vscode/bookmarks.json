@@ -17,11 +17,6 @@
 					"line": 91,
 					"column": 82,
 					"label": ""
-				},
-				{
-					"line": 133,
-					"column": 46,
-					"label": ""
 				}
 			]
 		},
@@ -54,27 +49,27 @@
 					"label": ""
 				},
 				{
-					"line": 862,
+					"line": 863,
 					"column": 56,
 					"label": ""
 				},
 				{
-					"line": 1713,
+					"line": 1714,
 					"column": 56,
 					"label": ""
 				},
 				{
-					"line": 1890,
+					"line": 1891,
 					"column": 53,
 					"label": ""
 				},
 				{
-					"line": 1921,
+					"line": 1922,
 					"column": 54,
 					"label": ""
 				},
 				{
-					"line": 2056,
+					"line": 2057,
 					"column": 24,
 					"label": ""
 				}
@@ -114,7 +109,12 @@
 					"label": ""
 				},
 				{
-					"line": 3696,
+					"line": 1047,
+					"column": 30,
+					"label": ""
+				},
+				{
+					"line": 3697,
 					"column": 19,
 					"label": ""
 				}
@@ -146,6 +146,26 @@
 				{
 					"line": 146,
 					"column": 21,
+					"label": ""
+				}
+			]
+		},
+		{
+			"path": "packages/react-reconciler/src/ReactFiberClassComponent.old.js",
+			"bookmarks": [
+				{
+					"line": 203,
+					"column": 44,
+					"label": ""
+				}
+			]
+		},
+		{
+			"path": "packages/react/src/ReactBaseClasses.js",
+			"bookmarks": [
+				{
+					"line": 55,
+					"column": 65,
 					"label": ""
 				}
 			]

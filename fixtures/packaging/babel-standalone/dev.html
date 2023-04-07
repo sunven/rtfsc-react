@@ -5,7 +5,7 @@
     <!-- <script src="https://unpkg.com/babel-standalone@6/babel.js"></script> -->
     <script src="./babel.js"></script>
     <div id="container"></div>
-    <script type="text/babel">
+    <!-- <script type="text/babel">
       const Component = React.Component;
       const createRoot = ReactDOM.createRoot;
       const root = createRoot(document.getElementById('container'));
@@ -24,6 +24,32 @@
               <a>a</a>
               <FC />
             </main>
+          )
+        }
+      }
+      root.render(<App />);
+    </script> -->
+    <script type="text/babel">
+      const root = ReactDOM.createRoot(document.getElementById('container'));
+      class App extends React.Component{
+        constructor(){
+          super();
+          this.state = {
+            count: 0
+          }
+        }
+        add = ()=>{
+          this.setState({
+            count: this.state.count+1
+          })
+        }
+        render() {
+          const { count } = this.state
+          return (
+            <div>
+              <span>{count}</span>
+              <button onClick={this.add}> add </button>
+            </div>
           )
         }
       }

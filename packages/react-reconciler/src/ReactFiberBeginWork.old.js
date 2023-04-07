@@ -1119,6 +1119,7 @@ function updateClassComponent(
     resetSuspendedCurrentOnMountInLegacyMode(current, workInProgress);
 
     // In the initial pass we might need to construct the instance.
+    // 绑定updater
     constructClassInstance(workInProgress, Component, nextProps);
     mountClassInstance(workInProgress, Component, nextProps, renderLanes);
     shouldUpdate = true;
