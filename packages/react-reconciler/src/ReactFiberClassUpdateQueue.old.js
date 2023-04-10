@@ -224,6 +224,7 @@ export function createUpdate(eventTime: number, lane: Lane): Update<*> {
   return update;
 }
 
+// setState
 export function enqueueUpdate<State>(
   fiber: Fiber,
   update: Update<State>,

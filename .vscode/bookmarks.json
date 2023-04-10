@@ -59,22 +59,27 @@
 					"label": ""
 				},
 				{
+					"line": 1502,
+					"column": 66,
+					"label": ""
+				},
+				{
 					"line": 1714,
 					"column": 56,
 					"label": ""
 				},
 				{
-					"line": 1891,
+					"line": 1892,
 					"column": 53,
 					"label": ""
 				},
 				{
-					"line": 1922,
+					"line": 1924,
 					"column": 54,
 					"label": ""
 				},
 				{
-					"line": 2057,
+					"line": 2059,
 					"column": 24,
 					"label": ""
 				}
@@ -119,7 +124,7 @@
 					"label": ""
 				},
 				{
-					"line": 3697,
+					"line": 3700,
 					"column": 19,
 					"label": ""
 				}
@@ -171,6 +176,26 @@
 				{
 					"line": 55,
 					"column": 65,
+					"label": ""
+				}
+			]
+		},
+		{
+			"path": "packages/react-reconciler/src/ReactFiberCompleteWork.old.js",
+			"bookmarks": [
+				{
+					"line": 849,
+					"column": 22,
+					"label": ""
+				}
+			]
+		},
+		{
+			"path": "packages/react-reconciler/src/ReactFiberConcurrentUpdates.old.js",
+			"bookmarks": [
+				{
+					"line": 141,
+					"column": 39,
 					"label": ""
 				}
 			]

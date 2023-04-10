@@ -31,25 +31,37 @@
     </script> -->
     <script type="text/babel">
       const root = ReactDOM.createRoot(document.getElementById('container'));
+      class Header extends React.PureComponent {
+        render() {
+          return (
+            <React.Fragment>
+              <h1>title</h1>
+              <h2>title2</h2>
+            </React.Fragment>
+          );
+        }
+      }
       class App extends React.Component{
         constructor(){
           super();
           this.state = {
-            count: 0
+            list: ['A', 'B', 'C'],
           }
         }
         add = ()=>{
-          this.setState({
-            count: this.state.count+1
-          })
+          this.setState({ list: ['C', 'A', 'X'] })
         }
         render() {
-          const { count } = this.state
           return (
-            <div>
-              <span>{count}</span>
+            <React.Fragment>
+              <Header />
               <button onClick={this.add}> add </button>
-            </div>
+              <div className="content">
+                {this.state.list.map(item => (
+                  <p key={item}>{item}</p>
+                ))}
+              </div>
+            </React.Fragment>
           )
         }
       }

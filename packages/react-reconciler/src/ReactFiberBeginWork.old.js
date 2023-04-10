@@ -3389,6 +3389,7 @@ function bailoutOnAlreadyFinishedWork(
       // the children.
       lazilyPropagateParentContextChanges(current, workInProgress, renderLanes);
       if (!includesSomeLane(renderLanes, workInProgress.childLanes)) {
+        // 渲染优先级不包括 workInProgress.childLanes, 表明子节点也无需更新. 返回null, 直接进入回溯阶段.
         return null;
       }
     } else {
@@ -3398,6 +3399,8 @@ function bailoutOnAlreadyFinishedWork(
 
   // This fiber doesn't have work, but its subtree does. Clone the child
   // fibers and continue.
+  // 本fiber虽然不用更新, 但是子节点需要更新. clone并返回子节点
+  // 复用current.alternate
   cloneChildFibers(current, workInProgress);
   return workInProgress.child;
 }

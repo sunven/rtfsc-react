@@ -286,6 +286,7 @@ if (supportsMutation) {
     workInProgress.updateQueue = (updatePayload: any);
     // If the update payload indicates that there is a change or if there
     // is a new ref we mark this as an update. All the work is done in commitWork.
+    // 如果有属性变动, 设置fiber.flags |= Update, 等待`commit`阶段的处理
     if (updatePayload) {
       markUpdate(workInProgress);
     }
