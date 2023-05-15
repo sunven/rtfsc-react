@@ -780,6 +780,7 @@ function commitLayoutEffectOnFiber(
               ) {
                 try {
                   startLayoutEffectTimer();
+                  // 初次渲染: 调用 componentDidMount
                   instance.componentDidMount();
                 } finally {
                   recordLayoutEffectDuration(finishedWork);
@@ -833,6 +834,7 @@ function commitLayoutEffectOnFiber(
               ) {
                 try {
                   startLayoutEffectTimer();
+                  // 更新阶段: 调用 componentDidUpdate
                   instance.componentDidUpdate(
                     prevProps,
                     prevState,
@@ -888,6 +890,7 @@ function commitLayoutEffectOnFiber(
           // We could update instance props and state here,
           // but instead we rely on them being set during last render.
           // TODO: revisit this when we implement resuming.
+          // 处理update回调函数 如: this.setState({}, callback)
           commitUpdateQueue(finishedWork, updateQueue, instance);
         }
         break;
@@ -924,6 +927,7 @@ function commitLayoutEffectOnFiber(
         if (current === null && finishedWork.flags & Update) {
           const type = finishedWork.type;
           const props = finishedWork.memoizedProps;
+          // 设置focus等原生状态
           commitMount(instance, type, props, finishedWork);
         }
 
@@ -1495,6 +1499,7 @@ function getHostSibling(fiber: Fiber): ?Instance {
   }
 }
 
+// 新增
 function commitPlacement(finishedWork: Fiber): void {
   if (!supportsMutation) {
     return;
@@ -1680,6 +1685,7 @@ function recursivelyTraverseDeletionEffects(
   }
 }
 
+// 删除
 function commitDeletionEffectsOnFiber(
   finishedRoot: FiberRoot,
   nearestMountedAncestor: Fiber,
@@ -2049,6 +2055,7 @@ export function commitMutationEffects(
   inProgressRoot = null;
 }
 
+// 递归遍历突变副作用
 function recursivelyTraverseMutationEffects(
   root: FiberRoot,
   parentFiber: Fiber,
@@ -2061,6 +2068,7 @@ function recursivelyTraverseMutationEffects(
     for (let i = 0; i < deletions.length; i++) {
       const childToDelete = deletions[i];
       try {
+        // 删除
         commitDeletionEffects(root, parentFiber, childToDelete);
       } catch (error) {
         captureCommitPhaseError(childToDelete, parentFiber, error);
@@ -2200,6 +2208,7 @@ function commitMutationEffectsOnFiber(
             finishedWork.updateQueue = null;
             if (updatePayload !== null) {
               try {
+                // 更新
                 commitUpdate(
                   instance,
                   updatePayload,
