@@ -296,6 +296,9 @@ export function reconcileChildren(
     // won't update its child set by applying minimal side-effects. Instead,
     // we will add them all to the child before it gets rendered. That means
     // we can optimize this reconciliation pass by not tracking side-effects.
+    // 如果这是一个尚未渲染的全新组件，我们将不会通过应用最小化的副作用来更新其子集。
+    // 相反，在它被渲染之前，我们将把所有子元素添加到该组件中。
+    // 这意味着我们可以通过不跟踪副作用来优化此协调过程。
     workInProgress.child = mountChildFibers(
       workInProgress,
       null,
@@ -309,6 +312,10 @@ export function reconcileChildren(
 
     // If we had any progressed work already, that is invalid at this point so
     // let's throw it out.
+    // 如果当前的子元素与正在进行的工作相同，这意味着我们尚未开始处理这些子元素。
+    // 因此，我们使用克隆算法来创建所有当前子元素的副本。
+
+    // 如果我们已经有了任何进展，那么在这个时候它是无效的，所以让我们抛弃它。
     workInProgress.child = reconcileChildFibers(
       workInProgress,
       current.child,
@@ -3475,6 +3482,7 @@ function checkScheduledUpdateOrContext(
 ): boolean {
   // Before performing an early bailout, we must check if there are pending
   // updates or context.
+  // 在进行早期撤离之前，我们必须检查是否有待处理的更新或上下文。
   const updateLanes = current.lanes;
   if (includesSomeLane(updateLanes, renderLanes)) {
     return true;
@@ -3739,6 +3747,7 @@ function beginWork(
       // Neither props nor legacy context changes. Check if there's a pending
       // update or context change.
       // 既没有道具也没有遗留的上下文更改。检查是否有待处理的更新或上下文更改
+      // 初次渲染为true，setState为false
       const hasScheduledUpdateOrContext = checkScheduledUpdateOrContext(
         current,
         renderLanes,

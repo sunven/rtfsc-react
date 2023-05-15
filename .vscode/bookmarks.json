@@ -17,6 +17,11 @@
 					"line": 91,
 					"column": 82,
 					"label": ""
+				},
+				{
+					"line": 133,
+					"column": 46,
+					"label": ""
 				}
 			]
 		},
@@ -54,27 +59,12 @@
 					"label": ""
 				},
 				{
-					"line": 1279,
-					"column": 38,
-					"label": ""
-				},
-				{
-					"line": 1502,
-					"column": 66,
-					"label": ""
-				},
-				{
-					"line": 1714,
-					"column": 56,
-					"label": ""
-				},
-				{
 					"line": 1892,
 					"column": 53,
 					"label": ""
 				},
 				{
-					"line": 1924,
+					"line": 1920,
 					"column": 54,
 					"label": ""
 				},
@@ -84,7 +74,7 @@
 					"label": ""
 				},
 				{
-					"line": 2059,
+					"line": 2055,
 					"column": 24,
 					"label": ""
 				}
@@ -124,12 +114,7 @@
 					"label": ""
 				},
 				{
-					"line": 1047,
-					"column": 30,
-					"label": ""
-				},
-				{
-					"line": 3700,
+					"line": 3704,
 					"column": 19,
 					"label": ""
 				}
@@ -161,46 +146,6 @@
 				{
 					"line": 146,
 					"column": 21,
-					"label": ""
-				}
-			]
-		},
-		{
-			"path": "packages/react-reconciler/src/ReactFiberClassComponent.old.js",
-			"bookmarks": [
-				{
-					"line": 203,
-					"column": 44,
-					"label": ""
-				}
-			]
-		},
-		{
-			"path": "packages/react/src/ReactBaseClasses.js",
-			"bookmarks": [
-				{
-					"line": 55,
-					"column": 65,
-					"label": ""
-				}
-			]
-		},
-		{
-			"path": "packages/react-reconciler/src/ReactFiberCompleteWork.old.js",
-			"bookmarks": [
-				{
-					"line": 849,
-					"column": 22,
-					"label": ""
-				}
-			]
-		},
-		{
-			"path": "packages/react-reconciler/src/ReactFiberConcurrentUpdates.old.js",
-			"bookmarks": [
-				{
-					"line": 141,
-					"column": 39,
 					"label": ""
 				}
 			]
