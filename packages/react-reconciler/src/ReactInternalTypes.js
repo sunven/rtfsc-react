@@ -138,6 +138,7 @@ export type Fiber = {|
 
   // The state used to create the output
   // 用于输出的state, 最终渲染所使用的state
+  // 上一次生成子节点之后保持在内存中的局部状态.
   memoizedState: any,
 
   // Dependencies (contexts, events) for this fiber, if it has any

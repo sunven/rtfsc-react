@@ -477,7 +477,9 @@ let needsPaint = false;
 
 // 是否让出主线程 让浏览器能够执行更高优先级的任务(如ui绘制, 用户输入等)
 function shouldYieldToHost() {
+  // 调度开始时，startTime赋值为当前时间
   const timeElapsed = getCurrentTime() - startTime;
+  // 5 ms
   if (timeElapsed < frameInterval) {
     // The main thread has only been blocked for a really short amount of time;
     // smaller than a single frame. Don't yield yet.
