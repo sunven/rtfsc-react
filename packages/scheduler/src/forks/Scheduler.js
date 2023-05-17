@@ -353,19 +353,23 @@ function unstable_scheduleCallback(priorityLevel, callback, options) {
   var timeout;
   switch (priorityLevel) {
     case ImmediatePriority:
+      // -1
       timeout = IMMEDIATE_PRIORITY_TIMEOUT;
       break;
     case UserBlockingPriority:
+      // 250
       timeout = USER_BLOCKING_PRIORITY_TIMEOUT;
       break;
     case IdlePriority:
       timeout = IDLE_PRIORITY_TIMEOUT;
       break;
     case LowPriority:
+      // 10000
       timeout = LOW_PRIORITY_TIMEOUT;
       break;
     case NormalPriority:
     default:
+      // 5000
       timeout = NORMAL_PRIORITY_TIMEOUT;
       break;
   }
