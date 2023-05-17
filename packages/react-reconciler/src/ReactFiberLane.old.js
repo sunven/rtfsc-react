@@ -35,12 +35,15 @@ export const TotalLanes = 31;
 export const NoLanes: Lanes = /*                        */ 0b0000000000000000000000000000000;
 export const NoLane: Lane = /*                          */ 0b0000000000000000000000000000000;
 
+// 用户输入，点击等
 export const SyncLane: Lane = /*                        */ 0b0000000000000000000000000000001;
 
 export const InputContinuousHydrationLane: Lane = /*    */ 0b0000000000000000000000000000010;
+// 滚动，拖拽等
 export const InputContinuousLane: Lane = /*             */ 0b0000000000000000000000000000100;
 
 export const DefaultHydrationLane: Lane = /*            */ 0b0000000000000000000000000001000;
+// 默认
 export const DefaultLane: Lane = /*                     */ 0b0000000000000000000000000010000;
 
 const TransitionHydrationLane: Lane = /*                */ 0b0000000000000000000000000100000;
@@ -76,6 +79,7 @@ export const SelectiveHydrationLane: Lane = /*          */ 0b0001000000000000000
 const NonIdleLanes: Lanes = /*                          */ 0b0001111111111111111111111111111;
 
 export const IdleHydrationLane: Lane = /*               */ 0b0010000000000000000000000000000;
+// 空闲
 export const IdleLane: Lane = /*                        */ 0b0100000000000000000000000000000;
 
 export const OffscreenLane: Lane = /*                   */ 0b1000000000000000000000000000000;
