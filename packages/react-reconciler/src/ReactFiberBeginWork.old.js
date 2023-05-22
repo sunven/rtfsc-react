@@ -288,7 +288,7 @@ if (__DEV__) {
 export function reconcileChildren(
   current: Fiber | null,
   workInProgress: Fiber,
-  nextChildren: any,
+  nextChildren: any, // ReactElement
   renderLanes: Lanes,
 ) {
   if (current === null) {
@@ -3707,8 +3707,8 @@ function attemptEarlyBailoutIfNoScheduledUpdate(
 }
 
 function beginWork(
-  current: Fiber | null,
-  workInProgress: Fiber,
+  current: Fiber | null, // 旧 即workInProgress.alternate
+  workInProgress: Fiber, // 新
   renderLanes: Lanes,
 ): Fiber | null {
   if (__DEV__) {
@@ -3762,6 +3762,8 @@ function beginWork(
         // No pending updates or context. Bail out now.
         // 没有待处理的更新或上下文。现在退出。
         didReceiveUpdate = false;
+        // 尝试提前退出，如果没有计划更新
+        // 复用
         return attemptEarlyBailoutIfNoScheduledUpdate(
           current,
           workInProgress,

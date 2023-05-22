@@ -356,6 +356,7 @@ function ChildReconciler(shouldTrackSideEffects) {
     }
   }
 
+  // 打上 Placement 编辑，新增节点
   function placeSingleChild(newFiber: Fiber): Fiber {
     // This is simpler for the single child case. We only need to do a
     // placement for inserting new children.
@@ -1133,14 +1134,18 @@ function ChildReconciler(shouldTrackSideEffects) {
     lanes: Lanes,
   ): Fiber {
     const key = element.key;
+    // 旧
     let child = currentFirstChild;
+    // 之前是否创建过
     while (child !== null) {
       // TODO: If key === null and child.key === null, then this only applies to
       // the first item in the list.
+      // key是否相等
       if (child.key === key) {
         const elementType = element.type;
         if (elementType === REACT_FRAGMENT_TYPE) {
           if (child.tag === Fragment) {
+            // 新旧都为 Fragment
             deleteRemainingChildren(returnFiber, child.sibling);
             const existing = useFiber(child, element.props.children);
             existing.return = returnFiber;
@@ -1166,7 +1171,10 @@ function ChildReconciler(shouldTrackSideEffects) {
               elementType.$$typeof === REACT_LAZY_TYPE &&
               resolveLazy(elementType) === child.type)
           ) {
+            // 新旧 节点类型相同
+            // 兄弟节点标记删除，因为已经找到复用的了
             deleteRemainingChildren(returnFiber, child.sibling);
+            // 复用该节点
             const existing = useFiber(child, element.props);
             existing.ref = coerceRef(returnFiber, child, element);
             existing.return = returnFiber;
@@ -1178,14 +1186,19 @@ function ChildReconciler(shouldTrackSideEffects) {
           }
         }
         // Didn't match.
+        // key相同且type不同时执行deleteRemainingChildren将child及其兄弟fiber都标记删除
         deleteRemainingChildren(returnFiber, child);
+        // key 相同已经用过，type不同，不能复用，那么没必要循环兄弟节点了，break
         break;
       } else {
+        // key不同，将该fiber标记为删除
+        // 后面还有兄弟fiber还没有遍历到。所以仅仅标记该fiber删除
         deleteChild(returnFiber, child);
       }
       child = child.sibling;
     }
 
+    // mount fiber需要新创建，不存在复用
     if (element.type === REACT_FRAGMENT_TYPE) {
       const created = createFiberFromFragment(
         element.props.children,
@@ -1340,6 +1353,7 @@ function ChildReconciler(shouldTrackSideEffects) {
     }
 
     // Remaining cases are all treated as empty.
+    // 删除
     return deleteRemainingChildren(returnFiber, currentFirstChild);
   }
 

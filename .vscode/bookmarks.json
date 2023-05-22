@@ -59,6 +59,11 @@
 					"label": ""
 				},
 				{
+					"line": 1714,
+					"column": 56,
+					"label": ""
+				},
+				{
 					"line": 1892,
 					"column": 53,
 					"label": ""
@@ -114,7 +119,7 @@
 					"label": ""
 				},
 				{
-					"line": 3704,
+					"line": 3708,
 					"column": 19,
 					"label": ""
 				}
@@ -146,6 +151,41 @@
 				{
 					"line": 146,
 					"column": 21,
+					"label": ""
+				}
+			]
+		},
+		{
+			"path": "packages/react-dom/src/events/ReactDOMEventListener.js",
+			"bookmarks": [
+				{
+					"line": 409,
+					"column": 65,
+					"label": ""
+				}
+			]
+		},
+		{
+			"path": "packages/react-reconciler/src/ReactChildFiber.old.js",
+			"bookmarks": [
+				{
+					"line": 264,
+					"column": 50,
+					"label": ""
+				},
+				{
+					"line": 1257,
+					"column": 32,
+					"label": ""
+				}
+			]
+		},
+		{
+			"path": "packages/react-reconciler/src/ReactFiberBeginWork.new.js",
+			"bookmarks": [
+				{
+					"line": 3684,
+					"column": 19,
 					"label": ""
 				}
 			]
