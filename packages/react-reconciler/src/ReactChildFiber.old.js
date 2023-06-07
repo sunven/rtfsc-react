@@ -340,6 +340,7 @@ function ChildReconciler(shouldTrackSideEffects) {
     }
     const current = newFiber.alternate;
     if (current !== null) {
+      // 复用的
       const oldIndex = current.index;
       if (oldIndex < lastPlacedIndex) {
         // This is a move.
@@ -797,11 +798,15 @@ function ChildReconciler(shouldTrackSideEffects) {
     }
 
     let resultingFirstChild: Fiber | null = null;
+    // 用来存储上一个新创建或复用的Fiber节点，用于构建sibling链表。
     let previousNewFiber: Fiber | null = null;
 
+    // 用来指向旧的Fiber节点，初始值为currentFirstChild。
     let oldFiber = currentFirstChild;
+    // 用来记录上一个被放置的Fiber节点的索引，初始值为0。
     let lastPlacedIndex = 0;
     let newIdx = 0;
+    // 用来存储下一个旧的Fiber节点。
     let nextOldFiber = null;
     // 老的，新的有一个遍历完，就结束遍历了
     // 以oldFiber为基准,去newChildren中找到一个 key相同的,然后oldFiber才会下一个
@@ -815,6 +820,7 @@ function ChildReconciler(shouldTrackSideEffects) {
       } else {
         nextOldFiber = oldFiber.sibling;
       }
+      // 用来存储新创建或复用的Fiber节点。
       // 文本节点直接更新，
       // 其他类型节点需要key相同才更新，否则返回 null，更新又分复用和新创建
       // 老的存在，且和新的类型相同才复用，否则创建
@@ -839,6 +845,7 @@ function ChildReconciler(shouldTrackSideEffects) {
       if (shouldTrackSideEffects) {
         // update 为 true
         // moute  为 false
+        // key 相同, type不同, 新创建,老的删除
         if (oldFiber && newFiber.alternate === null) {
           // We matched the slot, but we didn't reuse the existing fiber, so we
           // need to delete the existing child.
