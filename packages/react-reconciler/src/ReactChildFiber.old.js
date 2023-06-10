@@ -343,10 +343,12 @@ function ChildReconciler(shouldTrackSideEffects) {
       // 复用的
       const oldIndex = current.index;
       if (oldIndex < lastPlacedIndex) {
+        // 该可复用节点之前插入的位置索引小于这次更新需要插入的位置索引，代表该节点需要向右移动
         // This is a move.
         newFiber.flags |= Placement;
         return lastPlacedIndex;
       } else {
+        // 代表该可复用节点不需要移动
         // This item can stay in place.
         return oldIndex;
       }
@@ -812,6 +814,8 @@ function ChildReconciler(shouldTrackSideEffects) {
     // 以oldFiber为基准,去newChildren中找到一个 key相同的,然后oldFiber才会下一个
     for (; oldFiber !== null && newIdx < newChildren.length; newIdx++) {
       if (oldFiber.index > newIdx) {
+        // TODO: dot't understand
+        // oldIndex 大于 newIndex，那么需要旧的 fiber 等待新的 fiber，一直等到位置相同
         // 新的跑到前面去了 位置变了
         // 下次还是处理这个，
         nextOldFiber = oldFiber;
@@ -868,7 +872,7 @@ function ChildReconciler(shouldTrackSideEffects) {
     }
 
     if (newIdx === newChildren.length) {
-      // 新的遍历完了，删除剩下的老的 标记Deletion
+      // 新的遍历完了，剩下老节点是为删除, 标记Deletion
       // We've reached the end of the new children. We can delete the rest.
       deleteRemainingChildren(returnFiber, oldFiber);
       if (getIsHydrating()) {
@@ -906,6 +910,8 @@ function ChildReconciler(shouldTrackSideEffects) {
     }
 
     // Add all children to a key map for quick lookups.
+    // key 是 fiber的key或index,value是old fiber
+    // 便于通过key查找是否存在可复用的节点
     const existingChildren = mapRemainingChildren(returnFiber, oldFiber);
 
     // 新的 旧的都没遍历完
@@ -921,6 +927,7 @@ function ChildReconciler(shouldTrackSideEffects) {
       if (newFiber !== null) {
         if (shouldTrackSideEffects) {
           if (newFiber.alternate !== null) {
+            // 新节点是通过老节点复用的
             // The new fiber is a work in progress, but if there exists a
             // current, that means that we reused the fiber. We need to delete
             // it from the child list so that we don't add it to the deletion
