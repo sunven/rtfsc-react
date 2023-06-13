@@ -739,32 +739,6 @@ function ChildReconciler(shouldTrackSideEffects) {
     return knownKeys;
   }
 
-  //   reconcileChildrenArray的实现逻辑大致如下¹²³：
-
-  // - 定义一个变量lastPlacedIndex，用来记录上一个被放置的Fiber节点的索引，初始值为0。
-  // - 定义一个变量newFiber，用来存储新创建或复用的Fiber节点。
-  // - 定义一个变量previousNewFiber，用来存储上一个新创建或复用的Fiber节点，用于构建sibling链表。
-  // - 定义一个变量oldFiber，用来指向旧的Fiber节点，初始值为currentFirstChild。
-  // - 定义一个变量nextOldFiber，用来存储下一个旧的Fiber节点。
-  // - 遍历newChildren数组，对每个元素进行以下操作：
-  //   - 如果oldFiber不为null，那么获取它的alternate属性作为nextOldFiber，并将oldFiber指向nextOldFiber。
-  //   - 调用createChild函数，传入returnFiber、newChild、lanes和oldFiber作为参数，尝试复用或创建新的Fiber节点，并赋值给newFiber。
-  //   - 如果newFiber为null，说明没有可复用或创建的节点，跳出循环。
-  //   - 如果newFiber.key不为null，说明是有key的节点，调用placeChild函数，传入newFiber、lastPlacedIndex和newIdx作为参数，确定newFiber的位置，并更新lastPlacedIndex。
-  //   - 如果previousNewFiber不为null，那么将previousNewFiber.sibling指向newFiber，构建sibling链表。
-  //   - 如果是第一个子节点，那么将returnFiber.child指向newFiber。
-  //   - 将previousNewFiber指向newFiber。
-  // - 如果还有剩余的oldFiber没有处理，那么调用deleteRemainingChildren函数，传入returnFiber和oldFiber作为参数，删除多余的旧节点。
-  // - 如果还有剩余的newChildren没有处理，那么调用createChild函数和placeChild函数，创建并放置新节点，并更新sibling链表。
-  // - 返回returnFiber.child作为结果。
-
-  // 你对这个逻辑有什么疑问吗？还是想看一些示例代码？
-
-  // 源: 与必应的对话， 2023/6/7
-  // (1) React 源码系列：reconcileChildrenArray - 掘金. https://juejin.cn/post/7036021537740161055.
-  // (2) React源码解析（五）：reconcileChildren源码解析 - 掘金. https://juejin.cn/post/7190359498643472421.
-  // (3) React源码理解之reconcileChildrenArray - 掘金. https://juejin.cn/post/6923953408843972616.
-
   function reconcileChildrenArray(
     returnFiber: Fiber,
     currentFirstChild: Fiber | null, // 老的 链式
