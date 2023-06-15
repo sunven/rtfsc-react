@@ -185,15 +185,18 @@ type BasicStateAction<S> = (S => S) | S;
 type Dispatch<A> = A => void;
 
 // These are set right before calling the component.
+// 渲染优先级
 let renderLanes: Lanes = NoLanes;
 // The work-in-progress fiber. I've named it differently to distinguish it from
 // the work-in-progress hook.
+// 当前正在构造的fiber, 等同于 workInProgress, 为了和当前hook区分, 所以将其改名
 let currentlyRenderingFiber: Fiber = (null: any);
 
 // Hooks are stored as a linked list on the fiber's memoizedState field. The
 // current hook list is the list that belongs to the current fiber. The
 // work-in-progress hook list is a new list that will be added to the
 // work-in-progress fiber.
+// Hooks被存储在fiber.memoizedState 链表上
 let currentHook: Hook | null = null;
 let workInProgressHook: Hook | null = null;
 
@@ -201,11 +204,14 @@ let workInProgressHook: Hook | null = null;
 // does not get reset if we do another render pass; only when we're completely
 // finished evaluating this component. This is an optimization so we know
 // whether we need to clear render phase updates after a throw.
+// 在function的执行过程中, 是否再次发起了更新. 只有function被完全执行之后才会重置.
+// 当render异常时, 通过该变量可以决定是否清除render过程中的更新.
 let didScheduleRenderPhaseUpdate: boolean = false;
 // Where an update was scheduled only during the current render pass. This
 // gets reset after each attempt.
 // TODO: Maybe there's some way to consolidate this with
 // `didScheduleRenderPhaseUpdate`. Or with `numberOfReRenders`.
+// 在本次function的执行过程中, 是否再次发起了更新. 每一次调用function都会被重置
 let didScheduleRenderPhaseUpdateDuringThisPass: boolean = false;
 // Counts the number of useId hooks in this component.
 let localIdCounter: number = 0;
@@ -214,6 +220,7 @@ let localIdCounter: number = 0;
 // render attempts.
 let globalClientIdCounter: number = 0;
 
+// 在本次function的执行过程中, 重新发起更新的最大次数
 const RE_RENDER_LIMIT = 25;
 
 // In DEV, this is the name of the currently executing primitive hook
@@ -383,8 +390,9 @@ export function renderWithHooks<Props, SecondArg>(
   secondArg: SecondArg,
   nextRenderLanes: Lanes,
 ): any {
-  renderLanes = nextRenderLanes;
-  currentlyRenderingFiber = workInProgress;
+  // --------------- 1. 设置全局变量 -------------------
+  renderLanes = nextRenderLanes; // 当前渲染优先级
+  currentlyRenderingFiber = workInProgress; // 当前fiber节点, 也就是function组件对应的fiber节点
 
   if (__DEV__) {
     hookTypesDev =
@@ -397,6 +405,7 @@ export function renderWithHooks<Props, SecondArg>(
       current !== null && current.type !== workInProgress.type;
   }
 
+  // 清除当前fiber的遗留状态
   workInProgress.memoizedState = null;
   workInProgress.updateQueue = null;
   workInProgress.lanes = NoLanes;
@@ -429,12 +438,14 @@ export function renderWithHooks<Props, SecondArg>(
       ReactCurrentDispatcher.current = HooksDispatcherOnMountInDEV;
     }
   } else {
+    // --------------- 2. 调用function,生成子级ReactElement对象 -------------------
     ReactCurrentDispatcher.current =
       current === null || current.memoizedState === null
         ? HooksDispatcherOnMount
         : HooksDispatcherOnUpdate;
   }
 
+  // 执行function函数, 其中进行分析Hooks的使用
   let children = Component(props, secondArg);
 
   // Check if there was a render phase update
@@ -492,6 +503,8 @@ export function renderWithHooks<Props, SecondArg>(
   const didRenderTooFewHooks =
     currentHook !== null && currentHook.next !== null;
 
+  // --------------- 3. 重置全局变量,并返回 -------------------
+  // 执行function之后, 还原被修改的全局变量, 不影响下一次调用
   renderLanes = NoLanes;
   currentlyRenderingFiber = (null: any);
 
