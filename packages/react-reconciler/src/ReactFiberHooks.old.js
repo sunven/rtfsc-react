@@ -663,9 +663,11 @@ function mountWorkInProgressHook(): Hook {
 
   if (workInProgressHook === null) {
     // This is the first hook in the list
+    // 链表中首个hook
     currentlyRenderingFiber.memoizedState = workInProgressHook = hook;
   } else {
     // Append to the end of the list
+    // 将hook添加到链表末尾
     workInProgressHook = workInProgressHook.next = hook;
   }
   return workInProgressHook;
