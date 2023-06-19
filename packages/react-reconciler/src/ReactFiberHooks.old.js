@@ -439,6 +439,8 @@ export function renderWithHooks<Props, SecondArg>(
     }
   } else {
     // --------------- 2. 调用function,生成子级ReactElement对象 -------------------
+    // 这里决定了具体的hook,
+    // 比如是 mountState 还是 updateState
     ReactCurrentDispatcher.current =
       current === null || current.memoizedState === null
         ? HooksDispatcherOnMount
@@ -746,11 +748,14 @@ function basicStateReducer<S>(state: S, action: BasicStateAction<S>): S {
   return typeof action === 'function' ? action(state) : action;
 }
 
+// useReducer
+// mountState 是特殊的 mountReducer
 function mountReducer<S, I, A>(
   reducer: (S, A) => S,
   initialArg: I,
   init?: I => S,
 ): [S, Dispatch<A>] {
+  // 1. 创建hook
   const hook = mountWorkInProgressHook();
   let initialState;
   if (init !== undefined) {
@@ -758,16 +763,21 @@ function mountReducer<S, I, A>(
   } else {
     initialState = ((initialArg: any): S);
   }
+  // 2. 初始化hook的属性
+  // 2.1 设置 hook.memoizedState/hook.baseState
   hook.memoizedState = hook.baseState = initialState;
+  // 2.2 设置 hook.queue
   const queue: UpdateQueue<S, A> = {
     pending: null,
     interleaved: null,
     lanes: NoLanes,
     dispatch: null,
+    // queue.lastRenderedReducer是由外传入
     lastRenderedReducer: reducer,
     lastRenderedState: (initialState: any),
   };
   hook.queue = queue;
+  // 2.3 设置 hook.dispatch
   const dispatch: Dispatch<A> = (queue.dispatch = (dispatchReducerAction.bind(
     null,
     currentlyRenderingFiber,
@@ -781,6 +791,7 @@ function updateReducer<S, I, A>(
   initialArg: I,
   init?: I => S,
 ): [S, Dispatch<A>] {
+  // 1. 获取workInProgressHook对象
   const hook = updateWorkInProgressHook();
   const queue = hook.queue;
 
@@ -798,6 +809,7 @@ function updateReducer<S, I, A>(
   let baseQueue = current.baseQueue;
 
   // The last pending update that hasn't been processed yet.
+  // 2. 链表拼接: 将 hook.queue.pending 拼接到 current.baseQueue
   const pendingQueue = queue.pending;
   if (pendingQueue !== null) {
     // We have new updates that haven't been processed yet.
@@ -823,6 +835,7 @@ function updateReducer<S, I, A>(
     queue.pending = null;
   }
 
+  // 3. 状态计算
   if (baseQueue !== null) {
     // We have a queue to process.
     const first = baseQueue.next;
@@ -834,10 +847,12 @@ function updateReducer<S, I, A>(
     let update = first;
     do {
       const updateLane = update.lane;
+      // 3.1 优先级提取update
       if (!isSubsetOfLanes(renderLanes, updateLane)) {
         // Priority is insufficient. Skip this update. If this is the first
         // skipped update, the previous update/state is the new base
         // update/state.
+        // 优先级不够: 加入到baseQueue中, 等待下一次render
         const clone: Update<S, A> = {
           lane: updateLane,
           action: update.action,
@@ -861,7 +876,7 @@ function updateReducer<S, I, A>(
         markSkippedUpdateLanes(updateLane);
       } else {
         // This update does have sufficient priority.
-
+        // 优先级足够: 状态合并
         if (newBaseQueueLast !== null) {
           const clone: Update<S, A> = {
             // This update is going to be committed so we never want uncommit
@@ -889,6 +904,7 @@ function updateReducer<S, I, A>(
       update = update.next;
     } while (update !== null && update !== first);
 
+     // 3.2. 更新属性
     if (newBaseQueueLast === null) {
       newBaseState = newState;
     } else {
@@ -901,6 +917,7 @@ function updateReducer<S, I, A>(
       markWorkInProgressReceivedUpdate();
     }
 
+    // 把计算之后的结果更新到workInProgressHook上
     hook.memoizedState = newState;
     hook.baseState = newBaseState;
     hook.baseQueue = newBaseQueueLast;
@@ -1526,24 +1543,31 @@ function forceStoreRerender(fiber) {
   }
 }
 
+// useState
 function mountState<S>(
   initialState: (() => S) | S,
 ): [S, Dispatch<BasicStateAction<S>>] {
+  // 1. 创建hook
   const hook = mountWorkInProgressHook();
   if (typeof initialState === 'function') {
     // $FlowFixMe: Flow doesn't like mixed types
-    initialState = initialState();
+       = initialState();
   }
+  // 2. 初始化hook的属性
+  // 2.1 设置 hook.memoizedState/hook.baseState
+  // 2.2 设置 hook.queue
   hook.memoizedState = hook.baseState = initialState;
   const queue: UpdateQueue<S, BasicStateAction<S>> = {
     pending: null,
     interleaved: null,
     lanes: NoLanes,
     dispatch: null,
+    // queue.lastRenderedReducer是内置函数
     lastRenderedReducer: basicStateReducer,
     lastRenderedState: (initialState: any),
   };
   hook.queue = queue;
+  // 2.3 设置 hook.dispatch
   const dispatch: Dispatch<
     BasicStateAction<S>,
   > = (queue.dispatch = (dispatchSetState.bind(
@@ -2267,6 +2291,7 @@ function dispatchSetState<S, A>(
 
   const lane = requestUpdateLane(fiber);
 
+  // 1. 创建update对象
   const update: Update<S, A> = {
     lane,
     action,
@@ -2329,6 +2354,7 @@ function dispatchSetState<S, A>(
     const root = enqueueConcurrentHookUpdate(fiber, queue, update, lane);
     if (root !== null) {
       const eventTime = requestEventTime();
+      // 3. 发起调度更新, 进入`reconciler 运作流程`中的输入阶段.
       scheduleUpdateOnFiber(root, fiber, lane, eventTime);
       entangleTransitionUpdate(root, queue, lane);
     }
@@ -2352,10 +2378,13 @@ function enqueueRenderPhaseUpdate<S, A>(
   // This is a render phase update. Stash it in a lazily-created map of
   // queue -> linked list of updates. After this render pass, we'll restart
   // and apply the stashed updates on top of the work-in-progress hook.
+   // 渲染时更新, 做好全局标记
   didScheduleRenderPhaseUpdateDuringThisPass = didScheduleRenderPhaseUpdate = true;
+  // 2. 将update对象添加到hook.queue.pending队列
   const pending = queue.pending;
   if (pending === null) {
     // This is the first update. Create a circular list.
+    // 首个update, 创建一个环形链表
     update.next = update;
   } else {
     update.next = pending.next;

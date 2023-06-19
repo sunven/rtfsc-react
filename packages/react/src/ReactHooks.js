@@ -22,6 +22,7 @@ type BasicStateAction<S> = (S => S) | S;
 type Dispatch<A> = A => void;
 
 function resolveDispatcher() {
+  // renderWithHooks 方法决定了具体的Dispatcher
   const dispatcher = ReactCurrentDispatcher.current;
   if (__DEV__) {
     if (dispatcher === null) {
