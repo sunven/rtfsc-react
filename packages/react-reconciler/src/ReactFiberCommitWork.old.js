@@ -509,6 +509,7 @@ function commitBeforeMutationEffectsDeletion(deletion: Fiber) {
   }
 }
 
+// 依次执行: effect.destroy
 function commitHookEffectListUnmount(
   flags: HookFlags,
   finishedWork: Fiber,
@@ -522,6 +523,9 @@ function commitHookEffectListUnmount(
     do {
       if ((effect.tag & flags) === flags) {
         // Unmount
+        // 根据传入的tag过滤 effect链表.
+        // effect.tag HasEffect | Layout 由useLayoutEffect
+        // 所以 commitHookEffectListUnmount 只处理 useLayoutEffect() 创建的effect
         const destroy = effect.destroy;
         effect.destroy = undefined;
         if (destroy !== undefined) {
@@ -582,6 +586,7 @@ function commitHookEffectListMount(flags: HookFlags, finishedWork: Fiber) {
             setIsRunningInsertionEffect(true);
           }
         }
+        // 调用effect.create()之后, 将返回值赋值到effect.destroy
         effect.destroy = create();
         if (__DEV__) {
           if ((flags & HookInsertion) !== NoHookEffect) {
@@ -2039,6 +2044,7 @@ export function isSuspenseBoundaryBeingHidden(
   return false;
 }
 
+// dom 变更, 界面得到更新.
 export function commitMutationEffects(
   root: FiberRoot,
   finishedWork: Fiber,
@@ -2108,7 +2114,10 @@ function commitMutationEffectsOnFiber(
       commitReconciliationEffects(finishedWork);
 
       if (flags & Update) {
+        // useEffect,useLayoutEffect都会设置Update标记
+        // 更新节点
         try {
+          // 在突变阶段调用销毁函数, 保证所有的effect.destroy函数都会在effect.create之前执行
           commitHookEffectListUnmount(
             HookInsertion | HookHasEffect,
             finishedWork,
@@ -2465,6 +2474,7 @@ function commitReconciliationEffects(finishedWork: Fiber) {
   }
 }
 
+// dom 变更后
 export function commitLayoutEffects(
   finishedWork: Fiber,
   root: FiberRoot,

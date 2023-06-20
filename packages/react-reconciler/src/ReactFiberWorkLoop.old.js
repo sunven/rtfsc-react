@@ -2526,7 +2526,9 @@ function flushPassiveEffectsImpl() {
   const prevExecutionContext = executionContext;
   executionContext |= CommitContext;
 
+  // 1. 执行 effect.destroy()
   commitPassiveUnmountEffects(root.current);
+  // 2. 执行新 effect.create(), 重新赋值到 effect.destroy
   commitPassiveMountEffects(root, root.current, lanes, transitions);
 
   // TODO: Move to commitPassiveMountEffects

@@ -1591,6 +1591,7 @@ function rerenderState<S>(
 }
 
 function pushEffect(tag, create, destroy, deps) {
+  // 1. 创建effect对象
   const effect: Effect = {
     tag,
     create,
@@ -1599,10 +1600,13 @@ function pushEffect(tag, create, destroy, deps) {
     // Circular
     next: (null: any),
   };
+  // 2. 把effect对象添加到环形链表末尾
   let componentUpdateQueue: null | FunctionComponentUpdateQueue = (currentlyRenderingFiber.updateQueue: any);
   if (componentUpdateQueue === null) {
+    // 新建 workInProgress.updateQueue 用于挂载effect对象
     componentUpdateQueue = createFunctionComponentUpdateQueue();
     currentlyRenderingFiber.updateQueue = (componentUpdateQueue: any);
+    // updateQueue.lastEffect是一个环形链表
     componentUpdateQueue.lastEffect = effect.next = effect;
   } else {
     const lastEffect = componentUpdateQueue.lastEffect;
@@ -1710,9 +1714,12 @@ function updateRef<T>(initialValue: T): {|current: T|} {
 }
 
 function mountEffectImpl(fiberFlags, hookFlags, create, deps): void {
+  // 1. 创建hook
   const hook = mountWorkInProgressHook();
   const nextDeps = deps === undefined ? null : deps;
+  // 2. 设置workInProgress的副作用标记
   currentlyRenderingFiber.flags |= fiberFlags;
+  // 3. 创建Effect, 挂载到hook.memoizedState上
   hook.memoizedState = pushEffect(
     HookHasEffect | hookFlags,
     create,
@@ -1722,22 +1729,28 @@ function mountEffectImpl(fiberFlags, hookFlags, create, deps): void {
 }
 
 function updateEffectImpl(fiberFlags, hookFlags, create, deps): void {
+  // 1. 获取当前hook
   const hook = updateWorkInProgressHook();
   const nextDeps = deps === undefined ? null : deps;
   let destroy = undefined;
 
+  // 2. 分析依赖
   if (currentHook !== null) {
     const prevEffect = currentHook.memoizedState;
+    // 继续使用先前effect.destroy
     destroy = prevEffect.destroy;
     if (nextDeps !== null) {
       const prevDeps = prevEffect.deps;
+      // 比较依赖是否变化
       if (areHookInputsEqual(nextDeps, prevDeps)) {
+        // 2.1 如果依赖不变, 新建effect(tag不含HookHasEffect)
         hook.memoizedState = pushEffect(hookFlags, create, destroy, nextDeps);
         return;
       }
     }
   }
 
+  // 2.2 如果依赖改变, 更改fiber.flag, 新建effect
   currentlyRenderingFiber.flags |= fiberFlags;
 
   hook.memoizedState = pushEffect(
@@ -1794,6 +1807,7 @@ function updateInsertionEffect(
   return updateEffectImpl(UpdateEffect, HookInsertion, create, deps);
 }
 
+// useLayoutEffect
 function mountLayoutEffect(
   create: () => (() => void) | void,
   deps: Array<mixed> | void | null,
