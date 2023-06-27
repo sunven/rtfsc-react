@@ -47,6 +47,7 @@ import {
 } from 'shared/ReactFeatureFlags';
 import {REACT_SERVER_CONTEXT_DEFAULT_VALUE_NOT_LOADED} from 'shared/ReactSymbols';
 
+// 定义全局 valueCursor, 用于管理<Context.Provider/>组件的value
 const valueCursor: StackCursor<mixed> = createCursor(null);
 
 let rendererSigil;
@@ -84,6 +85,8 @@ export function exitDisallowedContextReadInDEV(): void {
   }
 }
 
+// 将context当前的值保存到valueCursor中, 并设置context._currentValue为最新值
+// 运行完成之后context为最新状态
 export function pushProvider<T>(
   providerFiber: Fiber,
   context: ReactContext<T>,
@@ -126,6 +129,8 @@ export function pushProvider<T>(
   }
 }
 
+// 取出valueCursor中保存的旧值, 设置到context._currentValue上.
+// 运行完成之后context恢复到上一个状态
 export function popProvider(
   context: ReactContext<any>,
   providerFiber: Fiber,
@@ -216,6 +221,8 @@ export function propagateContextChange<T>(
   }
 }
 
+// 向下遍历: 从ContextProvider类型的节点开始, 向下查找所有fiber.dependencies依赖该context的节点(假设叫做consumer).
+// 向上遍历: 从consumer节点开始, 向上遍历, 修改父路径上所有节点的fiber.childLanes属性, 表明其子节点有改动, 子节点会进入更新逻辑.
 function propagateContextChange_eager<T>(
   workInProgress: Fiber,
   context: ReactContext<T>,
@@ -241,13 +248,15 @@ function propagateContextChange_eager<T>(
       let dependency = list.firstContext;
       while (dependency !== null) {
         // Check if the context matches.
+        // 检查 dependency中依赖的context
         if (dependency.context === context) {
           // Match! Schedule an update on this fiber.
           if (fiber.tag === ClassComponent) {
             // Schedule a force update on the work-in-progress.
+            // 符合条件, 安排调度
             const lane = pickArbitraryLane(renderLanes);
             const update = createUpdate(NoTimestamp, lane);
-            update.tag = ForceUpdate;
+            update.tag = ForceUpdate; // 注意ForceUpdate, 保证class组件一定执行render
             // TODO: Because we don't have a work-in-progress, this will add the
             // update to the current fiber, too, which means it will persist even if
             // this render is thrown away. Since it's a race condition, not sure it's
@@ -271,11 +280,13 @@ function propagateContextChange_eager<T>(
             }
           }
 
+          // 标记优先级
           fiber.lanes = mergeLanes(fiber.lanes, renderLanes);
           const alternate = fiber.alternate;
           if (alternate !== null) {
             alternate.lanes = mergeLanes(alternate.lanes, renderLanes);
           }
+          // 向上
           scheduleContextWorkOnParentPath(
             fiber.return,
             renderLanes,
@@ -287,6 +298,7 @@ function propagateContextChange_eager<T>(
 
           // Since we already found a match, we can stop traversing the
           // dependency list.
+          // 退出查找
           break;
         }
         dependency = dependency.next;
@@ -626,6 +638,7 @@ export function prepareToReadContext(
   workInProgress: Fiber,
   renderLanes: Lanes,
 ): void {
+  // 1. 设置全局变量, 为readContext做准备
   currentlyRenderingFiber = workInProgress;
   lastContextDependency = null;
   lastFullyObservedContext = null;
@@ -663,6 +676,7 @@ export function readContext<T>(context: ReactContext<T>): T {
     }
   }
 
+  // 2. 返回 currentValue
   const value = isPrimaryRenderer
     ? context._currentValue
     : context._currentValue2;
@@ -676,6 +690,7 @@ export function readContext<T>(context: ReactContext<T>): T {
       next: null,
     };
 
+    // 1. 构造一个contextItem, 加入到 workInProgress.dependencies链表之后
     if (lastContextDependency === null) {
       if (currentlyRenderingFiber === null) {
         throw new Error(

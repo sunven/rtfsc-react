@@ -11,6 +11,7 @@ import type {Fiber} from './ReactInternalTypes';
 
 export type StackCursor<T> = {|current: T|};
 
+// 维护一个全局stack
 const valueStack: Array<any> = [];
 
 let fiberStack: Array<Fiber | null>;
@@ -21,6 +22,7 @@ if (__DEV__) {
 
 let index = -1;
 
+// 一个工厂函数, 创建StackCursor对象
 function createCursor<T>(defaultValue: T): StackCursor<T> {
   return {
     current: defaultValue,
@@ -31,6 +33,7 @@ function isEmpty(): boolean {
   return index === -1;
 }
 
+// 出栈
 function pop<T>(cursor: StackCursor<T>, fiber: Fiber): void {
   if (index < 0) {
     if (__DEV__) {
@@ -55,10 +58,11 @@ function pop<T>(cursor: StackCursor<T>, fiber: Fiber): void {
 
   index--;
 }
-
+// 入栈
 function push<T>(cursor: StackCursor<T>, value: T, fiber: Fiber): void {
   index++;
 
+  // 存储的是 cursor当前值, 随后更新了cursor.current
   valueStack[index] = cursor.current;
 
   if (__DEV__) {

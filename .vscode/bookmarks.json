@@ -109,7 +109,7 @@
 					"label": ""
 				},
 				{
-					"line": 3708,
+					"line": 3715,
 					"column": 19,
 					"label": ""
 				}
@@ -181,6 +181,16 @@
 				{
 					"line": 3684,
 					"column": 19,
+					"label": ""
+				}
+			]
+		},
+		{
+			"path": "packages/react-reconciler/src/ReactFiberNewContext.old.js",
+			"bookmarks": [
+				{
+					"line": 89,
+					"column": 32,
 					"label": ""
 				}
 			]
