@@ -86,6 +86,7 @@ type DispatchEntry = {|
 export type DispatchQueue = Array<DispatchEntry>;
 
 // TODO: remove top-level side effect.
+// 初始化事件到allNativeEvents
 SimpleEventPlugin.registerEvents();
 EnterLeaveEventPlugin.registerEvents();
 ChangeEventPlugin.registerEvents();
@@ -239,6 +240,7 @@ function processDispatchQueueItemsInOrder(
 ): void {
   let previousInstance;
   if (inCapturePhase) {
+    // 1. capture事件: 倒序遍历listeners
     for (let i = dispatchListeners.length - 1; i >= 0; i--) {
       const {instance, currentTarget, listener} = dispatchListeners[i];
       if (instance !== previousInstance && event.isPropagationStopped()) {
@@ -248,6 +250,7 @@ function processDispatchQueueItemsInOrder(
       previousInstance = instance;
     }
   } else {
+    // 2. bubble事件: 顺序遍历listeners
     for (let i = 0; i < dispatchListeners.length; i++) {
       const {instance, currentTarget, listener} = dispatchListeners[i];
       if (instance !== previousInstance && event.isPropagationStopped()) {
@@ -259,6 +262,7 @@ function processDispatchQueueItemsInOrder(
   }
 }
 
+// 执行派发
 export function processDispatchQueue(
   dispatchQueue: DispatchQueue,
   eventSystemFlags: EventSystemFlags,
@@ -343,6 +347,7 @@ export function listenToNativeEvent(
   if (isCapturePhaseListener) {
     eventSystemFlags |= IS_CAPTURE_PHASE;
   }
+  // 注册事件监听
   addTrappedEventListener(
     target,
     domEventName,
@@ -384,17 +389,22 @@ const listeningMarker =
     .toString(36)
     .slice(2);
 
+// 事件代理
 export function listenToAllSupportedEvents(rootContainerElement: EventTarget) {
+  // 1. 节流优化, 保证全局注册只被调用一次
   if (!(rootContainerElement: any)[listeningMarker]) {
     (rootContainerElement: any)[listeningMarker] = true;
+    // 2. 遍历allNativeEvents 监听冒泡和捕获阶段的事件
     allNativeEvents.forEach(domEventName => {
       // We handle selectionchange separately because it
       // doesn't bubble and needs to be on the document.
       // 我们单独处理selectionchange事件，因为它不会冒泡并且需要在文档上。
       if (domEventName !== 'selectionchange') {
         if (!nonDelegatedEvents.has(domEventName)) {
+          // 冒泡阶段监听
           listenToNativeEvent(domEventName, false, rootContainerElement);
         }
+        // 捕获阶段监听
         listenToNativeEvent(domEventName, true, rootContainerElement);
       }
     });
@@ -421,6 +431,7 @@ function addTrappedEventListener(
   isCapturePhaseListener: boolean,
   isDeferredListenerForLegacyFBSupport?: boolean,
 ) {
+  // 1. 构造listener
   let listener = createEventListenerWrapperWithPriority(
     targetContainer,
     domEventName,
@@ -428,6 +439,7 @@ function addTrappedEventListener(
   );
   // If passive option is not supported, then the event will be
   // active and not passive.
+  // 如果不支持被动选项，则事件将是主动的而不是被动的
   let isPassiveListener = undefined;
   if (passiveBrowserEventsSupported) {
     // Browsers introduced an intervention, making these events
@@ -475,6 +487,8 @@ function addTrappedEventListener(
     };
   }
   // TODO: There are too many combinations here. Consolidate them.
+  // 2. 注册事件监听
+  // 是捕获阶段侦听器
   if (isCapturePhaseListener) {
     if (isPassiveListener !== undefined) {
       unsubscribeListener = addEventCaptureListenerWithPassiveFlag(
@@ -675,9 +689,11 @@ export function accumulateSinglePhaseListeners(
   let lastHostComponent = null;
 
   // Accumulate all instances and listeners via the target -> root path.
+  // 从targetFiber开始, 向上遍历, 直到 root 为止
   while (instance !== null) {
     const {stateNode, tag} = instance;
     // Handle listeners that are on HostComponents (i.e. <div>)
+    // 当节点类型是HostComponent时(如: div, span, button等类型)
     if (tag === HostComponent && stateNode !== null) {
       lastHostComponent = stateNode;
 
@@ -706,6 +722,7 @@ export function accumulateSinglePhaseListeners(
 
       // Standard React on* listeners, i.e. onClick or onClickCapture
       if (reactEventName !== null) {
+        // 获取标准的监听函数 (如onClick , onClickCapture等)
         const listener = getListener(instance, reactEventName);
         if (listener != null) {
           listeners.push(
@@ -745,6 +762,7 @@ export function accumulateSinglePhaseListeners(
     // If we are only accumulating events for the target, then we don't
     // continue to propagate through the React fiber tree to find other
     // listeners.
+    // 如果只收集目标节点, 则不用向上遍历, 直接退出
     if (accumulateTargetOnly) {
       break;
     }

@@ -154,7 +154,12 @@
 			"path": "packages/react-dom/src/events/ReactDOMEventListener.js",
 			"bookmarks": [
 				{
-					"line": 409,
+					"line": 153,
+					"column": 30,
+					"label": ""
+				},
+				{
+					"line": 418,
 					"column": 65,
 					"label": ""
 				}
@@ -190,6 +195,21 @@
 			"bookmarks": [
 				{
 					"line": 89,
+					"column": 32,
+					"label": ""
+				}
+			]
+		},
+		{
+			"path": "packages/react-dom/src/events/DOMPluginEventSystem.js",
+			"bookmarks": [
+				{
+					"line": 265,
+					"column": 37,
+					"label": ""
+				},
+				{
+					"line": 392,
 					"column": 32,
 					"label": ""
 				}
