@@ -2,9 +2,7 @@
 
 const rollup = require('rollup');
 const babel = require('rollup-plugin-babel');
-const closure = require('./plugins/closure-plugin');
 const commonjs = require('rollup-plugin-commonjs');
-const prettier = require('rollup-plugin-prettier');
 const replace = require('rollup-plugin-replace');
 const stripBanner = require('rollup-plugin-strip-banner');
 const chalk = require('chalk');
@@ -17,11 +15,9 @@ const Stats = require('./stats');
 const Sync = require('./sync');
 const sizes = require('./plugins/sizes-plugin');
 const useForks = require('./plugins/use-forks-plugin');
-const stripUnusedImports = require('./plugins/strip-unused-imports');
 const Packaging = require('./packaging');
 const {asyncRimRaf} = require('./utils');
 const codeFrame = require('babel-code-frame');
-const Wrappers = require('./wrappers');
 
 const RELEASE_CHANNEL = process.env.RELEASE_CHANNEL;
 
@@ -42,25 +38,7 @@ process.on('unhandledRejection', err => {
   throw err;
 });
 
-const {
-  NODE_ES2015,
-  NODE_ESM,
-  UMD_DEV,
-  UMD_PROD,
-  UMD_PROFILING,
-  NODE_DEV,
-  NODE_PROD,
-  NODE_PROFILING,
-  FB_WWW_DEV,
-  FB_WWW_PROD,
-  FB_WWW_PROFILING,
-  RN_OSS_DEV,
-  RN_OSS_PROD,
-  RN_OSS_PROFILING,
-  RN_FB_DEV,
-  RN_FB_PROD,
-  RN_FB_PROFILING,
-} = Bundles.bundleTypes;
+const {UMD_DEV, UMD_PROD} = Bundles.bundleTypes;
 
 const {getFilename} = Bundles;
 
@@ -92,19 +70,6 @@ const forcePrettyOutput = argv.pretty;
 const isWatchMode = argv.watch;
 const syncFBSourcePath = argv['sync-fbsource'];
 const syncWWWPath = argv['sync-www'];
-
-const closureOptions = {
-  compilation_level: 'SIMPLE',
-  language_in: 'ECMASCRIPT_2015',
-  language_out: 'ECMASCRIPT5_STRICT',
-  env: 'CUSTOM',
-  warning_level: 'QUIET',
-  apply_input_source_maps: false,
-  use_types_for_optimization: false,
-  process_common_js_modules: false,
-  rewrite_polyfills: false,
-  inject_libraries: false,
-};
 
 // Non-ES2015 stuff applied before closure compiler.
 const babelPlugins = [
@@ -206,47 +171,15 @@ function getFormat(bundleType) {
   switch (bundleType) {
     case UMD_DEV:
     case UMD_PROD:
-    case UMD_PROFILING:
       return `umd`;
-    case NODE_ES2015:
-    case NODE_DEV:
-    case NODE_PROD:
-    case NODE_PROFILING:
-    case FB_WWW_DEV:
-    case FB_WWW_PROD:
-    case FB_WWW_PROFILING:
-    case RN_OSS_DEV:
-    case RN_OSS_PROD:
-    case RN_OSS_PROFILING:
-    case RN_FB_DEV:
-    case RN_FB_PROD:
-    case RN_FB_PROFILING:
-      return `cjs`;
-    case NODE_ESM:
-      return `es`;
   }
 }
 
 function isProductionBundleType(bundleType) {
   switch (bundleType) {
-    case NODE_ES2015:
-    case NODE_ESM:
     case UMD_DEV:
-    case NODE_DEV:
-    case FB_WWW_DEV:
-    case RN_OSS_DEV:
-    case RN_FB_DEV:
       return false;
     case UMD_PROD:
-    case NODE_PROD:
-    case UMD_PROFILING:
-    case NODE_PROFILING:
-    case FB_WWW_PROD:
-    case FB_WWW_PROFILING:
-    case RN_OSS_PROD:
-    case RN_OSS_PROFILING:
-    case RN_FB_PROD:
-    case RN_FB_PROFILING:
       return true;
     default:
       throw new Error(`Unknown type: ${bundleType}`);
@@ -255,25 +188,9 @@ function isProductionBundleType(bundleType) {
 
 function isProfilingBundleType(bundleType) {
   switch (bundleType) {
-    case NODE_ES2015:
-    case NODE_ESM:
-    case FB_WWW_DEV:
-    case FB_WWW_PROD:
-    case NODE_DEV:
-    case NODE_PROD:
-    case RN_FB_DEV:
-    case RN_FB_PROD:
-    case RN_OSS_DEV:
-    case RN_OSS_PROD:
     case UMD_DEV:
     case UMD_PROD:
       return false;
-    case FB_WWW_PROFILING:
-    case NODE_PROFILING:
-    case RN_FB_PROFILING:
-    case RN_OSS_PROFILING:
-    case UMD_PROFILING:
-      return true;
     default:
       throw new Error(`Unknown type: ${bundleType}`);
   }
@@ -308,22 +225,7 @@ function getPlugins(
   const forks = Modules.getForks(bundleType, entry, moduleType, bundle);
   const isProduction = isProductionBundleType(bundleType);
   const isProfiling = isProfilingBundleType(bundleType);
-  const isUMDBundle =
-    bundleType === UMD_DEV ||
-    bundleType === UMD_PROD ||
-    bundleType === UMD_PROFILING;
-  const isFBWWWBundle =
-    bundleType === FB_WWW_DEV ||
-    bundleType === FB_WWW_PROD ||
-    bundleType === FB_WWW_PROFILING;
-  const isRNBundle =
-    bundleType === RN_OSS_DEV ||
-    bundleType === RN_OSS_PROD ||
-    bundleType === RN_OSS_PROFILING ||
-    bundleType === RN_FB_DEV ||
-    bundleType === RN_FB_PROD ||
-    bundleType === RN_FB_PROFILING;
-  const shouldStayReadable = isFBWWWBundle || isRNBundle || forcePrettyOutput;
+  const isUMDBundle = bundleType === UMD_DEV || bundleType === UMD_PROD;
   return [
     // Shim any modules that need forking in this environment.
     useForks(forks),
@@ -506,25 +408,10 @@ async function createBundle(bundle, bundleType) {
   const format = getFormat(bundleType);
   const packageName = Packaging.getPackageName(bundle.entry);
 
-  const isFBWWWBundle =
-    bundleType === FB_WWW_DEV ||
-    bundleType === FB_WWW_PROD ||
-    bundleType === FB_WWW_PROFILING;
-
-  const isFBRNBundle =
-    bundleType === RN_FB_DEV ||
-    bundleType === RN_FB_PROD ||
-    bundleType === RN_FB_PROFILING;
-
-  let resolvedEntry = resolveEntryFork(
-    require.resolve(bundle.entry),
-    isFBWWWBundle || isFBRNBundle
-  );
+  let resolvedEntry = resolveEntryFork(require.resolve(bundle.entry), false);
 
   const shouldBundleDependencies =
-    bundleType === UMD_DEV ||
-    bundleType === UMD_PROD ||
-    bundleType === UMD_PROFILING;
+    bundleType === UMD_DEV || bundleType === UMD_PROD;
   const peerGlobals = Modules.getPeerGlobals(bundle.externals, bundleType);
   let externals = Object.keys(peerGlobals);
   if (!shouldBundleDependencies) {
@@ -707,25 +594,7 @@ async function buildEverything() {
   let bundles = [];
   // eslint-disable-next-line no-for-of-loops/no-for-of-loops
   for (const bundle of Bundles.bundles) {
-    bundles.push(
-      [bundle, NODE_ES2015],
-      [bundle, NODE_ESM],
-      [bundle, UMD_DEV],
-      [bundle, UMD_PROD],
-      [bundle, UMD_PROFILING],
-      [bundle, NODE_DEV],
-      [bundle, NODE_PROD],
-      [bundle, NODE_PROFILING],
-      [bundle, FB_WWW_DEV],
-      [bundle, FB_WWW_PROD],
-      [bundle, FB_WWW_PROFILING],
-      [bundle, RN_OSS_DEV],
-      [bundle, RN_OSS_PROD],
-      [bundle, RN_OSS_PROFILING],
-      [bundle, RN_FB_DEV],
-      [bundle, RN_FB_PROD],
-      [bundle, RN_FB_PROFILING]
-    );
+    bundles.push([bundle, UMD_DEV], [bundle, UMD_PROD]);
   }
 
   if (process.env.CIRCLE_NODE_TOTAL) {
