@@ -105,10 +105,10 @@ async function copyRNShims() {
     `${__dirname}/shims/react-native`,
     'build/react-native/shims'
   );
-  await asyncCopyTo(
-    require.resolve('react-native-renderer/src/ReactNativeTypes.js'),
-    'build/react-native/shims/ReactNativeTypes.js'
-  );
+  // await asyncCopyTo(
+  //   require.resolve('react-native-renderer/src/ReactNativeTypes.js'),
+  //   'build/react-native/shims/ReactNativeTypes.js'
+  // );
 }
 
 async function copyAllShims() {
