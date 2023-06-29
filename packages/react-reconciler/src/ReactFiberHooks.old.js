@@ -904,7 +904,7 @@ function updateReducer<S, I, A>(
       update = update.next;
     } while (update !== null && update !== first);
 
-     // 3.2. 更新属性
+    // 3.2. 更新属性
     if (newBaseQueueLast === null) {
       newBaseState = newState;
     } else {
@@ -1551,7 +1551,7 @@ function mountState<S>(
   const hook = mountWorkInProgressHook();
   if (typeof initialState === 'function') {
     // $FlowFixMe: Flow doesn't like mixed types
-       = initialState();
+    initialState = initialState();
   }
   // 2. 初始化hook的属性
   // 2.1 设置 hook.memoizedState/hook.baseState
@@ -2392,7 +2392,7 @@ function enqueueRenderPhaseUpdate<S, A>(
   // This is a render phase update. Stash it in a lazily-created map of
   // queue -> linked list of updates. After this render pass, we'll restart
   // and apply the stashed updates on top of the work-in-progress hook.
-   // 渲染时更新, 做好全局标记
+  // 渲染时更新, 做好全局标记
   didScheduleRenderPhaseUpdateDuringThisPass = didScheduleRenderPhaseUpdate = true;
   // 2. 将update对象添加到hook.queue.pending队列
   const pending = queue.pending;
