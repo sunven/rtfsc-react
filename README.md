@@ -73,3 +73,11 @@ To help you get your feet wet and get you familiar with our contribution process
 ### License
 
 React is [MIT licensed](./LICENSE).
+
+### trouble shooting
+
+#### TypeError [ERR_INVALID_PROTOCOL]: Protocol "https:" not supported. Expected "http:"
+
+不配置HTTPS_PROXY环境变量，clash 开启 tun 模式
+
+<https://github.com/npm/cli/issues/2003>
