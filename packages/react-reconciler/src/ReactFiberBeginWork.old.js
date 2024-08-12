@@ -288,7 +288,7 @@ if (__DEV__) {
 export function reconcileChildren(
   current: Fiber | null,
   workInProgress: Fiber,
-  nextChildren: any, // ReactElement
+  nextChildren: any,
   renderLanes: Lanes,
 ) {
   if (current === null) {
@@ -296,9 +296,6 @@ export function reconcileChildren(
     // won't update its child set by applying minimal side-effects. Instead,
     // we will add them all to the child before it gets rendered. That means
     // we can optimize this reconciliation pass by not tracking side-effects.
-    // 如果这是一个尚未渲染的全新组件，我们将不会通过应用最小化的副作用来更新其子集。
-    // 相反，在它被渲染之前，我们将把所有子元素添加到该组件中。
-    // 这意味着我们可以通过不跟踪副作用来优化此协调过程。
     workInProgress.child = mountChildFibers(
       workInProgress,
       null,
@@ -312,10 +309,6 @@ export function reconcileChildren(
 
     // If we had any progressed work already, that is invalid at this point so
     // let's throw it out.
-    // 如果当前的子元素与正在进行的工作相同，这意味着我们尚未开始处理这些子元素。
-    // 因此，我们使用克隆算法来创建所有当前子元素的副本。
-
-    // 如果我们已经有了任何进展，那么在这个时候它是无效的，所以让我们抛弃它。
     workInProgress.child = reconcileChildFibers(
       workInProgress,
       current.child,
@@ -502,6 +495,20 @@ function updateMemoComponent(
           'prop',
           getComponentNameFromType(type),
         );
+      }
+      if (
+        warnAboutDefaultPropsOnFunctionComponents &&
+        Component.defaultProps !== undefined
+      ) {
+        const componentName = getComponentNameFromType(type) || 'Unknown';
+        if (!didWarnAboutDefaultPropsOnFunctionComponent[componentName]) {
+          console.error(
+            '%s: Support for defaultProps will be removed from memo components ' +
+              'in a future major release. Use JavaScript default parameters instead.',
+            componentName,
+          );
+          didWarnAboutDefaultPropsOnFunctionComponent[componentName] = true;
+        }
       }
     }
     const child = createFiberFromTypeAndProps(
@@ -1126,7 +1133,6 @@ function updateClassComponent(
     resetSuspendedCurrentOnMountInLegacyMode(current, workInProgress);
 
     // In the initial pass we might need to construct the instance.
-    // 绑定updater
     constructClassInstance(workInProgress, Component, nextProps);
     mountClassInstance(workInProgress, Component, nextProps, renderLanes);
     shouldUpdate = true;
@@ -1283,19 +1289,17 @@ function pushHostRootContext(workInProgress) {
   pushHostContainer(workInProgress, root.containerInfo);
 }
 
-// HostRootFiber
 function updateHostRoot(current, workInProgress, renderLanes) {
   pushHostRootContext(workInProgress);
 
   if (current === null) {
     throw new Error('Should have a current fiber. This is a bug in React.');
   }
-  // 1. 状态计算, 更新整合到 workInProgress.memoizedState中来
+
   const nextProps = workInProgress.pendingProps;
   const prevState = workInProgress.memoizedState;
   const prevChildren = prevState.element;
   cloneUpdateQueue(current, workInProgress);
-  // 遍历updateQueue.shared.pending, 提取有足够优先级的update对象, 计算出最终的状态 workInProgress.memoizedState
   processUpdateQueue(workInProgress, nextProps, null, renderLanes);
 
   const nextState: RootState = workInProgress.memoizedState;
@@ -1313,10 +1317,8 @@ function updateHostRoot(current, workInProgress, renderLanes) {
 
   // Caution: React DevTools currently depends on this property
   // being called "element".
-  // 2. 获取下级`ReactElement`对象
   const nextChildren = nextState.element;
   if (supportsHydration && prevState.isDehydrated) {
-    // ssr
     // This is a hydration root whose shell has not yet hydrated. We should
     // attempt to hydrate.
 
@@ -1412,7 +1414,6 @@ function updateHostRoot(current, workInProgress, renderLanes) {
     if (nextChildren === prevChildren) {
       return bailoutOnAlreadyFinishedWork(current, workInProgress, renderLanes);
     }
-    // 3. 根据`ReactElement`对象, 调用`reconcileChildren`生成`Fiber`子节点(只生成`次级子节点`)
     reconcileChildren(current, workInProgress, nextChildren, renderLanes);
   }
   return workInProgress.child;
@@ -1436,7 +1437,6 @@ function mountHostRootWithoutHydrating(
   return workInProgress.child;
 }
 
-// 普通 DOM 标签类型
 function updateHostComponent(
   current: Fiber | null,
   workInProgress: Fiber,
@@ -1448,12 +1448,10 @@ function updateHostComponent(
     tryToClaimNextHydratableInstance(workInProgress);
   }
 
-  // 1. 状态计算, 由于HostComponent是无状态组件, 所以只需要收集 nextProps即可, 它没有 memoizedState
   const type = workInProgress.type;
   const nextProps = workInProgress.pendingProps;
   const prevProps = current !== null ? current.memoizedProps : null;
 
-  // 2. 获取下级`ReactElement`对象
   let nextChildren = nextProps.children;
   const isDirectTextChild = shouldSetTextContent(type, nextProps);
 
@@ -1462,18 +1460,14 @@ function updateHostComponent(
     // case. We won't handle it as a reified child. We will instead handle
     // this in the host environment that also has access to this prop. That
     // avoids allocating another HostText fiber and traversing it.
-    // 如果子节点只有一个文本节点, 不用再创建一个HostText类型的fiber
     nextChildren = null;
   } else if (prevProps !== null && shouldSetTextContent(type, prevProps)) {
     // If we're switching from a direct text child to a normal child, or to
     // empty, we need to schedule the text content to be reset.
-    // 特殊操作需要设置fiber.flags
     workInProgress.flags |= ContentReset;
   }
 
-  // 特殊操作需要设置fiber.flags
   markRef(current, workInProgress);
-  // 3. 根据`ReactElement`对象, 调用`reconcileChildren`生成`Fiber`子节点(只生成`次级子节点`) 多个children生成sibling
   reconcileChildren(current, workInProgress, nextChildren, renderLanes);
   return workInProgress.child;
 }
@@ -3213,7 +3207,6 @@ function updateContextProvider(
   const newProps = workInProgress.pendingProps;
   const oldProps = workInProgress.memoizedProps;
 
-  // 接收新value
   const newValue = newProps.value;
 
   if (__DEV__) {
@@ -3232,7 +3225,6 @@ function updateContextProvider(
     }
   }
 
-  // 更新 ContextProvider._currentValue
   pushProvider(workInProgress, context, newValue);
 
   if (enableLazyContextPropagation) {
@@ -3242,12 +3234,9 @@ function updateContextProvider(
     // responsibility to the consumer to track whether something has changed.
   } else {
     if (oldProps !== null) {
-      // 更新阶段进入
       const oldValue = oldProps.value;
-      // 对比 newValue 和 oldValue
       if (is(oldValue, newValue)) {
         // No change. Bailout early if children are the same.
-        // value没有变动, 进入 Bailout 逻辑
         if (
           oldProps.children === newProps.children &&
           !hasLegacyContextChanged()
@@ -3261,7 +3250,6 @@ function updateContextProvider(
       } else {
         // The context value changed. Search for matching consumers and schedule
         // them to update.
-        // value变动, 查找对应的consumers, 并使其能够被更新
         propagateContextChange(workInProgress, context, renderLanes);
       }
     }
@@ -3319,7 +3307,6 @@ function updateContextConsumer(
     }
   }
 
-  // 读取context
   prepareToReadContext(workInProgress, renderLanes);
   const newValue = readContext(context);
   if (enableSchedulingProfiler) {
@@ -3403,7 +3390,6 @@ function bailoutOnAlreadyFinishedWork(
       // the children.
       lazilyPropagateParentContextChanges(current, workInProgress, renderLanes);
       if (!includesSomeLane(renderLanes, workInProgress.childLanes)) {
-        // 渲染优先级不包括 workInProgress.childLanes, 表明子节点也无需更新. 返回null, 直接进入回溯阶段.
         return null;
       }
     } else {
@@ -3413,8 +3399,6 @@ function bailoutOnAlreadyFinishedWork(
 
   // This fiber doesn't have work, but its subtree does. Clone the child
   // fibers and continue.
-  // 本fiber虽然不用更新, 但是子节点需要更新. clone并返回子节点
-  // 复用current.alternate
   cloneChildFibers(current, workInProgress);
   return workInProgress.child;
 }
@@ -3489,7 +3473,6 @@ function checkScheduledUpdateOrContext(
 ): boolean {
   // Before performing an early bailout, we must check if there are pending
   // updates or context.
-  // 在进行早期撤离之前，我们必须检查是否有待处理的更新或上下文。
   const updateLanes = current.lanes;
   if (includesSomeLane(updateLanes, renderLanes)) {
     return true;
@@ -3714,8 +3697,8 @@ function attemptEarlyBailoutIfNoScheduledUpdate(
 }
 
 function beginWork(
-  current: Fiber | null, // 旧 即workInProgress.alternate
-  workInProgress: Fiber, // 新
+  current: Fiber | null,
+  workInProgress: Fiber,
   renderLanes: Lanes,
 ): Fiber | null {
   if (__DEV__) {
@@ -3748,13 +3731,10 @@ function beginWork(
     ) {
       // If props or context changed, mark the fiber as having performed work.
       // This may be unset if the props are determined to be equal later (memo).
-      // props变化,没有遗留上下文变化,标记需要更新
       didReceiveUpdate = true;
     } else {
       // Neither props nor legacy context changes. Check if there's a pending
       // update or context change.
-      // 既没有道具也没有遗留的上下文更改。检查是否有待处理的更新或上下文更改
-      // 初次渲染为true，setState为false
       const hasScheduledUpdateOrContext = checkScheduledUpdateOrContext(
         current,
         renderLanes,
@@ -3763,14 +3743,10 @@ function beginWork(
         !hasScheduledUpdateOrContext &&
         // If this is the second pass of an error or suspense boundary, there
         // may not be work scheduled on `current`, so we check for this flag.
-        // 如果这是错误或悬而未决边界的第二次通过，则“current”上可能没有安排工作，因此我们检查此标志。
         (workInProgress.flags & DidCapture) === NoFlags
       ) {
         // No pending updates or context. Bail out now.
-        // 没有待处理的更新或上下文。现在退出。
         didReceiveUpdate = false;
-        // 尝试提前退出，如果没有计划更新
-        // 复用
         return attemptEarlyBailoutIfNoScheduledUpdate(
           current,
           workInProgress,
@@ -3780,7 +3756,6 @@ function beginWork(
       if ((current.flags & ForceUpdateForLegacySuspense) !== NoFlags) {
         // This is a special case that only exists for legacy mode.
         // See https://github.com/facebook/react/pull/19216.
-        // 这是一个仅存在于遗留模式下的特殊情况
         didReceiveUpdate = true;
       } else {
         // An update was scheduled on this fiber, but there are no new props
@@ -3803,9 +3778,6 @@ function beginWork(
       //
       // We only use this for id generation during hydration, which is why the
       // logic is located in this special branch.
-      // 检查此子元素是否属于其父级中的多个子元素列表。
-      // 在真正的多线程实现中，我们将在并行线程上呈现子元素。这将代表此子树的新渲染线程的开始。
-      // 我们仅在hydration期间使用它进行id生成，这就是为什么逻辑位于此特殊分支中的原因。
       const slotIndex = workInProgress.index;
       const numberOfForks = getForksAtLevel(workInProgress);
       pushTreeId(workInProgress, numberOfForks, slotIndex);
@@ -3817,15 +3789,8 @@ function beginWork(
   // the update queue. However, there's an exception: SimpleMemoComponent
   // sometimes bails out later in the begin phase. This indicates that we should
   // move this assignment out of the common path and into each branch.
-  // 在进入开始阶段之前，清除待处理的更新优先级。
-  // TODO: 这假设我们即将评估组件并处理更新队列。但是，有一个例外：SimpleMemoComponent
-  // 有时会在后面的开始阶段退出。这表明我们应该将此赋值从公共路径移出，并移到每个分支中。
-
-  // 不能复用, 创建新的fiber节点
-  // 重置优先级为 NoLanes
-  // 1. 设置workInProgress优先级为NoLanes(最高优先级)
   workInProgress.lanes = NoLanes;
-  // 2. 根据workInProgress节点的类型, 用不同的方法派生出子节点
+
   switch (workInProgress.tag) {
     case IndeterminateComponent: {
       return mountIndeterminateComponent(

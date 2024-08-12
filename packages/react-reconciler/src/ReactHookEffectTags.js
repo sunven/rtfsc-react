@@ -16,5 +16,5 @@ export const HasEffect = /* */ 0b0001;
 
 // Represents the phase in which the effect (not the clean-up) fires.
 export const Insertion = /*  */ 0b0010;
-export const Layout = /*    */ 0b0100; // dom突变后同步触发
-export const Passive = /*   */ 0b1000; // dom突变前异步触发
+export const Layout = /*    */ 0b0100;
+export const Passive = /*   */ 0b1000;

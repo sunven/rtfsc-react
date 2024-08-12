@@ -120,38 +120,27 @@ import assign from 'shared/assign';
 export type Update<State> = {|
   // TODO: Temporary field. Will remove this by storing a map of
   // transition -> event time on the root.
-  // 发起update事件的时间
   eventTime: number,
-  // update所属的优先级
   lane: Lane,
 
   tag: 0 | 1 | 2 | 3,
-  // 载荷, 根据场景可以设置成一个回调函数或者对象
   payload: any,
-  // 回调函数
   callback: (() => mixed) | null,
 
-  // 指向链表中的下一个, 由于UpdateQueue是一个环形链表, 最后一个update.next指向第一个update对象
   next: Update<State> | null,
 |};
 
 export type SharedQueue<State> = {|
-  // 指向即将输入的update队列. 在class组件中调用setState()之后, 会将新的 update 对象添加到这个队列中来.
   pending: Update<State> | null,
   interleaved: Update<State> | null,
   lanes: Lanes,
 |};
 
 export type UpdateQueue<State> = {|
-  // 表示此队列的基础 state
   baseState: State,
-  // 指向基础队列的队首
   firstBaseUpdate: Update<State> | null,
-  // 指向基础队列的队尾
   lastBaseUpdate: Update<State> | null,
-  // 共享队列
   shared: SharedQueue<State>,
-  // 用于保存有callback回调函数的 update 对象, 在commit之后, 会依次调用这里的回调函数.
   effects: Array<Update<State>> | null,
 |};
 
@@ -224,7 +213,6 @@ export function createUpdate(eventTime: number, lane: Lane): Update<*> {
   return update;
 }
 
-// setState
 export function enqueueUpdate<State>(
   fiber: Fiber,
   update: Update<State>,

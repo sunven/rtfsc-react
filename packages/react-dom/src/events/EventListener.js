@@ -7,7 +7,6 @@
  * @flow
  */
 
-// 注册原生事件 冒泡
 export function addEventBubbleListener(
   target: EventTarget,
   eventType: string,
@@ -17,7 +16,6 @@ export function addEventBubbleListener(
   return listener;
 }
 
-// 注册原生事件 捕获
 export function addEventCaptureListener(
   target: EventTarget,
   eventType: string,

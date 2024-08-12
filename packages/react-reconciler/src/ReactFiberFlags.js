@@ -16,11 +16,8 @@ export const NoFlags = /*                      */ 0b00000000000000000000000000;
 export const PerformedWork = /*                */ 0b00000000000000000000000001;
 
 // You can change the rest (and add more).
-// DOM需要插入到页面中
 export const Placement = /*                    */ 0b00000000000000000000000010;
-// DOM需要更新
 export const Update = /*                       */ 0b00000000000000000000000100;
-// DOM需要删除
 export const Deletion = /*                     */ 0b00000000000000000000001000;
 export const ChildDeletion = /*                */ 0b00000000000000000000010000;
 export const ContentReset = /*                 */ 0b00000000000000000000100000;

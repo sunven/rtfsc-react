@@ -22,8 +22,6 @@ export function createContext<T>(defaultValue: T): ReactContext<T> {
     // there to be two concurrent renderers at most: React Native (primary) and
     // Fabric (secondary); React DOM (primary) and React ART (secondary).
     // Secondary renderers store their context values on separate fields.
-    // 初始值
-    // 保存 2 个 value 是为了支持多个渲染器并发渲染
     _currentValue: defaultValue,
     _currentValue2: defaultValue,
     // Used to track how many concurrent renderers this context currently

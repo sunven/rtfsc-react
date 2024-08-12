@@ -509,7 +509,6 @@ function commitBeforeMutationEffectsDeletion(deletion: Fiber) {
   }
 }
 
-// 依次执行: effect.destroy
 function commitHookEffectListUnmount(
   flags: HookFlags,
   finishedWork: Fiber,
@@ -523,9 +522,6 @@ function commitHookEffectListUnmount(
     do {
       if ((effect.tag & flags) === flags) {
         // Unmount
-        // 根据传入的tag过滤 effect链表.
-        // effect.tag HasEffect | Layout 由useLayoutEffect
-        // 所以 commitHookEffectListUnmount 只处理 useLayoutEffect() 创建的effect
         const destroy = effect.destroy;
         effect.destroy = undefined;
         if (destroy !== undefined) {
@@ -586,7 +582,6 @@ function commitHookEffectListMount(flags: HookFlags, finishedWork: Fiber) {
             setIsRunningInsertionEffect(true);
           }
         }
-        // 调用effect.create()之后, 将返回值赋值到effect.destroy
         effect.destroy = create();
         if (__DEV__) {
           if ((flags & HookInsertion) !== NoHookEffect) {
@@ -785,7 +780,6 @@ function commitLayoutEffectOnFiber(
               ) {
                 try {
                   startLayoutEffectTimer();
-                  // 初次渲染: 调用 componentDidMount
                   instance.componentDidMount();
                 } finally {
                   recordLayoutEffectDuration(finishedWork);
@@ -839,7 +833,6 @@ function commitLayoutEffectOnFiber(
               ) {
                 try {
                   startLayoutEffectTimer();
-                  // 更新阶段: 调用 componentDidUpdate
                   instance.componentDidUpdate(
                     prevProps,
                     prevState,
@@ -895,7 +888,6 @@ function commitLayoutEffectOnFiber(
           // We could update instance props and state here,
           // but instead we rely on them being set during last render.
           // TODO: revisit this when we implement resuming.
-          // 处理update回调函数 如: this.setState({}, callback)
           commitUpdateQueue(finishedWork, updateQueue, instance);
         }
         break;
@@ -932,7 +924,6 @@ function commitLayoutEffectOnFiber(
         if (current === null && finishedWork.flags & Update) {
           const type = finishedWork.type;
           const props = finishedWork.memoizedProps;
-          // 设置focus等原生状态
           commitMount(instance, type, props, finishedWork);
         }
 
@@ -1504,7 +1495,6 @@ function getHostSibling(fiber: Fiber): ?Instance {
   }
 }
 
-// 新增
 function commitPlacement(finishedWork: Fiber): void {
   if (!supportsMutation) {
     return;
@@ -1690,7 +1680,6 @@ function recursivelyTraverseDeletionEffects(
   }
 }
 
-// 删除
 function commitDeletionEffectsOnFiber(
   finishedRoot: FiberRoot,
   nearestMountedAncestor: Fiber,
@@ -2044,7 +2033,6 @@ export function isSuspenseBoundaryBeingHidden(
   return false;
 }
 
-// dom 变更, 界面得到更新.
 export function commitMutationEffects(
   root: FiberRoot,
   finishedWork: Fiber,
@@ -2061,7 +2049,6 @@ export function commitMutationEffects(
   inProgressRoot = null;
 }
 
-// 递归遍历突变副作用
 function recursivelyTraverseMutationEffects(
   root: FiberRoot,
   parentFiber: Fiber,
@@ -2074,7 +2061,6 @@ function recursivelyTraverseMutationEffects(
     for (let i = 0; i < deletions.length; i++) {
       const childToDelete = deletions[i];
       try {
-        // 删除
         commitDeletionEffects(root, parentFiber, childToDelete);
       } catch (error) {
         captureCommitPhaseError(childToDelete, parentFiber, error);
@@ -2114,10 +2100,7 @@ function commitMutationEffectsOnFiber(
       commitReconciliationEffects(finishedWork);
 
       if (flags & Update) {
-        // useEffect,useLayoutEffect都会设置Update标记
-        // 更新节点
         try {
-          // 在突变阶段调用销毁函数, 保证所有的effect.destroy函数都会在effect.create之前执行
           commitHookEffectListUnmount(
             HookInsertion | HookHasEffect,
             finishedWork,
@@ -2217,7 +2200,6 @@ function commitMutationEffectsOnFiber(
             finishedWork.updateQueue = null;
             if (updatePayload !== null) {
               try {
-                // 更新
                 commitUpdate(
                   instance,
                   updatePayload,
@@ -2474,7 +2456,6 @@ function commitReconciliationEffects(finishedWork: Fiber) {
   }
 }
 
-// dom 变更后
 export function commitLayoutEffects(
   finishedWork: Fiber,
   root: FiberRoot,

@@ -221,8 +221,6 @@ export function createRoot(
     }
   }
 
-  // 1. 创建fiberRoot
-  // ConcurrentRoot rootTag
   const root = createContainer(
     container,
     ConcurrentRoot,
@@ -233,8 +231,6 @@ export function createRoot(
     onRecoverableError,
     transitionCallbacks,
   );
-  // document.getElementById('container')["__reactContainer$9vaadzygxou"]
-  // 2. 把dom和fiber对象关联起来
   markContainerAsRoot(root.current, container);
 
   const rootContainerElement: Document | Element | DocumentFragment =

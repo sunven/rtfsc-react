@@ -140,15 +140,13 @@ export function enqueueConcurrentRenderForLane(fiber: Fiber, lane: Lane) {
 export const unsafe_markUpdateLaneFromFiberToRoot = markUpdateLaneFromFiberToRoot;
 
 function markUpdateLaneFromFiberToRoot(
-  sourceFiber: Fiber, // sourceFiber表示被更新的节点
-  lane: Lane, // lane表示update优先级
+  sourceFiber: Fiber,
+  lane: Lane,
 ): FiberRoot | null {
   // Update the source fiber's lanes
-  // 1. 将update优先级设置到sourceFiber.lanes
   sourceFiber.lanes = mergeLanes(sourceFiber.lanes, lane);
   let alternate = sourceFiber.alternate;
   if (alternate !== null) {
-    // 同时设置sourceFiber.alternate的优先级
     alternate.lanes = mergeLanes(alternate.lanes, lane);
   }
   if (__DEV__) {
@@ -160,7 +158,6 @@ function markUpdateLaneFromFiberToRoot(
     }
   }
   // Walk the parent path to the root and update the child lanes.
-  // 2. 从sourceFiber开始, 向上遍历所有节点, 直到HostRoot. 设置沿途所有节点(包括alternate)的childLanes
   let node = sourceFiber;
   let parent = sourceFiber.return;
   while (parent !== null) {

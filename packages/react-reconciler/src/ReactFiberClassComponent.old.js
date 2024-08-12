@@ -12,7 +12,6 @@ import type {Lanes} from './ReactFiberLane.old';
 import type {UpdateQueue} from './ReactFiberClassUpdateQueue.old';
 import type {Flags} from './ReactFiberFlags';
 
-import * as React from 'react';
 import {
   LayoutStatic,
   MountLayoutDev,
@@ -82,10 +81,6 @@ import {
 
 const fakeInternalInstance = {};
 
-// React.Component uses a shared frozen object by default.
-// We'll use it to determine whether we need to initialize legacy refs.
-export const emptyRefsObject = new React.Component().refs;
-
 let didWarnAboutStateAssignmentForComponent;
 let didWarnAboutUninitializedState;
 let didWarnAboutGetSnapshotBeforeUpdateWithoutDidUpdate;
@@ -96,6 +91,7 @@ let warnOnInvalidCallback;
 let didWarnAboutDirectlyAssigningPropsToState;
 let didWarnAboutContextTypeAndContextTypes;
 let didWarnAboutInvalidateContextType;
+let didWarnAboutLegacyContext;
 
 if (__DEV__) {
   didWarnAboutStateAssignmentForComponent = new Set();
@@ -106,6 +102,7 @@ if (__DEV__) {
   didWarnAboutUndefinedDerivedState = new Set();
   didWarnAboutContextTypeAndContextTypes = new Set();
   didWarnAboutInvalidateContextType = new Set();
+  didWarnAboutLegacyContext = new Set();
 
   const didWarnOnInvalidCallback = new Set();
 
@@ -202,7 +199,6 @@ function applyDerivedStateFromProps(
 const classComponentUpdater = {
   isMounted,
   enqueueSetState(inst, payload, callback) {
-    // setState
     const fiber = getInstance(inst);
     const eventTime = requestEventTime();
     const lane = requestUpdateLane(fiber);
@@ -436,6 +432,39 @@ function checkClassInstance(workInProgress: Fiber, ctor: any, newProps: any) {
         );
       }
     } else {
+      if (
+        ctor.childContextTypes &&
+        !didWarnAboutLegacyContext.has(ctor) &&
+        // Strict Mode has its own warning for legacy context, so we can skip
+        // this one.
+        (workInProgress.mode & StrictLegacyMode) === NoMode
+      ) {
+        didWarnAboutLegacyContext.add(ctor);
+        console.error(
+          '%s uses the legacy childContextTypes API which is no longer ' +
+            'supported and will be removed in the next major release. Use ' +
+            'React.createContext() instead\n\n.' +
+            'Learn more about this warning here: https://reactjs.org/link/legacy-context',
+          name,
+        );
+      }
+      if (
+        ctor.contextTypes &&
+        !didWarnAboutLegacyContext.has(ctor) &&
+        // Strict Mode has its own warning for legacy context, so we can skip
+        // this one.
+        (workInProgress.mode & StrictLegacyMode) === NoMode
+      ) {
+        didWarnAboutLegacyContext.add(ctor);
+        console.error(
+          '%s uses the legacy contextTypes API which is no longer supported ' +
+            'and will be removed in the next major release. Use ' +
+            'React.createContext() with static contextType instead.\n\n' +
+            'Learn more about this warning here: https://reactjs.org/link/legacy-context',
+          name,
+        );
+      }
+
       if (instance.contextTypes) {
         console.error(
           'contextTypes was defined as an instance property on %s. Use a static ' +
@@ -837,7 +866,7 @@ function mountClassInstance(
   const instance = workInProgress.stateNode;
   instance.props = newProps;
   instance.state = workInProgress.memoizedState;
-  instance.refs = emptyRefsObject;
+  instance.refs = {};
 
   initializeUpdateQueue(workInProgress);
 

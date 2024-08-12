@@ -49,7 +49,6 @@ import {IS_CAPTURE_PHASE} from '../EventSystemFlags';
 
 import {enableCreateEventHandleAPI} from 'shared/ReactFeatureFlags';
 
-// 提取事件
 function extractEvents(
   dispatchQueue: DispatchQueue,
   domEventName: DOMEventName,
@@ -164,7 +163,6 @@ function extractEvents(
     enableCreateEventHandleAPI &&
     eventSystemFlags & IS_EVENT_HANDLE_NON_MANAGED_NODE
   ) {
-    // 1. 收集所有监听该事件的函数.
     const listeners = accumulateEventHandleNonManagedNodeListeners(
       // TODO: this cast may not make sense for events like
       // "focus" where React listens to e.g. "focusin".
@@ -174,7 +172,6 @@ function extractEvents(
     );
     if (listeners.length > 0) {
       // Intentionally create event lazily.
-      // 2. 构造合成事件, 添加到派发队列
       const event = new SyntheticEventCtor(
         reactName,
         reactEventType,
@@ -197,7 +194,6 @@ function extractEvents(
       // This is a breaking change that can wait until React 18.
       domEventName === 'scroll';
 
-    // 1. 收集所有监听该事件的函数.
     const listeners = accumulateSinglePhaseListeners(
       targetInst,
       reactName,
@@ -208,7 +204,6 @@ function extractEvents(
     );
     if (listeners.length > 0) {
       // Intentionally create event lazily.
-      // 2. 构造合成事件, 添加到派发队列
       const event = new SyntheticEventCtor(
         reactName,
         reactEventType,

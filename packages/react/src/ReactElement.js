@@ -148,19 +148,15 @@ function warnIfStringRefCannotBeAutoConverted(config) {
 const ReactElement = function(type, key, ref, self, source, owner, props) {
   const element = {
     // This tag allows us to uniquely identify this as a React Element
-    // 这个标签允许我们将其唯一地识别为React元素。
     $$typeof: REACT_ELEMENT_TYPE,
 
     // Built-in properties that belong on the element
-    // 字符串（div span）,函数（function class）, react
-    // 内部定义的节点类型(portal,context,fragment等) /shared/ReactSymbols.js
     type: type,
     key: key,
     ref: ref,
-    props: props, // props.children 子节点
+    props: props,
 
     // Record the component responsible for creating this element.
-    // 记录创建此元素的fiber。还未与Fiber树关联之前, 该属性为null
     _owner: owner,
   };
 

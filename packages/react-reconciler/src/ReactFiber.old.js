@@ -254,9 +254,6 @@ export function createWorkInProgress(current: Fiber, pendingProps: any): Fiber {
     // node that we're free to reuse. This is lazily created to avoid allocating
     // extra objects for things that are never updated. It also allow us to
     // reclaim the extra memory if needed.
-    // 我们使用双缓冲池技术，因为我们知道我们最多只需要两个版本的树。
-    // 我们将“其他”未使用的节点进行池化以便重复利用。这是懒惰创建的，以避免为从不更新的事物分配额外对象。
-    // 它还使我们能够在需要时回收额外内存。
     workInProgress = createFiber(
       current.tag,
       pendingProps,
@@ -464,7 +461,7 @@ export function createHostRootFiber(
     // Without some nodes in the tree having empty base times.
     mode |= ProfileMode;
   }
-  // tag 决定了 model
+
   return createFiber(HostRoot, null, null, mode);
 }
 

@@ -20,15 +20,10 @@ export const requestPaint = Scheduler.unstable_requestPaint;
 export const now = Scheduler.unstable_now;
 export const getCurrentPriorityLevel =
   Scheduler.unstable_getCurrentPriorityLevel;
-
-// 立即优先级 用于处理紧急事件，例如用户输入
 export const ImmediatePriority = Scheduler.unstable_ImmediatePriority;
-// 用户阻塞优先级 滚动等事件
 export const UserBlockingPriority = Scheduler.unstable_UserBlockingPriority;
-// 默认
 export const NormalPriority = Scheduler.unstable_NormalPriority;
 export const LowPriority = Scheduler.unstable_LowPriority;
-// 空闲
 export const IdlePriority = Scheduler.unstable_IdlePriority;
 export type SchedulerCallback = (isSync: boolean) => SchedulerCallback | null;
 

@@ -286,7 +286,6 @@ if (supportsMutation) {
     workInProgress.updateQueue = (updatePayload: any);
     // If the update payload indicates that there is a change or if there
     // is a new ref we mark this as an update. All the work is done in commitWork.
-    // 如果有属性变动, 设置fiber.flags |= Update, 等待`commit`阶段的处理
     if (updatePayload) {
       markUpdate(workInProgress);
     }
@@ -962,7 +961,6 @@ function completeWork(
       const rootContainerInstance = getRootHostContainer();
       const type = workInProgress.type;
       if (current !== null && workInProgress.stateNode != null) {
-        // update逻辑, 初次render不会进入
         updateHostComponent(
           current,
           workInProgress,
@@ -1009,7 +1007,6 @@ function completeWork(
             markUpdate(workInProgress);
           }
         } else {
-          // 1. 创建DOM对象
           const instance = createInstance(
             type,
             newProps,
@@ -1017,16 +1014,15 @@ function completeWork(
             currentHostContext,
             workInProgress,
           );
-          // 2. 把子树中的DOM对象append到本节点的DOM对象之后
+
           appendAllChildren(instance, workInProgress, false, false);
-          // 设置stateNode属性, 指向DOM对象
+
           workInProgress.stateNode = instance;
 
           // Certain renderers require commit-time effects for initial mount.
           // (eg DOM renderer supports auto-focus for certain elements).
           // Make sure such renderers get scheduled for later work.
           if (
-            // 3. 设置DOM对象的属性, 绑定事件等
             finalizeInitialChildren(
               instance,
               type,
@@ -1035,14 +1031,12 @@ function completeWork(
               currentHostContext,
             )
           ) {
-            // 设置fiber.flags标记(Update)
             markUpdate(workInProgress);
           }
         }
 
         if (workInProgress.ref !== null) {
           // If there is a ref on a host node we need to schedule a callback
-          // 设置fiber.flags标记(Ref)
           markRef(workInProgress);
         }
       }

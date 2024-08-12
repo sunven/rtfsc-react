@@ -148,7 +148,6 @@ function defineRefPropWarningGetter(props, displayName) {
 const ReactElement = function(type, key, ref, self, source, owner, props) {
   const element = {
     // This tag allows us to uniquely identify this as a React Element
-    // 这个标签允许我们将其唯一地识别为React元素。
     $$typeof: REACT_ELEMENT_TYPE,
 
     // Built-in properties that belong on the element

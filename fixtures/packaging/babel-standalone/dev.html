@@ -2,70 +2,13 @@
   <body>
     <script src="../../../build/node_modules/react/umd/react.development.js"></script>
     <script src="../../../build/node_modules/react-dom/umd/react-dom.development.js"></script>
-    <!-- <script src="https://unpkg.com/babel-standalone@6/babel.js"></script> -->
-    <script src="./babel.js"></script>
+    <script src="https://unpkg.com/babel-standalone@6/babel.js"></script>
     <div id="container"></div>
     <script type="text/babel">
-      const Component = React.Component;
-      const createRoot = ReactDOM.createRoot;
-      const root = createRoot(document.getElementById('container'));
-      const FC = ()=>{
-        return (
-          <div>
-            <p>p</p>
-            <span>span</span>
-          </div>
-        )
-      }
-      class App extends Component{
-        render() {
-          return (
-            <main>
-              <a>a</a>
-              <FC />
-            </main>
-          )
-        }
-      }
-      root.render(<App />);
+      ReactDOM.render(
+        <h1>Hello World!</h1>,
+        document.getElementById('container')
+      );
     </script>
-    <!-- <script type="text/babel">
-      const root = ReactDOM.createRoot(document.getElementById('container'));
-      class Header extends React.PureComponent {
-        render() {
-          return (
-            <React.Fragment>
-              <h1>title</h1>
-              <h2>title2</h2>
-            </React.Fragment>
-          );
-        }
-      }
-      class App extends React.Component{
-        constructor(){
-          super();
-          this.state = {
-            list: ['A', 'B', 'C'],
-          }
-        }
-        add = ()=>{
-          this.setState({ list: ['C', 'A', 'X'] })
-        }
-        render() {
-          return (
-            <React.Fragment>
-              <Header />
-              <button onClick={this.add}> add </button>
-              <div className="content">
-                {this.state.list.map(item => (
-                  <p key={item}>{item}</p>
-                ))}
-              </div>
-            </React.Fragment>
-          )
-        }
-      }
-      root.render(<App />);
-    </script> -->
   </body>
 </html>

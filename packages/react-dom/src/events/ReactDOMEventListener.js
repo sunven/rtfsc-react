@@ -88,25 +88,20 @@ export function createEventListenerWrapperWithPriority(
   domEventName: DOMEventName,
   eventSystemFlags: EventSystemFlags,
 ): Function {
-  // 1. 根据优先级设置 listenerWrapper
   const eventPriority = getEventPriority(domEventName);
   let listenerWrapper;
   switch (eventPriority) {
-    // 先级最高
     case DiscreteEventPriority:
       listenerWrapper = dispatchDiscreteEvent;
       break;
-    // 优先级适中
     case ContinuousEventPriority:
       listenerWrapper = dispatchContinuousEvent;
       break;
-    // 优先级最低
     case DefaultEventPriority:
     default:
       listenerWrapper = dispatchEvent;
       break;
   }
-  // 2. 返回 listenerWrapper
   return listenerWrapper.bind(
     null,
     domEventName,
@@ -208,7 +203,6 @@ function dispatchEventOriginal(
     return;
   }
 
-  // 查找实例阻塞事件
   const blockedOn = findInstanceBlockingEvent(
     domEventName,
     eventSystemFlags,
@@ -216,7 +210,6 @@ function dispatchEventOriginal(
     nativeEvent,
   );
   if (blockedOn === null) {
-    // 3. 通过插件系统, 派发事件
     dispatchEventForPluginEventSystem(
       domEventName,
       eventSystemFlags,
@@ -369,9 +362,7 @@ export function findInstanceBlockingEvent(
 
   return_targetInst = null;
 
-  // 1. 定位原生DOM节点
   const nativeEventTarget = getEventTarget(nativeEvent);
-  // 2. 获取与DOM节点对应的fiber节点
   let targetInst = getClosestInstanceFromNode(nativeEventTarget);
 
   if (targetInst !== null) {

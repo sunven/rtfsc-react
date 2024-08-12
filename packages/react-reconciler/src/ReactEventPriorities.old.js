@@ -21,14 +21,9 @@ import {
 
 export opaque type EventPriority = Lane;
 
-// 参考getEventPriority
-// 离散事件优先级，高优先级，用于处理离散事件，例如用户输入、点击等
 export const DiscreteEventPriority: EventPriority = SyncLane;
-// 连续事件优先级 滚动，拖拽等
 export const ContinuousEventPriority: EventPriority = InputContinuousLane;
-// 默认事件优先级 数据更新、渲染等
 export const DefaultEventPriority: EventPriority = DefaultLane;
-// 空闲事件优先级 后台数据预取、缓存更新
 export const IdleEventPriority: EventPriority = IdleLane;
 
 let currentUpdatePriority: EventPriority = NoLane;

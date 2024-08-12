@@ -35,15 +35,12 @@ export const TotalLanes = 31;
 export const NoLanes: Lanes = /*                        */ 0b0000000000000000000000000000000;
 export const NoLane: Lane = /*                          */ 0b0000000000000000000000000000000;
 
-// 用户输入，点击等
 export const SyncLane: Lane = /*                        */ 0b0000000000000000000000000000001;
 
 export const InputContinuousHydrationLane: Lane = /*    */ 0b0000000000000000000000000000010;
-// 滚动，拖拽等
 export const InputContinuousLane: Lane = /*             */ 0b0000000000000000000000000000100;
 
 export const DefaultHydrationLane: Lane = /*            */ 0b0000000000000000000000000001000;
-// 默认
 export const DefaultLane: Lane = /*                     */ 0b0000000000000000000000000010000;
 
 const TransitionHydrationLane: Lane = /*                */ 0b0000000000000000000000000100000;
@@ -79,7 +76,6 @@ export const SelectiveHydrationLane: Lane = /*          */ 0b0001000000000000000
 const NonIdleLanes: Lanes = /*                          */ 0b0001111111111111111111111111111;
 
 export const IdleHydrationLane: Lane = /*               */ 0b0010000000000000000000000000000;
-// 空闲
 export const IdleLane: Lane = /*                        */ 0b0100000000000000000000000000000;
 
 export const OffscreenLane: Lane = /*                   */ 0b1000000000000000000000000000000;
@@ -190,7 +186,6 @@ function getHighestPriorityLanes(lanes: Lanes | Lane): Lanes {
 
 export function getNextLanes(root: FiberRoot, wipLanes: Lanes): Lanes {
   // Early bailout if there's no pending work left.
-  // 1. check是否有等待中的lanes
   const pendingLanes = root.pendingLanes;
   if (pendingLanes === NoLanes) {
     return NoLanes;
@@ -536,33 +531,22 @@ function laneToIndex(lane: Lane) {
 }
 
 export function includesSomeLane(a: Lanes | Lane, b: Lanes | Lane) {
-  // 0001 & 0010 > 0000
-  // 0011 & 0001 > 0001 0011包含0001
   return (a & b) !== NoLanes;
 }
 
 export function isSubsetOfLanes(set: Lanes, subset: Lanes | Lane) {
-  // 0011 & 0001 > 0001 return true
-  // 0001 & 0011 > 0001 return false
   return (set & subset) === subset;
 }
 
 export function mergeLanes(a: Lanes | Lane, b: Lanes | Lane): Lanes {
-  // 并集
-  // 0001 | 0010 > 0011
   return a | b;
 }
 
 export function removeLanes(set: Lanes, subset: Lanes | Lane): Lanes {
-  // ~ 取反
-  // 0011 & ~0001
-  // ~0001 > 1110
-  // 0011 & 1110 > 0010
   return set & ~subset;
 }
 
 export function intersectLanes(a: Lanes | Lane, b: Lanes | Lane): Lanes {
-  // 交集 找出共同的
   return a & b;
 }
 
