@@ -81,3 +81,10 @@ React is [MIT licensed](./LICENSE).
 不配置HTTPS_PROXY环境变量，clash 开启 tun 模式
 
 <https://github.com/npm/cli/issues/2003>
+
+#### -- PLUGIN_ERROR (scripts/rollup/plugins/closure-plugin) --
+
+<https://legacy.reactjs.org/docs/how-to-contribute.html#contribution-prerequisites>
+
+java --version 不显示版本
+cmd 运行 where java  查看多个 java 路径，删除多余的 java 路径
