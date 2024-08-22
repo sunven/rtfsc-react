@@ -33,10 +33,12 @@ export const possibleRegistrationNames = __DEV__ ? {} : (null: any);
 // Trust the developer to only use possibleRegistrationNames in __DEV__
 
 export function registerTwoPhaseEvent(
-  registrationName: string,
-  dependencies: Array<DOMEventName>,
+  registrationName: string, // onClick
+  dependencies: Array<DOMEventName>, // [click]
 ): void {
+  // 冒泡阶段
   registerDirectEvent(registrationName, dependencies);
+  // 捕获阶段 onClickCapture
   registerDirectEvent(registrationName + 'Capture', dependencies);
 }
 

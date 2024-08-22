@@ -204,12 +204,12 @@
 			"path": "packages/react-dom/src/events/DOMPluginEventSystem.js",
 			"bookmarks": [
 				{
-					"line": 265,
+					"line": 266,
 					"column": 37,
 					"label": ""
 				},
 				{
-					"line": 392,
+					"line": 393,
 					"column": 32,
 					"label": ""
 				}

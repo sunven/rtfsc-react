@@ -1,3 +1,5 @@
 {
-  "bookmarks.saveBookmarksInProject": true
+  "bookmarks.saveBookmarksInProject": true,
+  "prettier.enable": false,
+  "editor.formatOnSave": false,
 }

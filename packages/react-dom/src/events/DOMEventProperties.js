@@ -7,9 +7,9 @@
  * @flow
  */
 
-import type {DOMEventName} from './DOMEventNames';
+import type { DOMEventName } from './DOMEventNames';
 
-import {registerTwoPhaseEvent} from './EventRegistry';
+import { registerTwoPhaseEvent } from './EventRegistry';
 import {
   ANIMATION_END,
   ANIMATION_ITERATION,
@@ -17,7 +17,7 @@ import {
   TRANSITION_END,
 } from './DOMEventNames';
 
-import {enableCreateEventHandleAPI} from 'shared/ReactFeatureFlags';
+import { enableCreateEventHandleAPI } from 'shared/ReactFeatureFlags';
 
 export const topLevelEventsToReactNames: Map<
   DOMEventName,
@@ -118,9 +118,13 @@ function registerSimpleEvent(domEventName, reactName) {
 
 export function registerSimpleEvents() {
   for (let i = 0; i < simpleEventPluginEvents.length; i++) {
+    // dragEnd
     const eventName = ((simpleEventPluginEvents[i]: any): string);
+    // dragend
     const domEventName = ((eventName.toLowerCase(): any): DOMEventName);
+    // DragEnd
     const capitalizedEvent = eventName[0].toUpperCase() + eventName.slice(1);
+    // dragend DragEnd
     registerSimpleEvent(domEventName, 'on' + capitalizedEvent);
   }
   // Special cases where event names don't match.
