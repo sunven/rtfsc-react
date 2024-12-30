@@ -1,17 +1,18 @@
 import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react-swc'
+import path from 'node:path';
+import react1 from '@vitejs/plugin-react-swc'
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react1()],
   resolve: {
     alias: {
-      'react': '../build/node_modules/react/umd/react.development.js',
-      'react-dom':'../build/node_modules/react-dom/umd/react-dom.development.js',
+      'react': path.resolve(__dirname, '../build/node_modules/react'),
+      'react-dom':path.resolve(__dirname, '../build/node_modules/react-dom'),
     }
   },
   optimizeDeps:{
-    // include:['../build/node_modules/react/umd/*','../build/node_modules/react-dom/umd/*'],
+    // include:['../build/node_modules/react/*','../build/node_modules/react-dom/*'],
     // include:['react','react-dom']
   },
   // build: {
