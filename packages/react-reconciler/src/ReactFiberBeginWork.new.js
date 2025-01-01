@@ -1300,6 +1300,9 @@ function updateHostRoot(current, workInProgress, renderLanes) {
   const prevState = workInProgress.memoizedState;
   const prevChildren = prevState.element;
   cloneUpdateQueue(current, workInProgress);
+  // 此调用处理本文开头提到的更新
+  // 请记住，已处理计划的更新
+  //  提取有效载荷后，将元素指定为memorizedState
   processUpdateQueue(workInProgress, nextProps, null, renderLanes);
 
   const nextState: RootState = workInProgress.memoizedState;
@@ -1317,6 +1320,7 @@ function updateHostRoot(current, workInProgress, renderLanes) {
 
   // Caution: React DevTools currently depends on this property
   // being called "element".
+  // 我们能够得到ReactDOMRoot.render（）的参数！
   const nextChildren = nextState.element;
   if (supportsHydration && prevState.isDehydrated) {
     // This is a hydration root whose shell has not yet hydrated. We should
@@ -3720,6 +3724,7 @@ function beginWork(
   }
 
   if (current !== null) {
+    // re-render
     const oldProps = current.memoizedProps;
     const newProps = workInProgress.pendingProps;
 
@@ -3766,6 +3771,7 @@ function beginWork(
       }
     }
   } else {
+    // initial mount
     didReceiveUpdate = false;
 
     if (getIsHydrating() && isForkedChild(workInProgress)) {
@@ -3793,6 +3799,9 @@ function beginWork(
 
   switch (workInProgress.tag) {
     case IndeterminateComponent: {
+      // 不确定组件是指类组件或功能组件
+      // 它还没有被实例化。一旦呈现，就确定了
+      // 正确的标签。我们很快会再回来的
       return mountIndeterminateComponent(
         current,
         workInProgress,
@@ -3840,6 +3849,7 @@ function beginWork(
       );
     }
     case HostRoot:
+      // 这是FiberRootNode下的HostRoot
       return updateHostRoot(current, workInProgress, renderLanes);
     case HostComponent:
       return updateHostComponent(current, workInProgress, renderLanes);

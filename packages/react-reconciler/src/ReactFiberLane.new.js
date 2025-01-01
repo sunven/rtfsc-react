@@ -464,6 +464,7 @@ export function includesOnlyTransitions(lanes: Lanes) {
   return (lanes & TransitionLanes) === lanes;
 }
 
+// Blocking 意味着它很重要，不应该被打断。
 export function includesBlockingLane(root: FiberRoot, lanes: Lanes) {
   if (
     allowConcurrentByDefault &&

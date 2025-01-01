@@ -362,6 +362,7 @@ export function updateContainer(
   const update = createUpdate(eventTime, lane);
   // Caution: React DevTools currently depends on this property
   // being called "element".
+  // render() 的参数存在 playload 中
   update.payload = {element};
 
   callback = callback === undefined ? null : callback;
@@ -378,6 +379,7 @@ export function updateContainer(
     update.callback = callback;
   }
 
+  // 更新在排队
   const root = enqueueUpdate(current, update, lane);
   if (root !== null) {
     scheduleUpdateOnFiber(root, current, lane, eventTime);

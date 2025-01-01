@@ -270,6 +270,7 @@ function resolveLazy(lazyType) {
 // to be able to optimize each path individually by branching early. This needs
 // a compiler or we can do it manually. Helpers that don't need this branching
 // live outside of this function.
+// shouldTrackSideEffects 此标志控制我们是否需要跟踪插入等
 function ChildReconciler(shouldTrackSideEffects) {
   function deleteChild(returnFiber: Fiber, childToDelete: Fiber): void {
     if (!shouldTrackSideEffects) {

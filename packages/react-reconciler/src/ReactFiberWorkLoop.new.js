@@ -874,6 +874,8 @@ function performConcurrentWorkOnRoot(root, didTimeout) {
   // TODO: We only check `didTimeout` defensively, to account for a Scheduler
   // bug we're still investigating. Once the bug in Scheduler is fixed,
   // we can remove this, since we track expiration ourselves.
+  // 初次 mount 时为 DefaultLane，执行 renderRootSync
+  // 对于初始挂载，实际上并没有使用并发模式。这是有道理的，对于初始挂载，我们应该尽快绘制UI，推迟它没有帮助
   const shouldTimeSlice =
     !includesBlockingLane(root, lanes) &&
     !includesExpiredLane(root, lanes) &&
@@ -1474,6 +1476,7 @@ function prepareFreshStack(root: FiberRoot, lanes: Lanes): Fiber {
     }
   }
   workInProgressRoot = root;
+  // root 的 current 是 HostRoot 的 FiberNode
   const rootWorkInProgress = createWorkInProgress(root.current, null);
   workInProgress = rootWorkInProgress;
   workInProgressRootRenderLanes = subtreeRenderLanes = workInProgressRootIncludedLanes = lanes;
@@ -1660,6 +1663,8 @@ export function renderHasNotSuspendedYet(): boolean {
   return workInProgressRootExitStatus === RootInProgress;
 }
 
+// current 表示当前绘制在 UI 上的版本，
+// workInProgress 表示正在构建并将用作下一个current的版本
 function renderRootSync(root: FiberRoot, lanes: Lanes) {
   const prevExecutionContext = executionContext;
   executionContext |= RenderContext;
@@ -1833,6 +1838,7 @@ function workLoopConcurrent() {
   }
 }
 
+// 在单个 Fiber Node 上工作以查看是否有任何事情要做的地方
 function performUnitOfWork(unitOfWork: Fiber): void {
   // The current, flushed, state of this fiber is the alternate. Ideally
   // nothing should rely on this, but relying on it here means that we don't
@@ -2938,6 +2944,9 @@ export function warnAboutUpdateOnNotYetMountedFiberInDEV(fiber: Fiber) {
   }
 }
 
+/**
+ * 实际渲染发生的地方
+ */
 let beginWork;
 if (__DEV__ && replayFailedUnitOfWorkWithInvokeGuardedCallback) {
   const dummyFiber = null;

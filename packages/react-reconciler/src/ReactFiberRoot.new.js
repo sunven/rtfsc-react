@@ -164,6 +164,7 @@ export function createFiberRoot(
 
   // Cyclic construction. This cheats the type system right now because
   // stateNode is any.
+  // 创建HostRoot的FiberNode并将其指定为React根的当前节点
   const uninitializedFiber = createHostRootFiber(
     tag,
     isStrictMode,
