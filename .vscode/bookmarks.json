@@ -69,7 +69,12 @@
 			"path": "packages/react-reconciler/src/ReactFiberBeginWork.old.js",
 			"bookmarks": [
 				{
-					"line": 1291,
+					"line": 287,
+					"column": 34,
+					"label": ""
+				},
+				{
+					"line": 1292,
 					"column": 12,
 					"label": ""
 				}
@@ -92,22 +97,12 @@
 					"line": 146,
 					"column": 21,
 					"label": ""
-				},
-				{
-					"line": 1546,
-					"column": 23,
-					"label": ""
 				}
 			]
 		},
 		{
 			"path": "packages/react-dom/src/events/ReactDOMEventListener.js",
 			"bookmarks": [
-				{
-					"line": 153,
-					"column": 30,
-					"label": ""
-				},
 				{
 					"line": 418,
 					"column": 65,
@@ -124,8 +119,8 @@
 					"label": ""
 				},
 				{
-					"line": 1284,
-					"column": 32,
+					"line": 273,
+					"column": 14,
 					"label": ""
 				}
 			]

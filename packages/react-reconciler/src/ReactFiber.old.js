@@ -473,6 +473,7 @@ export function createFiberFromTypeAndProps(
   mode: TypeOfMode,
   lanes: Lanes,
 ): Fiber {
+  // 当 Fiber Node 是从自定义组件创建时， 它的标签是 IndeterminateComponent，而不是 FunctionComponent
   let fiberTag = IndeterminateComponent;
   // The resolved type is set if we know what the final type will be. I.e. it's not lazy.
   let resolvedType = type;
