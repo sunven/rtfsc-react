@@ -821,6 +821,7 @@ function ensureRootIsScheduled(root: FiberRoot, currentTime: number) {
 
 // This is the entry point for every concurrent task, i.e. anything that
 // goes through Scheduler.
+// 这是每个并发任务的入口点，即任何通过Scheduler的任务
 function performConcurrentWorkOnRoot(root, didTimeout) {
   if (enableProfilerTimer && enableProfilerNestedUpdatePhase) {
     resetNestedUpdateFlag();
@@ -1443,6 +1444,8 @@ export function popRenderLanes(fiber: Fiber) {
   popFromStack(subtreeRenderLanesCursor, fiber);
 }
 
+// 因此，每次开始新的渲染时，都会从当前 HostRoot 创建一个新的 workInProgress。 它用作新 Fiber Tree 的根。
+// 因此，对于 beginWork() 中的分支，我们首先转到 HostRootupdateHostRoot() 是 下一步
 function prepareFreshStack(root: FiberRoot, lanes: Lanes): Fiber {
   root.finishedWork = null;
   root.finishedLanes = NoLanes;

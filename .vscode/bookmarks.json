@@ -44,33 +44,8 @@
 			"path": "packages/react-reconciler/src/ReactFiberWorkLoop.old.js",
 			"bookmarks": [
 				{
-					"line": 550,
-					"column": 38,
-					"label": ""
-				},
-				{
-					"line": 720,
-					"column": 70,
-					"label": ""
-				},
-				{
-					"line": 863,
-					"column": 56,
-					"label": ""
-				},
-				{
-					"line": 1714,
-					"column": 56,
-					"label": ""
-				},
-				{
-					"line": 1892,
-					"column": 53,
-					"label": ""
-				},
-				{
-					"line": 2032,
-					"column": 20,
+					"line": 690,
+					"column": 19,
 					"label": ""
 				}
 			]
@@ -78,16 +53,6 @@
 		{
 			"path": "packages/scheduler/src/forks/Scheduler.js",
 			"bookmarks": [
-				{
-					"line": 151,
-					"column": 51,
-					"label": ""
-				},
-				{
-					"line": 199,
-					"column": 50,
-					"label": ""
-				},
 				{
 					"line": 333,
 					"column": 70,
@@ -104,13 +69,8 @@
 			"path": "packages/react-reconciler/src/ReactFiberBeginWork.old.js",
 			"bookmarks": [
 				{
-					"line": 287,
-					"column": 34,
-					"label": ""
-				},
-				{
-					"line": 3715,
-					"column": 19,
+					"line": 1291,
+					"column": 12,
 					"label": ""
 				}
 			]
@@ -121,16 +81,6 @@
 				{
 					"line": 66,
 					"column": 22,
-					"label": ""
-				}
-			]
-		},
-		{
-			"path": "packages/react-reconciler/src/ReactFiberClassUpdateQueue.old.js",
-			"bookmarks": [
-				{
-					"line": 144,
-					"column": 35,
 					"label": ""
 				}
 			]

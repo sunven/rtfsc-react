@@ -3793,6 +3793,8 @@ function beginWork(
 
   switch (workInProgress.tag) {
     case IndeterminateComponent: {
+      // 不确定组件是指类组件或功能组件它还没有被实例化。
+      // 一旦呈现，就确定了正确的标签。我们很快会再回来的
       return mountIndeterminateComponent(
         current,
         workInProgress,
