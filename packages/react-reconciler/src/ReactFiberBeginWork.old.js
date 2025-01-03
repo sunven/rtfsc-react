@@ -1450,10 +1450,12 @@ function updateHostComponent(
   }
 
   const type = workInProgress.type;
+  // pendingProps包含<div/>的子元素，即<p/>
   const nextProps = workInProgress.pendingProps;
   const prevProps = current !== null ? current.memoizedProps : null;
 
   let nextChildren = nextProps.children;
+  // 如果它的子元素是静态文本，那么这是一个改进，如同<a/>一样
   const isDirectTextChild = shouldSetTextContent(type, nextProps);
 
   if (isDirectTextChild) {
@@ -1479,6 +1481,7 @@ function updateHostText(current, workInProgress) {
   }
   // Nothing to do here. This is terminal. We'll do the completion step
   // immediately after.
+  // 除了处理水合作用之外没有任何作用
   return null;
 }
 
@@ -1691,6 +1694,7 @@ function mountIndeterminateComponent(
     hasId = checkDidRenderIdHook();
     setIsRendering(false);
   } else {
+    // 运行函数组件，返回子节点
     value = renderWithHooks(
       null,
       workInProgress,
@@ -1795,6 +1799,7 @@ function mountIndeterminateComponent(
     );
   } else {
     // Proceed under the assumption that this is a function component
+    // 渲染后，它不再是 IndeterminateComponent
     workInProgress.tag = FunctionComponent;
     if (__DEV__) {
       if (disableLegacyContext && Component.contextTypes) {
@@ -1830,6 +1835,7 @@ function mountIndeterminateComponent(
       pushMaterializedTreeId(workInProgress);
     }
 
+    // 由于此处current为null，因此将使用mountChildFibers（）
     reconcileChildren(null, workInProgress, value, renderLanes);
     if (__DEV__) {
       validateFunctionComponentInDev(workInProgress, Component);
@@ -3796,6 +3802,7 @@ function beginWork(
     case IndeterminateComponent: {
       // 不确定组件是指类组件或功能组件它还没有被实例化。
       // 一旦呈现，就确定了正确的标签。我们很快会再回来的
+      // <App /> 先就是 mountIndeterminateComponent
       return mountIndeterminateComponent(
         current,
         workInProgress,
@@ -3813,6 +3820,7 @@ function beginWork(
       );
     }
     case FunctionComponent: {
+      // function component
       const Component = workInProgress.type;
       const unresolvedProps = workInProgress.pendingProps;
       const resolvedProps =
@@ -3843,10 +3851,13 @@ function beginWork(
       );
     }
     case HostRoot:
+      // 这是FiberRootNode下的HostRoot
       return updateHostRoot(current, workInProgress, renderLanes);
     case HostComponent:
+      // HTML tags, like p, div .etc
       return updateHostComponent(current, workInProgress, renderLanes);
     case HostText:
+      // HTML text node
       return updateHostText(current, workInProgress);
     case SuspenseComponent:
       return updateSuspenseComponent(current, workInProgress, renderLanes);

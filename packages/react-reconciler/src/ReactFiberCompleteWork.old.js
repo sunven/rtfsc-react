@@ -961,6 +961,7 @@ function completeWork(
       const rootContainerInstance = getRootHostContainer();
       const type = workInProgress.type;
       if (current !== null && workInProgress.stateNode != null) {
+        // 如果有当前版本，那么我们去更新分支
         updateHostComponent(
           current,
           workInProgress,
@@ -1007,6 +1008,7 @@ function completeWork(
             markUpdate(workInProgress);
           }
         } else {
+          // 实际的DOM节点
           const instance = createInstance(
             type,
             newProps,
@@ -1014,7 +1016,8 @@ function completeWork(
             currentHostContext,
             workInProgress,
           );
-
+          // 当创建DOM节点时，这一点很重要
+          // 它需要是子树中所有直接连接的DOM节点的父节点
           appendAllChildren(instance, workInProgress, false, false);
 
           workInProgress.stateNode = instance;

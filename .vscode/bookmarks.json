@@ -47,6 +47,31 @@
 					"line": 690,
 					"column": 19,
 					"label": ""
+				},
+				{
+					"line": 824,
+					"column": 56,
+					"label": ""
+				},
+				{
+					"line": 1660,
+					"column": 56,
+					"label": ""
+				},
+				{
+					"line": 1861,
+					"column": 54,
+					"label": ""
+				},
+				{
+					"line": 1960,
+					"column": 20,
+					"label": ""
+				},
+				{
+					"line": 1987,
+					"column": 24,
+					"label": ""
 				}
 			]
 		},
@@ -76,6 +101,16 @@
 				{
 					"line": 1292,
 					"column": 12,
+					"label": ""
+				},
+				{
+					"line": 1440,
+					"column": 21,
+					"label": ""
+				},
+				{
+					"line": 3705,
+					"column": 19,
 					"label": ""
 				}
 			]
@@ -156,6 +191,26 @@
 				{
 					"line": 393,
 					"column": 32,
+					"label": ""
+				}
+			]
+		},
+		{
+			"path": "packages/react-reconciler/src/ReactFiberCompleteWork.old.js",
+			"bookmarks": [
+				{
+					"line": 848,
+					"column": 16,
+					"label": ""
+				}
+			]
+		},
+		{
+			"path": "packages/react-reconciler/src/ReactFiberCommitWork.old.js",
+			"bookmarks": [
+				{
+					"line": 2035,
+					"column": 38,
 					"label": ""
 				}
 			]
