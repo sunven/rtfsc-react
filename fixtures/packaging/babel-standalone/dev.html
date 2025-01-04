@@ -5,10 +5,26 @@
     <script src="https://unpkg.com/babel-standalone@6/babel.js"></script>
     <div id="container"></div>
     <script type="text/babel">
-      ReactDOM.render(
-        <h1>Hello World!</h1>,
-        document.getElementById('container')
-      );
+      function Link() {
+        return <a href="https://jser.dev">jser.dev</a>
+      }
+      function App() {
+        // debugger
+        const [count, setCount] = React.useState(0)
+        return (
+          <div>
+            <p>
+              <Link />
+              <br />
+              <button onClick={() => setCount(count => count + 1)}>click me - {count}</button>
+            </p>
+          </div>
+        )
+      }
+      // debugger
+      const root = ReactDOM.createRoot(document.getElementById('container'))
+      // debugger
+      root.render(<App />);
     </script>
   </body>
 </html>

@@ -1504,8 +1504,10 @@ function commitPlacement(finishedWork: Fiber): void {
   const parentFiber = getHostParentFiber(finishedWork);
 
   // Note: these two variables *must* always be updated together.
+  // 请注意，我们正在检查父光纤的类型，因为插入是针对父节点完成的
   switch (parentFiber.tag) {
     case HostComponent: {
+      // 在初始挂载时，我们不会碰这个分支
       const parent: Instance = parentFiber.stateNode;
       if (parentFiber.flags & ContentReset) {
         // Reset the text content of the parent before doing any insertions
@@ -1520,10 +1522,13 @@ function commitPlacement(finishedWork: Fiber): void {
       insertOrAppendPlacementNode(finishedWork, before, parent);
       break;
     }
+    // 具有初始装载位置标志的光纤节点是<App/>，其父光纤是HostRoot
     case HostRoot:
     case HostPortal: {
+      // HostRoot的stateNode指向FiberRootNode
       const parent: Container = parentFiber.stateNode.containerInfo;
       const before = getHostSibling(finishedWork);
+      // 这个想法是将 finishedWork 的 DOM 插入或追加到父容器的正确位置。
       insertOrAppendPlacementNodeIntoContainer(finishedWork, before, parent);
       break;
     }
@@ -2096,7 +2101,9 @@ function commitMutationEffectsOnFiber(
     case ForwardRef:
     case MemoComponent:
     case SimpleMemoComponent: {
+      // 此递归调用确保首先处理子树
       recursivelyTraverseMutationEffects(root, finishedWork, lanes);
+      // 和解效果是指插入等。
       commitReconciliationEffects(finishedWork);
 
       if (flags & Update) {
@@ -2434,6 +2441,7 @@ function commitMutationEffectsOnFiber(
     }
   }
 }
+// 处理插入、重新排序等
 function commitReconciliationEffects(finishedWork: Fiber) {
   // Placement effects (insertions, reorders) can be scheduled on any fiber
   // type. They needs to happen after the children effects have fired, but
