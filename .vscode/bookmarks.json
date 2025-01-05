@@ -54,6 +54,11 @@
 					"label": ""
 				},
 				{
+					"line": 950,
+					"column": 19,
+					"label": ""
+				},
+				{
 					"line": 1661,
 					"column": 56,
 					"label": ""
@@ -76,6 +81,11 @@
 				{
 					"line": 1989,
 					"column": 24,
+					"label": ""
+				},
+				{
+					"line": 2156,
+					"column": 8,
 					"label": ""
 				}
 			]
@@ -139,8 +149,8 @@
 			"path": "packages/react-dom/src/events/ReactDOMEventListener.js",
 			"bookmarks": [
 				{
-					"line": 418,
-					"column": 65,
+					"line": 409,
+					"column": 23,
 					"label": ""
 				}
 			]
@@ -209,8 +219,8 @@
 			"path": "packages/react-reconciler/src/ReactFiberCommitWork.old.js",
 			"bookmarks": [
 				{
-					"line": 2035,
-					"column": 38,
+					"line": 2049,
+					"column": 11,
 					"label": ""
 				}
 			]
