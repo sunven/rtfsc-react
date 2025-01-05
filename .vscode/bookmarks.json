@@ -54,22 +54,27 @@
 					"label": ""
 				},
 				{
-					"line": 1660,
+					"line": 1661,
 					"column": 56,
 					"label": ""
 				},
 				{
-					"line": 1861,
-					"column": 54,
-					"label": ""
-				},
-				{
-					"line": 1960,
+					"line": 1834,
 					"column": 20,
 					"label": ""
 				},
 				{
-					"line": 1987,
+					"line": 1862,
+					"column": 54,
+					"label": ""
+				},
+				{
+					"line": 1962,
+					"column": 20,
+					"label": ""
+				},
+				{
+					"line": 1989,
 					"column": 24,
 					"label": ""
 				}
@@ -81,11 +86,6 @@
 				{
 					"line": 333,
 					"column": 70,
-					"label": ""
-				},
-				{
-					"line": 576,
-					"column": 40,
 					"label": ""
 				}
 			]
@@ -211,6 +211,16 @@
 				{
 					"line": 2035,
 					"column": 38,
+					"label": ""
+				}
+			]
+		},
+		{
+			"path": "packages/react-dom/src/client/ReactDOMHostConfig.js",
+			"bookmarks": [
+				{
+					"line": 287,
+					"column": 40,
 					"label": ""
 				}
 			]

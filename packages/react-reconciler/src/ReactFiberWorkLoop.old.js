@@ -915,6 +915,7 @@ function performConcurrentWorkOnRoot(root, didTimeout) {
       // to the main thread, if it was fast enough, or if it expired. We could
       // skip the consistency check in that case, too.
       const renderWasConcurrent = !includesBlockingLane(root, lanes);
+      // 这里的 finishedWork 就存 刚生成的fiber
       const finishedWork: Fiber = (root.current.alternate: any);
       if (
         renderWasConcurrent &&
@@ -1943,6 +1944,7 @@ function completeUnitOfWork(unitOfWork: Fiber): void {
     const siblingFiber = completedWork.sibling;
     if (siblingFiber !== null) {
       // If there is more work to do in this returnFiber, do that next.
+      // 如果此returnFiber中还有更多工作要做，请接下来做。
       workInProgress = siblingFiber;
       return;
     }
