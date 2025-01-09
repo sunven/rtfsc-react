@@ -275,6 +275,8 @@ export function createWorkInProgress(current: Fiber, pendingProps: any): Fiber {
     workInProgress.alternate = current;
     current.alternate = workInProgress;
   } else {
+    // 由于我们可以重用，因此不需要创建光纤节点
+    // 但只要通过更新属性来重用它
     workInProgress.pendingProps = pendingProps;
     // Needed because Blocks store data on type.
     workInProgress.type = current.type;

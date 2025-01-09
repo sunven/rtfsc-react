@@ -3727,9 +3727,14 @@ function beginWork(
   }
 
   if (current !== null) {
+    // 它有以前版本的Fiber Node和DOM节点
+    // 如果它是HostComponent。因此，React能够通过以下方式进行优化：
+    // 避免深入子树-救助
     const oldProps = current.memoizedProps;
     const newProps = workInProgress.pendingProps;
 
+    // 这里使用===不浅相等
+    // 这导致了React渲染的重要行为
     if (
       oldProps !== newProps ||
       hasLegacyContextChanged() ||
@@ -3754,6 +3759,8 @@ function beginWork(
       ) {
         // No pending updates or context. Bail out now.
         didReceiveUpdate = false;
+        // 如果此光纤没有更新，React将尝试救助
+        // 但前提是没有道具或背景变化
         return attemptEarlyBailoutIfNoScheduledUpdate(
           current,
           workInProgress,
