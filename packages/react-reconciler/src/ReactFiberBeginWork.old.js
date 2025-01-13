@@ -3400,12 +3400,16 @@ function bailoutOnAlreadyFinishedWork(
         return null;
       }
     } else {
+      // 因此，如果光纤本身及其子树没有更新
+      // 当然，我们可以停止深入树下
+      // 通过返回null
       return null;
     }
   }
 
   // This fiber doesn't have work, but its subtree does. Clone the child
   // fibers and continue.
+  // 虽然它的名字是clone，但它实际上要么创建新的子节点，要么重用以前的节点
   cloneChildFibers(current, workInProgress);
   return workInProgress.child;
 }

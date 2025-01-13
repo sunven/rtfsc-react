@@ -1374,6 +1374,7 @@ export function cloneChildFibers(
   }
 
   let currentChild = workInProgress.child;
+  // 因此，在cloneChildFibers（）中，子光纤是从其以前的版本创建的，但使用了新的pendingProps，这是在协调过程中设置的
   let newChild = createWorkInProgress(currentChild, currentChild.pendingProps);
   workInProgress.child = newChild;
 
